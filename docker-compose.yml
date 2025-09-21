@@ -10,15 +10,15 @@ services:
       - ./_init/sql:/docker-entrypoint-initdb.d
     networks: [ backend ]
 
-  rabbitmq:
-    image: ${RABBIT_IMAGE}
-    container_name: rabbit
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
-    ports:
-      - "15672:15672"
-    networks: [ backend ]
+  # rabbitmq:
+  #   image: ${RABBIT_IMAGE}
+  #   container_name: rabbit
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+  #     RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
+  #   ports:
+  #     - "15672:15672"
+  #   networks: [ backend ]
 
   # === Microservicios (Dockerfile común) ===
   auth:
@@ -32,10 +32,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBIT_USER}
-      RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres, rabbitmq ]
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
     networks: [ backend ]
 
   event:
@@ -49,10 +49,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${EVENT_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBIT_USER}
-      RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres, rabbitmq ]
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
     networks: [ backend ]
 
   ticket:
@@ -66,10 +66,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${TICKET_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBIT_USER}
-      RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres, rabbitmq ]
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
     networks: [ backend ]
 
   payments:
@@ -83,10 +83,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${PAYMENTS_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBIT_USER}
-      RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres, rabbitmq ]
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
     networks: [ backend ]
 
   notifications:
@@ -100,10 +100,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${NOTIF_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBIT_USER}
-      RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres, rabbitmq ]
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
     networks: [ backend ]
 
   # Frontend estático servido por Node 'serve'
