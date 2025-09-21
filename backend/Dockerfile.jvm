@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1
+
+# ====== STAGE 1: BUILD ======
+# Podés usar tu imagen anterior; yo recomiendo esta que ya trae Maven+JDK17.
+FROM maven:3.9.8-eclipse-temurin-17 AS build
+WORKDIR /workspace
+
+# Cache de deps
+COPY pom.xml .
+RUN mvn -q -DskipTests dependency:go-offline
+
+# Código y build
+COPY src ./src
+# Si es proyecto Spring Boot, esto genera target/<algo>.jar
+RUN mvn -q -DskipTests package
+
+# Copiamos el primer jar que encontremos a un nombre fijo
+# (sirve tanto para *-SNAPSHOT.jar como para *.jar)
+RUN JAR="$(ls target/*-SNAPSHOT.jar 2>/dev/null || ls target/*.jar | head -n 1)" \
+    && test -n "$JAR" \
+    && cp "$JAR" /workspace/app.jar
+
+# ====== STAGE 2: RUNTIME ======
+FROM eclipse-temurin:17-jre AS runtime
+WORKDIR /app
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/urandom" \
+    SPRING_PROFILES_ACTIVE=prod \
+    SERVER_PORT=8080
+
+# Copiamos SIEMPRE el mismo nombre fijo
+COPY --from=build /workspace/app.jar /app/app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]
