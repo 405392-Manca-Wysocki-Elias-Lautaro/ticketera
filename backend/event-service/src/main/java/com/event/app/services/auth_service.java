@@ -1,4 +1,4 @@
-package main.java.com.event.app.services;
+package com.event.app.services;
 
 public class auth_service {
     
