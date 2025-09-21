@@ -1,4 +1,4 @@
-package main.java.com.auth.app.models;
+package com.auth.app.models;
 
 public class auth {
     
