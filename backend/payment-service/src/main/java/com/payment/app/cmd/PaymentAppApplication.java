@@ -1,4 +1,4 @@
-package com.payment.app;
+package com.payment.app.cmd;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

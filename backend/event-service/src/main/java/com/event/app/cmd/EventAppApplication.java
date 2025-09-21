@@ -1,4 +1,4 @@
-package com.event.app;
+package com.event.app.cmd;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
