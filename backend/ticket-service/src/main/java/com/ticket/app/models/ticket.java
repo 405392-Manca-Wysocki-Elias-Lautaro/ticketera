@@ -1,4 +1,4 @@
-package main.java.com.ticket.app.models;
+package com.ticket.app.models;
 
 public class ticket {
     

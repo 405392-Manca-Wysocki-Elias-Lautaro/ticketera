@@ -1,4 +1,4 @@
-package main.java.com.event.app.models;
+package com.event.app.models;
 
 public class event {
     
