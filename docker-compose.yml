@@ -1,0 +1,138 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    container_name: db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./_init/sql:/docker-entrypoint-initdb.d
+    networks: [ backend ]
+
+  rabbitmq:
+    image: ${RABBIT_IMAGE}
+    container_name: rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
+    ports:
+      - "15672:15672"
+    networks: [ backend ]
+
+  # === Microservicios (Dockerfile común) ===
+  auth:
+    build:
+      context: ./backend/auth-service
+      dockerfile: ../Dockerfile.jvm
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBIT_USER}
+      RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres, rabbitmq ]
+    networks: [ backend ]
+
+  event:
+    build:
+      context: ./backend/event-service
+      dockerfile: ../Dockerfile.jvm
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${EVENT_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBIT_USER}
+      RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres, rabbitmq ]
+    networks: [ backend ]
+
+  ticket:
+    build:
+      context: ./backend/ticket-service
+      dockerfile: ../Dockerfile.jvm
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${TICKET_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBIT_USER}
+      RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres, rabbitmq ]
+    networks: [ backend ]
+
+  payments:
+    build:
+      context: ./backend/payment-service
+      dockerfile: ../Dockerfile.jvm
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${PAYMENTS_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBIT_USER}
+      RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres, rabbitmq ]
+    networks: [ backend ]
+
+  notifications:
+    build:
+      context: ./backend/notification-service
+      dockerfile: ../Dockerfile.jvm
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${NOTIF_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBIT_USER}
+      RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres, rabbitmq ]
+    networks: [ backend ]
+
+  # Frontend estático servido por Node 'serve'
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8081:8081"
+    networks: [ frontend_net ]
+
+  # API Gateway WebFlux (Spring Cloud Gateway)
+  gateway:
+    build:
+      context: ./backend/gateway
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:8081"
+    depends_on: [ auth, event, ticket, payments, notifications ]
+    ports:
+      - "${PUBLIC_HTTP_PORT}:8080"
+    networks: [ backend, frontend_net ]
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
+  frontend_net:
