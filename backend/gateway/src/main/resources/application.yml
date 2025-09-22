@@ -20,35 +20,35 @@ spring:
           predicates:
             - Path=/api/auth/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/auth/?(?<segment>.*), /${segment}
 
-        - id: event
-          uri: http://event:8080
+        - id: events
+          uri: http://events:8080
           predicates:
-            - Path=/api/event/**
+            - Path=/api/events/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/events/?(?<segment>.*), /${segment}
 
-        - id: ticket
+        - id: tickets
           uri: http://ticket:8080
           predicates:
-            - Path=/api/ticket/**
+            - Path=/api/tickets/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
 
         - id: payments
           uri: http://payments:8080
           predicates:
             - Path=/api/payments/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
         - id: notifications
           uri: http://notifications:8080
           predicates:
             - Path=/api/notifications/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
 
       # CORS global (ajusta origen/esquemas)
       globalcors:
