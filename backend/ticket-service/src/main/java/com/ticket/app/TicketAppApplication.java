@@ -1,13 +1,13 @@
-package com.event.app.cmd;
+package com.ticket.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EventAppApplication {
+public class TicketAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(EventAppApplication.class, args);
+		SpringApplication.run(TicketAppApplication.class, args);
 	}
 
 }

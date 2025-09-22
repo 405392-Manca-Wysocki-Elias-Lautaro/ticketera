@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: auth   # cambia por el nombre del micro
+  datasource:
+    # leemos de env; si falta, usamos defaults de dev
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/appdb}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:appuser}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:apppass}}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update   # solo para dev
+    show-sql: true       # opcional
+
+# NO fijamos server.port -> queda en 8080 (default)
