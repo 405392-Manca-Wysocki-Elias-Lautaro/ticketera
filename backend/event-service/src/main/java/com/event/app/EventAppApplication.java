@@ -1,13 +1,13 @@
-package com.payment.app.cmd;
+package com.event.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PaymentAppApplication {
+public class EventAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PaymentAppApplication.class, args);
+		SpringApplication.run(EventAppApplication.class, args);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.notification.app.cmd;
+package com.notification.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

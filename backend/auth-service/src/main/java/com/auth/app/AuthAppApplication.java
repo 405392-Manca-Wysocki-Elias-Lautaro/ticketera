@@ -1,4 +1,4 @@
-package com.auth.app.cmd;
+package com.auth.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
