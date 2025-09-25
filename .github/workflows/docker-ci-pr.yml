@@ -1,4 +1,3 @@
-# .github/workflows/docker-ci-pr.yml
 name: CI - PR Docker build
 on:
   pull_request:
