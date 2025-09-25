@@ -74,6 +74,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --prune
+          git checkout ${{ github.ref_name }}   # normalmente 'develop'
+          git pull --ff-only origin ${{ github.ref_name }}
 
       # Instala semantic-release y plugins en la RAÍZ (los micros Java no tienen package.json)
       - name: Install semantic-release plugins (root)
@@ -100,6 +103,7 @@ jobs:
           - { name: ticket,   path: "backend/ticket-service", image: "ticketera-ticket-service", tagprefix: "ticket-service-v" }
           - { name: payment,  path: "backend/payment-service", image: "ticketera-payment-service", tagprefix: "payment-service-v" }
           - { name: notif,    path: "backend/notification-service", image: "ticketera-notification-service", tagprefix: "notification-service-v" }
+      max-parallel: 1   
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
