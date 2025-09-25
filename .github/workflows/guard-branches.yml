@@ -1,0 +1,42 @@
+name: Guard Branches (no direct pushes)
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Fail if direct push (except merges/releases/bots)
+        shell: bash
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          ACTOR="${{ github.actor }}"
+          MSG="${{ github.event.head_commit.message }}"
+
+          # ✅ Permitir releases automáticas
+          if echo "$MSG" | grep -qiE '^chore\(release\): '; then
+            echo "✔ Release commit permitido"
+            exit 0
+          fi
+
+          # ✅ Permitir bots y merges vía UI
+          if [ "$ACTOR" = "github-actions[bot]" ] || [ "$ACTOR" = "web-flow" ]; then
+            echo "✔ Actor $ACTOR permitido"
+            exit 0
+          fi
+
+          # ✅ Permitir MERGE COMMITS (PR merge con 'Create a merge commit')
+          PARENT_COUNT=$(git rev-list --parents -n 1 "$GITHUB_SHA" | wc -w)
+          # un commit normal imprime: "<sha> <parent1>" => 2 palabras
+          # un merge imprime:       "<sha> <parent1> <parent2>" => 3 palabras o más
+          if [ "$PARENT_COUNT" -ge 3 ]; then
+            echo "✔ Merge commit detectado (padres=$((PARENT_COUNT-1)))"
+            exit 0
+          fi
+
+          echo "❌ Push directo a ${BRANCH} por ${ACTOR}. Usá PR (merge commit)."
+          exit 1

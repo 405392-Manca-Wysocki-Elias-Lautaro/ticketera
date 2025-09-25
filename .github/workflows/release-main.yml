@@ -1,0 +1,165 @@
+name: Release - main
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write      # 👈 necesario para push a GHCR
+
+jobs:
+  release-frontend:
+    name: Release Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Install semantic-release plugins (root)
+        working-directory: .
+        run: npm ci
+
+      - name: Install deps (frontend)
+        working-directory: frontend
+        run: npm ci
+
+      - name: semantic-release (frontend)
+        working-directory: frontend
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-backend:
+    name: Release Backend (microservices)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        svc:
+          - { name: gateway,      path: "backend/gateway" }
+          - { name: auth-service, path: "backend/auth-service" }
+          - { name: event-service, path: "backend/event-service" }
+          - { name: ticket-service, path: "backend/ticket-service" }
+          - { name: payment-service, path: "backend/payment-service" }
+          - { name: notification-service, path: "backend/notification-service" }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --prune
+          git checkout ${{ github.ref_name }}
+          git pull --ff-only origin ${{ github.ref_name }}
+
+      - name: Install semantic-release plugins (root)
+        working-directory: .
+        run: npm ci
+
+      - name: semantic-release (${{ matrix.svc.name }})
+        working-directory: ${{ matrix.svc.path }}
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker-release:
+    name: Docker release images (GHCR)
+    runs-on: ubuntu-latest
+    needs: [release-frontend, release-backend]
+    strategy:
+      fail-fast: false                 # 👈 no canceles el resto si uno falla
+      matrix:
+        svc:
+          - { name: frontend, path: "frontend", image: "ticketera-frontend", tagprefix: "frontend-v" }
+          - { name: gateway,  path: "backend/gateway", image: "ticketera-gateway", tagprefix: "gateway-v" }
+          - { name: auth,     path: "backend/auth-service", image: "ticketera-auth-service", tagprefix: "auth-service-v" }
+          - { name: event,    path: "backend/event-service", image: "ticketera-event-service", tagprefix: "event-service-v" }
+          - { name: ticket,   path: "backend/ticket-service", image: "ticketera-ticket-service", tagprefix: "ticket-service-v" }
+          - { name: payment,  path: "backend/payment-service", image: "ticketera-payment-service", tagprefix: "payment-service-v" }
+          - { name: notif,    path: "backend/notification-service", image: "ticketera-notification-service", tagprefix: "notification-service-v" }
+      max-parallel: 1
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Compute vars (owner lowercase)
+        id: vars
+        shell: bash
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ steps.vars.outputs.owner_lc }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read version tag for this module
+        id: ver
+        shell: bash
+        run: |
+          set -e
+          TAG=$(git tag --list '${{ matrix.svc.tagprefix }}*' --sort=-v:refname | head -n1 || true)
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          if [ -z "$TAG" ]; then
+            echo "version=" >> $GITHUB_OUTPUT
+            echo "No tag for ${{ matrix.svc.tagprefix }}, skipping build."
+            exit 0
+          fi
+          VER="${TAG#${{ matrix.svc.tagprefix }}}"
+          echo "version=${VER}" >> $GITHUB_OUTPUT
+
+      - name: Select Dockerfile for ${{ matrix.svc.name }}
+        id: dfsel
+        shell: bash
+        run: |
+          if [ "${{ matrix.svc.name }}" = "frontend" ]; then
+            FILE="${{ matrix.svc.path }}/Dockerfile"
+          else
+            FILE="backend/Dockerfile.jvm"
+          fi
+          echo "dockerfile=$FILE" >> "$GITHUB_OUTPUT"
+          if [ -f "$FILE" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "Using Dockerfile: $FILE"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Missing Dockerfile::$FILE not found, skipping ${{ matrix.svc.name }}"
+          fi
+
+      - name: Build & Push ${{ matrix.svc.name }}
+        if: steps.dfsel.outputs.present == 'true' && steps.ver.outputs.version != ''
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.svc.path }}
+          file: ${{ steps.dfsel.outputs.dockerfile }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ matrix.svc.image }}:v${{ steps.ver.outputs.version }}
+            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ matrix.svc.image }}:latest
