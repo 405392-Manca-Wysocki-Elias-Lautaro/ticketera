@@ -1,0 +1,88 @@
+# .github/workflows/ci-pr.yml
+name: CI - PR
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      gateway:  ${{ steps.filter.outputs.gateway }}
+      auth:     ${{ steps.filter.outputs.auth }}
+      event:    ${{ steps.filter.outputs.event }}
+      ticket:   ${{ steps.filter.outputs.ticket }}
+      payment:  ${{ steps.filter.outputs.payment }}
+      notif:    ${{ steps.filter.outputs.notif }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend: ["ticketera/frontend/**"]
+            gateway:  ["ticketera/backend/gateway/**"]
+            auth:     ["ticketera/backend/auth-service/**"]
+            event:    ["ticketera/backend/event-service/**"]
+            ticket:   ["ticketera/backend/ticket-service/**"]
+            payment:  ["ticketera/backend/payment-service/**"]
+            notif:    ["ticketera/backend/notification-service/**"]
+
+  # ---------- Frontend (React) ----------
+  frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ticketera/frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'ticketera/frontend/package-lock.json'
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm test --if-present -- --ci
+      - run: npm run build
+
+  # ---------- Backend (Java/Spring) ----------
+  backend:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.gateway == 'true' ||
+      needs.detect-changes.outputs.auth    == 'true' ||
+      needs.detect-changes.outputs.event   == 'true' ||
+      needs.detect-changes.outputs.ticket  == 'true' ||
+      needs.detect-changes.outputs.payment == 'true' ||
+      needs.detect-changes.outputs.notif   == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        svc:
+          - { name: gateway, path: "ticketera/backend/gateway" }
+          - { name: auth,    path: "ticketera/backend/auth-service" }
+          - { name: event,   path: "ticketera/backend/event-service" }
+          - { name: ticket,  path: "ticketera/backend/ticket-service" }
+          - { name: payment, path: "ticketera/backend/payment-service" }
+          - { name: notif,   path: "ticketera/backend/notification-service" }
+      max-parallel: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+      - name: Build & Test ${{ matrix.svc.name }}
+        working-directory: ${{ matrix.svc.path }}
+        run: |
+          if [ -f mvnw ]; then
+            chmod +x mvnw
+            ./mvnw -B -ntp verify
+          else
+            mvn -B -ntp verify
+          fi

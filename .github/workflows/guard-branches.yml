@@ -1,0 +1,17 @@
+# .github/workflows/guard-branches.yml
+name: Guard Branches (no direct pushes)
+on:
+  push:
+    branches: [main, develop]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if direct push (except releases/bots)
+        run: |
+          MSG="${{ github.event.head_commit.message }}"
+          ACTOR="${{ github.actor }}"
+          if echo "$MSG" | grep -qiE '^chore\(release\): ' ; then exit 0; fi
+          if [ "$ACTOR" = "github-actions[bot]" ] || [ "$ACTOR" = "web-flow" ]; then exit 0; fi
+          echo "❌ Push directo a ${GITHUB_REF#refs/heads/} por $ACTOR. Usá PR."
+          exit 1
