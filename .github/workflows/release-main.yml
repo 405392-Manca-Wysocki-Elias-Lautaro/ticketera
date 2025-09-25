@@ -1,0 +1,85 @@
+# .github/workflows/release-main.yml
+name: Release - main
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release-frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ticketera/frontend } }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        svc:
+          - ticketera/backend/gateway
+          - ticketera/backend/auth-service
+          - ticketera/backend/event-service
+          - ticketera/backend/ticket-service
+          - ticketera/backend/payment-service
+          - ticketera/backend/notification-service
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: semantic-release ${{ matrix.svc }}
+        working-directory: ${{ matrix.svc }}
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  docker-release:
+    runs-on: ubuntu-latest
+    needs: [release-frontend, release-backend]
+    strategy:
+      matrix:
+        svc:
+          - { name: frontend, path: "ticketera/frontend", image: "ticketera-frontend", tagprefix: "frontend-v" }
+          - { name: gateway,  path: "ticketera/backend/gateway", image: "ticketera-gateway", tagprefix: "gateway-v" }
+          - { name: auth,     path: "ticketera/backend/auth-service", image: "ticketera-auth-service", tagprefix: "auth-service-v" }
+          - { name: event,    path: "ticketera/backend/event-service", image: "ticketera-event-service", tagprefix: "event-service-v" }
+          - { name: ticket,   path: "ticketera/backend/ticket-service", image: "ticketera-ticket-service", tagprefix: "ticket-service-v" }
+          - { name: payment,  path: "ticketera/backend/payment-service", image: "ticketera-payment-service", tagprefix: "payment-service-v" }
+          - { name: notif,    path: "ticketera/backend/notification-service", image: "ticketera-notification-service", tagprefix: "notification-service-v" }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: docker/setup-buildx-action@v3
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read version tag for this module
+        id: ver
+        working-directory: ${{ matrix.svc.path }}
+        run: |
+          # Busca el tag más reciente que matchee el prefijo del módulo
+          TAG=$(git tag --list "${{ matrix.svc.tagprefix }}*" --sort=-creatordate | head -n1)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          VER=${TAG#${{ matrix.svc.tagprefix }}}
+          echo "version=$VER" >> $GITHUB_OUTPUT
+
+      - name: Build & Push ${{ matrix.svc.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.svc.path }}
+          file: ${{ matrix.svc.path }}/Dockerfile
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.svc.image }}:v${{ steps.ver.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.svc.image }}:latest
