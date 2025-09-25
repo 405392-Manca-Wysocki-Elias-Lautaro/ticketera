@@ -54,11 +54,11 @@ jobs:
     strategy:
       matrix:
         svc:
-          - { name: gateway,      path: "backend/gateway",                  tag: "gateway-v*" }
-          - { name: auth-service, path: "backend/auth-service",             tag: "auth-service-v*" }
-          - { name: event-service, path: "backend/event-service",           tag: "event-service-v*" }
-          - { name: ticket-service, path: "backend/ticket-service",         tag: "ticket-service-v*" }
-          - { name: payment-service, path: "backend/payment-service",       tag: "payment-service-v*" }
+          - { name: gateway,      path: "backend/gateway",                tag: "gateway-v*" }
+          - { name: auth-service, path: "backend/auth-service",           tag: "auth-service-v*" }
+          - { name: event-service, path: "backend/event-service",         tag: "event-service-v*" }
+          - { name: ticket-service, path: "backend/ticket-service",       tag: "ticket-service-v*" }
+          - { name: payment-service, path: "backend/payment-service",     tag: "payment-service-v*" }
           - { name: notification-service, path: "backend/notification-service", tag: "notification-service-v*" }
       max-parallel: 1
     steps:
@@ -110,6 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prerelease-frontend, prerelease-backend]
     strategy:
+      fail-fast: false            # 👈 no canceles el resto si uno falla
       matrix:
         svc:
           - { name: frontend, path: "frontend", image: "ticketera-frontend" }
@@ -124,13 +125,13 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      - name: Compute vars (lowercase owner + short sha)
+      - name: Compute vars (owner lowercase + next tag)
         id: vars
         shell: bash
         run: |
           echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
-          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "tag1=${GITHUB_REF_NAME}-next-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          SHA=${GITHUB_SHA::7}
+          echo "tag1=${GITHUB_REF_NAME}-next-${SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Login GHCR
         uses: docker/login-action@v3
@@ -139,11 +140,30 @@ jobs:
           username: ${{ steps.vars.outputs.owner_lc }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Select Dockerfile for ${{ matrix.svc.name }}
+        id: dfsel
+        shell: bash
+        run: |
+          if [ "${{ matrix.svc.name }}" = "frontend" ]; then
+            FILE="${{ matrix.svc.path }}/Dockerfile"
+          else
+            FILE="backend/Dockerfile.jvm"
+          fi
+          echo "dockerfile=$FILE" >> "$GITHUB_OUTPUT"
+          if [ -f "$FILE" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "Using Dockerfile: $FILE"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Missing Dockerfile::$FILE not found, skipping ${{ matrix.svc.name }}"
+          fi
+
       - name: Build & Push ${{ matrix.svc.name }}
+        if: steps.dfsel.outputs.present == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.svc.path }}
-          file: ${{ matrix.svc.path }}/Dockerfile
+          file: ${{ steps.dfsel.outputs.dockerfile }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
