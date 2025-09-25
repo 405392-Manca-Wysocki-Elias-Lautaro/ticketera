@@ -31,6 +31,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --prune
+          git checkout ${{ github.ref_name }}   # normalmente 'develop'
+          git pull --ff-only origin ${{ github.ref_name }}
+
 
       # 1) Instalar semantic-release + plugins en la RAÍZ (para resolverlos "hacia arriba")
       - name: Install semantic-release plugins (root)
@@ -61,6 +65,7 @@ jobs:
           - { name: ticket-service, path: "backend/ticket-service",      tag: "ticket-service-v*" }
           - { name: payment-service, path: "backend/payment-service",    tag: "payment-service-v*" }
           - { name: notification-service, path: "backend/notification-service", tag: "notification-service-v*" }
+      max-parallel: 1   
     steps:
       - uses: actions/checkout@v4
         with:
