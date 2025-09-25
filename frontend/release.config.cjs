@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     branches: [{ name: 'develop', prerelease: 'next' }, 'main'],
     tagFormat: 'frontend-v${version}',
     plugins: [
