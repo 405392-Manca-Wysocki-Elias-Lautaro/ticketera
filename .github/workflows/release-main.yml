@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  packages: write
 
 jobs:
   release-frontend:
@@ -75,7 +76,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch --prune
-          git checkout ${{ github.ref_name }}   # normalmente 'develop'
+          git checkout ${{ github.ref_name }}   # normalmente 'main'
           git pull --ff-only origin ${{ github.ref_name }}
 
       # Instala semantic-release y plugins en la RAÍZ (los micros Java no tienen package.json)
@@ -103,18 +104,24 @@ jobs:
           - { name: ticket,   path: "backend/ticket-service", image: "ticketera-ticket-service", tagprefix: "ticket-service-v" }
           - { name: payment,  path: "backend/payment-service", image: "ticketera-payment-service", tagprefix: "payment-service-v" }
           - { name: notif,    path: "backend/notification-service", image: "ticketera-notification-service", tagprefix: "notification-service-v" }
-      max-parallel: 1   
+      max-parallel: 1   # evita empujes concurrentes a GHCR
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
 
       - uses: docker/setup-buildx-action@v3
 
+      - name: Compute vars (lowercase owner)
+        id: vars
+        shell: bash
+        run: |
+          echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ steps.vars.outputs.owner_lc }}   # owner en lowercase
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Read version tag for this module
@@ -143,5 +150,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.svc.image }}:v${{ steps.ver.outputs.version }}
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.svc.image }}:latest
+            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ matrix.svc.image }}:v${{ steps.ver.outputs.version }}
+            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ matrix.svc.image }}:latest

@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  packages: write
 
 jobs:
   prerelease-frontend:
@@ -21,32 +22,26 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          # Cachea tanto root como frontend
           cache-dependency-path: |
             package-lock.json
             frontend/package-lock.json
 
-      # Identidad de git para commits de @semantic-release/git (si lo usás en frontend)
       - name: Configure git user
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch --prune
-          git checkout ${{ github.ref_name }}   # normalmente 'develop'
+          git checkout ${{ github.ref_name }}
           git pull --ff-only origin ${{ github.ref_name }}
 
-
-      # 1) Instalar semantic-release + plugins en la RAÍZ (para resolverlos "hacia arriba")
       - name: Install semantic-release plugins (root)
         working-directory: .
         run: npm ci
 
-      # 2) Instalar dependencias del frontend (si las tiene)
       - name: Install deps (frontend)
         working-directory: frontend
         run: npm ci
 
-      # 3) Correr semantic-release desde el frontend usando plugins instalados en raíz
       - name: semantic-release (frontend)
         working-directory: frontend
         run: npx semantic-release
@@ -59,13 +54,13 @@ jobs:
     strategy:
       matrix:
         svc:
-          - { name: gateway,      path: "backend/gateway",               tag: "gateway-v*" }
-          - { name: auth-service, path: "backend/auth-service",          tag: "auth-service-v*" }
-          - { name: event-service, path: "backend/event-service",        tag: "event-service-v*" }
-          - { name: ticket-service, path: "backend/ticket-service",      tag: "ticket-service-v*" }
-          - { name: payment-service, path: "backend/payment-service",    tag: "payment-service-v*" }
+          - { name: gateway,      path: "backend/gateway",                  tag: "gateway-v*" }
+          - { name: auth-service, path: "backend/auth-service",             tag: "auth-service-v*" }
+          - { name: event-service, path: "backend/event-service",           tag: "event-service-v*" }
+          - { name: ticket-service, path: "backend/ticket-service",         tag: "ticket-service-v*" }
+          - { name: payment-service, path: "backend/payment-service",       tag: "payment-service-v*" }
           - { name: notification-service, path: "backend/notification-service", tag: "notification-service-v*" }
-      max-parallel: 1   
+      max-parallel: 1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,12 +77,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      # Instala semantic-release y plugins en la RAÍZ (los micros Java no tienen package.json)
       - name: Install semantic-release plugins (root)
         working-directory: .
         run: npm ci
 
-      # Detecta si cambió la carpeta del micro desde su último tag propio
       - name: Detect changes (${{ matrix.svc.name }})
         id: changed
         shell: bash
@@ -131,21 +124,20 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
+      - name: Compute vars (lowercase owner + short sha)
+        id: vars
+        shell: bash
+        run: |
+          echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "tag1=${GITHUB_REF_NAME}-next-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ steps.vars.outputs.owner_lc }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute tags
-        id: vars
-        shell: bash
-        run: |
-          SHA=${GITHUB_SHA::7}
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-          # canal 'next' para develop
-          echo "tag1=${{ github.ref_name }}-next-${SHA}" >> $GITHUB_OUTPUT
 
       - name: Build & Push ${{ matrix.svc.name }}
         uses: docker/build-push-action@v6
@@ -156,4 +148,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.svc.image }}:${{ steps.vars.outputs.tag1 }}
+            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ matrix.svc.image }}:${{ steps.vars.outputs.tag1 }}
