@@ -1,4 +1,3 @@
-# .github/workflows/commitlint.yml
 name: Lint PR Title & Commits
 on:
   pull_request:

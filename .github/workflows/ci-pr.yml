@@ -1,4 +1,3 @@
-# .github/workflows/ci-pr.yml
 name: CI - PR
 
 on:

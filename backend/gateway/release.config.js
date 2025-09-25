@@ -1,6 +1,6 @@
-export default {
+module.exports = {
     branches: [{ name: 'develop', prerelease: 'next' }, 'main'],
-    tagFormat: 'auth-v${version}',
+    tagFormat: 'gateway-v${version}',
     plugins: [
         '@semantic-release/commit-analyzer',
         '@semantic-release/release-notes-generator',
