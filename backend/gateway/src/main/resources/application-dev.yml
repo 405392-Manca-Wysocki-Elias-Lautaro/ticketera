@@ -29,35 +29,35 @@ spring:
       routes:
         # ===== Rutas DEV (Docker) con ENV + default seguros =====
         - id: auth
-          uri: "${SERVICES_AUTH_BASE_URL:http://auth_dev:8080}"
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
             - Path=/api/auth/**
           filters:
             - RewritePath=/api/auth/?(?<segment>.*), /${segment}
 
         - id: events
-          uri: "${SERVICES_EVENT_BASE_URL:http://event_dev:8080}"
+          uri: "${SERVICES_EVENT_BASE_URL:http://event-dev:8080}"
           predicates:
             - Path=/api/events/**
           filters:
             - RewritePath=/api/events/?(?<segment>.*), /${segment}
 
         - id: tickets
-          uri: "${SERVICES_TICKET_BASE_URL:http://ticket_dev:8080}"
+          uri: "${SERVICES_TICKET_BASE_URL:http://ticket-dev:8080}"
           predicates:
             - Path=/api/tickets/**
           filters:
             - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
 
         - id: payments
-          uri: "${SERVICES_PAYMENT_BASE_URL:http://payment_dev:8080}"
+          uri: "${SERVICES_PAYMENT_BASE_URL:http://payment-dev:8080}"
           predicates:
             - Path=/api/payments/**
           filters:
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
         - id: notifications
-          uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification_dev:8080}"
+          uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification-dev:8080}"
           predicates:
             - Path=/api/notifications/**
           filters:
@@ -82,11 +82,3 @@ management:
     health:
       probes:
         enabled: true
-
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.client: DEBUG
-    org.springframework.cloud.gateway.route: TRACE
-    org.springframework.cloud.gateway.config: TRACE
-    org.springframework.web.util: TRACE

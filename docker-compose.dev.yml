@@ -25,7 +25,7 @@ services:
       retries: 5
     networks: [backend]
 
-  frontend_dev:
+  frontend-dev:
     image: ${NODE_IMAGE:-node:20}
     working_dir: /app
     command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port 5173"
@@ -35,7 +35,7 @@ services:
       - "5173:5173"
     networks: [ frontend_net, backend ]
 
-  gateway_dev:
+  gateway-dev:
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command: >
@@ -48,23 +48,23 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SERVICES_AUTH_BASE_URL: http://auth_dev:8080
-      SERVICES_EVENT_BASE_URL: http://event_dev:8080
-      SERVICES_TICKET_BASE_URL: http://ticket_dev:8080
-      SERVICES_PAYMENT_BASE_URL: http://payment_dev:8080
-      SERVICES_NOTIFICATION_BASE_URL: http://notification_dev:8080
+      SERVICES_AUTH_BASE_URL: http://auth-dev:8080
+      SERVICES_EVENT_BASE_URL: http://event-dev:8080
+      SERVICES_TICKET_BASE_URL: http://ticket-dev:8080
+      SERVICES_PAYMENT_BASE_URL: http://payment-dev:8080
+      SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
     depends_on:
-      - auth_dev
-      - event_dev
-      - ticket_dev
-      - payment_dev
-      - notification_dev
+      - auth-dev
+      - event-dev
+      - ticket-dev
+      - payment-dev
+      - notification-dev
     networks: [backend]
     ports:
       - "8080:8080"
       - "5005:5005"
 
-  auth_dev:
+  auth-dev:
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command: >
@@ -86,8 +86,7 @@ services:
       - "8082:8080"
       - "5006:5005"
 
-
-  event_dev:
+  event-dev:
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command: >
@@ -109,7 +108,7 @@ services:
       - "8083:8080"
       - "5007:5005"
 
-  notification_dev:
+  notification-dev:
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command: >
@@ -131,7 +130,7 @@ services:
       - "8086:8080"
       - "5008:5005"
 
-  payment_dev:
+  payment-dev:
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command: >
@@ -153,7 +152,7 @@ services:
       - "8085:8080"
       - "5009:5005"
 
-  ticket_dev:
+  ticket-dev:
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command: >
