@@ -165,6 +165,7 @@ jobs:
           context: ${{ matrix.svc.path }}
           file: ${{ steps.dfsel.outputs.dockerfile }}
           push: true
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
