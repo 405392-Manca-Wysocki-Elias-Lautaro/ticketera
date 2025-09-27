@@ -22,11 +22,11 @@ services:
   #     - "15672:15672"
   #   networks: [ backend ]
 
-  # === Microservicios (Dockerfile común) ===
+  # === Microservicios ===
   auth:
     build:
       context: ./backend/auth-service
-      dockerfile: ../Dockerfile.jvm
+      dockerfile: ./Dockerfile
       args:
         JDK_IMAGE: ${JDK_IMAGE}
         RUNTIME_IMAGE: eclipse-temurin:17-jre
@@ -43,7 +43,7 @@ services:
   events:
     build:
       context: ./backend/event-service
-      dockerfile: ../Dockerfile.jvm
+      dockerfile: ./Dockerfile
       args:
         JDK_IMAGE: ${JDK_IMAGE}
         RUNTIME_IMAGE: eclipse-temurin:17-jre
@@ -60,7 +60,7 @@ services:
   tickets:
     build:
       context: ./backend/ticket-service
-      dockerfile: ../Dockerfile.jvm
+      dockerfile: ./Dockerfile
       args:
         JDK_IMAGE: ${JDK_IMAGE}
         RUNTIME_IMAGE: eclipse-temurin:17-jre
@@ -77,7 +77,7 @@ services:
   payments:
     build:
       context: ./backend/payment-service
-      dockerfile: ../Dockerfile.jvm
+      dockerfile: ./Dockerfile
       args:
         JDK_IMAGE: ${JDK_IMAGE}
         RUNTIME_IMAGE: eclipse-temurin:17-jre
@@ -94,7 +94,7 @@ services:
   notifications:
     build:
       context: ./backend/notification-service
-      dockerfile: ../Dockerfile.jvm
+      dockerfile: ./Dockerfile
       args:
         JDK_IMAGE: ${JDK_IMAGE}
         RUNTIME_IMAGE: eclipse-temurin:17-jre

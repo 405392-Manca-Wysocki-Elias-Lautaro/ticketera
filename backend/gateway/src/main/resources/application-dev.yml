@@ -2,59 +2,73 @@ server:
   port: 8080
 
 spring:
+  config:
+    activate:
+      on-profile: dev
+
   main:
     web-application-type: reactive
+
   application:
     name: gateway
+
   cloud:
     gateway:
       httpclient:
         connect-timeout: 3000
         response-timeout: 5s
+
       default-filters:
         - RemoveRequestHeader=Cookie
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+      discovery:
+        locator:
+          enabled: false
+
       routes:
+        # ===== Rutas DEV (Docker) con ENV + default seguros =====
         - id: auth
-          uri: http://auth:8080
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth_dev:8080}"
           predicates:
             - Path=/api/auth/**
           filters:
             - RewritePath=/api/auth/?(?<segment>.*), /${segment}
 
         - id: events
-          uri: http://events:8080
+          uri: "${SERVICES_EVENT_BASE_URL:http://event_dev:8080}"
           predicates:
             - Path=/api/events/**
           filters:
             - RewritePath=/api/events/?(?<segment>.*), /${segment}
 
         - id: tickets
-          uri: http://tickets:8080
+          uri: "${SERVICES_TICKET_BASE_URL:http://ticket_dev:8080}"
           predicates:
             - Path=/api/tickets/**
           filters:
             - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
 
         - id: payments
-          uri: http://payments:8080
+          uri: "${SERVICES_PAYMENT_BASE_URL:http://payment_dev:8080}"
           predicates:
             - Path=/api/payments/**
           filters:
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
         - id: notifications
-          uri: http://notifications:8080
+          uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification_dev:8080}"
           predicates:
             - Path=/api/notifications/**
           filters:
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
 
-      # CORS global (ajusta origen/esquemas)
       globalcors:
         corsConfigurations:
           "[/**]":
-            allowedOrigins: "http://localhost:5173, http://localhost:8081"
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:8081"
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
@@ -68,7 +82,11 @@ management:
     health:
       probes:
         enabled: true
+
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.client: DEBUG
+    org.springframework.cloud.gateway.route: TRACE
+    org.springframework.cloud.gateway.config: TRACE
+    org.springframework.web.util: TRACE

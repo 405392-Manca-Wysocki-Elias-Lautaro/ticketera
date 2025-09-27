@@ -1,11 +1,176 @@
-version: "3.9"
+networks:
+  backend:
+  frontend_net:
+
+volumes:
+  m2cache:
+  pgdata:
+
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${APP_DB:-app}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./_init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${APP_DB:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [backend]
+
   frontend_dev:
-    image: ${NODE_IMAGE}
+    image: ${NODE_IMAGE:-node:20}
     working_dir: /app
     command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port 5173"
     volumes:
       - ./frontend:/app
     ports:
       - "5173:5173"
-    networks: [ frontend_net ]
+    networks: [ frontend_net, backend ]
+
+  gateway_dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/gateway:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVICES_AUTH_BASE_URL: http://auth_dev:8080
+      SERVICES_EVENT_BASE_URL: http://event_dev:8080
+      SERVICES_TICKET_BASE_URL: http://ticket_dev:8080
+      SERVICES_PAYMENT_BASE_URL: http://payment_dev:8080
+      SERVICES_NOTIFICATION_BASE_URL: http://notification_dev:8080
+    depends_on:
+      - auth_dev
+      - event_dev
+      - ticket_dev
+      - payment_dev
+      - notification_dev
+    networks: [backend]
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+
+  auth_dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/auth-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB:-auth}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8082:8080"
+      - "5006:5005"
+
+
+  event_dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/event-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${EVENTS_DB:-events}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8083:8080"
+      - "5007:5005"
+
+  notification_dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/notification-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${NOTIFICATIONS_DB:-notifications}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8086:8080"
+      - "5008:5005"
+
+  payment_dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/payment-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${PAYMENTS_DB:-payments}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8085:8080"
+      - "5009:5005"
+
+  ticket_dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/ticket-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${TICKETS_DB:-tickets}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8084:8080"
+      - "5010:5005"
