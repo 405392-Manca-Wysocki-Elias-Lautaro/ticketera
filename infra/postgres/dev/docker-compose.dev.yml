@@ -1,29 +1,26 @@
-networks:
-  backend:
-  frontend_net:
-
-volumes:
-  m2cache:
-  pgdata:
-
 services:
   postgres:
-    image: postgres:16
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: ticketera-postgres-dev
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
-      POSTGRES_DB: ${APP_DB:-app}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ:-America/Argentina/Cordoba}
     ports:
-      - "5432:5432"
+      - "${PG_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./_init:/docker-entrypoint-initdb.d:ro
+      - ${PGDATA_VOL:-ticketera_dev_pgdata}:/var/lib/postgresql/data
+      - ./infra/postgres/dev/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${APP_DB:-app}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks: [backend]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - backend
+
 
   frontend-dev:
     image: ${NODE_IMAGE:-node:20}
@@ -77,9 +74,11 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB:-auth}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: auth
+      FLYWAY_TABLE: flyway_history_auth
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -99,58 +98,16 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${EVENTS_DB:-events}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: events
+      FLYWAY_TABLE: flyway_history_events
     depends_on: [postgres]
     networks: [backend]
     ports:
       - "8083:8080"
       - "5007:5005"
-
-  notification-dev:
-    image: maven:3.9.8-eclipse-temurin-17
-    working_dir: /workspace
-    command: >
-      bash -lc "
-        mvn -q -DskipTests dependency:go-offline &&
-        mvn -q -Dspring-boot.run.fork=false spring-boot:run
-      "
-    volumes:
-      - ./backend/notification-service:/workspace
-      - m2cache:/root/.m2
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${NOTIFICATIONS_DB:-notifications}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
-    depends_on: [postgres]
-    networks: [backend]
-    ports:
-      - "8086:8080"
-      - "5008:5005"
-
-  payment-dev:
-    image: maven:3.9.8-eclipse-temurin-17
-    working_dir: /workspace
-    command: >
-      bash -lc "
-        mvn -q -DskipTests dependency:go-offline &&
-        mvn -q -Dspring-boot.run.fork=false spring-boot:run
-      "
-    volumes:
-      - ./backend/payment-service:/workspace
-      - m2cache:/root/.m2
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${PAYMENTS_DB:-payments}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
-    depends_on: [postgres]
-    networks: [backend]
-    ports:
-      - "8085:8080"
-      - "5009:5005"
 
   ticket-dev:
     image: maven:3.9.8-eclipse-temurin-17
@@ -165,11 +122,68 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${TICKETS_DB:-tickets}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: tickets
+      FLYWAY_TABLE: flyway_history_tickets
     depends_on: [postgres]
     networks: [backend]
     ports:
       - "8084:8080"
       - "5010:5005"
+
+  payment-dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/payment-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: payments
+      FLYWAY_TABLE: flyway_history_payments
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8085:8080"
+      - "5009:5005"
+
+  notification-dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/notification-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: notifications
+      FLYWAY_TABLE: flyway_history_notifications
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8086:8080"
+      - "5008:5005"
+
+networks:
+  backend:
+  frontend_net:
+
+volumes:
+  ticketera_dev_pgdata:

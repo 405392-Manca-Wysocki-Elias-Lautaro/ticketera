@@ -1,5 +1,0 @@
-CREATE DATABASE authdb;
-CREATE DATABASE eventdb;
-CREATE DATABASE ticketdb;
-CREATE DATABASE paymentsdb;
-CREATE DATABASE notifdb;

@@ -1,16 +1,24 @@
 services:
   postgres:
-    image: ${POSTGRES_IMAGE}
-    container_name: db
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: ticketera-postgres
+    restart: unless-stopped
     environment:
+      POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"   
+      TZ: ${TZ:-America/Argentina/Cordoba}
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./_init/sql:/docker-entrypoint-initdb.d
-    networks: [ backend ]
+      - ${PGDATA_VOL:-ticketera_prod_pgdata}:/var/lib/postgresql/data
+      # En prod NO solemos bootstrapear con init.sql. Si lo necesitás para un primer init:
+      # - ./infra/postgres/prod/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks:
+      - backend
 
   # rabbitmq:
   #   image: ${RABBIT_IMAGE}
@@ -22,93 +30,7 @@ services:
   #     - "15672:15672"
   #   networks: [ backend ]
 
-  # === Microservicios ===
-  auth:
-    build:
-      context: ./backend/auth-service
-      dockerfile: ./Dockerfile
-      args:
-        JDK_IMAGE: ${JDK_IMAGE}
-        RUNTIME_IMAGE: eclipse-temurin:17-jre
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres ]
-    networks: [ backend ]
-
-  events:
-    build:
-      context: ./backend/event-service
-      dockerfile: ./Dockerfile
-      args:
-        JDK_IMAGE: ${JDK_IMAGE}
-        RUNTIME_IMAGE: eclipse-temurin:17-jre
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${EVENT_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres ]
-    networks: [ backend ]
-
-  tickets:
-    build:
-      context: ./backend/ticket-service
-      dockerfile: ./Dockerfile
-      args:
-        JDK_IMAGE: ${JDK_IMAGE}
-        RUNTIME_IMAGE: eclipse-temurin:17-jre
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${TICKET_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres ]
-    networks: [ backend ]
-
-  payments:
-    build:
-      context: ./backend/payment-service
-      dockerfile: ./Dockerfile
-      args:
-        JDK_IMAGE: ${JDK_IMAGE}
-        RUNTIME_IMAGE: eclipse-temurin:17-jre
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${PAYMENTS_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres ]
-    networks: [ backend ]
-
-  notifications:
-    build:
-      context: ./backend/notification-service
-      dockerfile: ./Dockerfile
-      args:
-        JDK_IMAGE: ${JDK_IMAGE}
-        RUNTIME_IMAGE: eclipse-temurin:17-jre
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${NOTIF_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
-    depends_on: [ postgres ]
-    networks: [ backend ]
-
-  # Frontend estático servido por Node 'serve'
+    # Frontend estático servido por Node 'serve'
   frontend:
     build:
       context: ./frontend
@@ -132,9 +54,106 @@ services:
       - "${PUBLIC_HTTP_PORT}:8080"
     networks: [ backend, frontend_net ]
 
-volumes:
-  pgdata:
+  # === Microservicios ===
+  
+  auth:
+    build:
+      context: ./backend/auth-service
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: auth
+      FLYWAY_TABLE: flyway_history_auth
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
+    networks: [ backend ]
+
+  events:
+    build:
+      context: ./backend/event-service
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: events
+      FLYWAY_TABLE: flyway_history_events
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
+    networks: [ backend ]
+
+  tickets:
+    build:
+      context: ./backend/ticket-service
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: tickets
+      FLYWAY_TABLE: flyway_history_tickets
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
+    networks: [ backend ]
+
+  payments:
+    build:
+      context: ./backend/payment-service
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: payments
+      FLYWAY_TABLE: flyway_history_payments
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
+    networks: [ backend ]
+
+  notifications:
+    build:
+      context: ./backend/notification-service
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: notifications
+      FLYWAY_TABLE: flyway_history_notifications
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
+    networks: [ backend ]
 
 networks:
   backend:
   frontend_net:
+
+volumes:
+  ticketera_prod_pgdata:
