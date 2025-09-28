@@ -72,11 +72,12 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA},public
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${AUTH_DB_SCHEMA},public
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SCHEMA: auth
-      FLYWAY_TABLE: flyway_history_auth
+      SPRING_FLYWAY_SCHEMAS: ${AUTH_DB_SCHEMA:-auth}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${AUTH_DB_SCHEMA:-auth}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -96,11 +97,12 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA},public
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${EVENT_DB_SCHEMA},public
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SCHEMA: events
-      FLYWAY_TABLE: flyway_history_events
+      SPRING_FLYWAY_SCHEMAS: ${EVENT_DB_SCHEMA:-event}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${EVENT_DB_SCHEMA:-event}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -120,11 +122,12 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA},public
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${TICKET_DB_SCHEMA},public
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SCHEMA: tickets
-      FLYWAY_TABLE: flyway_history_tickets
+      SPRING_FLYWAY_SCHEMAS: ${TICKET_DB_SCHEMA:-ticket}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${TICKET_DB_SCHEMA:-ticket}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -144,11 +147,12 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA},public
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${PAYMENT_DB_SCHEMA},public
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SCHEMA: payments
-      FLYWAY_TABLE: flyway_history_payments
+      SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payment}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payment}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -168,11 +172,12 @@ services:
       - m2cache:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA},public
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${NOTIFICATION_DB_SCHEMA},public
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_SCHEMA: notifications
-      FLYWAY_TABLE: flyway_history_notifications
+      SPRING_FLYWAY_SCHEMAS: ${NOTIFICATION_DB_SCHEMA:-notification}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${NOTIFICATION_DB_SCHEMA:-notification}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -185,3 +190,4 @@ networks:
 
 volumes:
   ticketera_dev_pgdata:
+  m2cache:
