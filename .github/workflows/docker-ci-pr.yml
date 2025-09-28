@@ -1,4 +1,4 @@
-name: CI - PR Docker build
+name: CI - PR Docker (detect + matrix build)
 on:
   pull_request:
     branches: [develop, main]
@@ -7,56 +7,50 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
-      gateway:  ${{ steps.filter.outputs.gateway }}
-      auth:     ${{ steps.filter.outputs.auth }}
-      event:    ${{ steps.filter.outputs.event }}
-      ticket:   ${{ steps.filter.outputs.ticket }}
-      payment:  ${{ steps.filter.outputs.payment }}
-      notif:    ${{ steps.filter.outputs.notif }}
+      matrix: ${{ steps.mk.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: filter
+        id: changes
         with:
           filters: |
-            frontend: ["ticketera/frontend/**", "ticketera/frontend/Dockerfile"]
-            gateway:  ["ticketera/backend/gateway/**", "ticketera/backend/gateway/Dockerfile"]
-            auth:     ["ticketera/backend/auth-service/**", "ticketera/backend/auth-service/Dockerfile"]
-            event:    ["ticketera/backend/event-service/**", "ticketera/backend/event-service/Dockerfile"]
-            ticket:   ["ticketera/backend/ticket-service/**", "ticketera/backend/ticket-service/Dockerfile"]
-            payment:  ["ticketera/backend/payment-service/**", "ticketera/backend/payment-service/Dockerfile"]
-            notif:    ["ticketera/backend/notification-service/**", "ticketera/backend/notification-service/Dockerfile"]
+            frontend:       ['ticketera/frontend/**','ticketera/frontend/Dockerfile']
+            gateway:        ['ticketera/backend/gateway/**','ticketera/backend/gateway/Dockerfile']
+            auth:           ['ticketera/backend/auth-service/**','ticketera/backend/auth-service/Dockerfile']
+            events:         ['ticketera/backend/event-service/**','ticketera/backend/event-service/Dockerfile']
+            tickets:        ['ticketera/backend/ticket-service/**','ticketera/backend/ticket-service/Dockerfile']
+            payments:       ['ticketera/backend/payment-service/**','ticketera/backend/payment-service/Dockerfile']
+            notifications:  ['ticketera/backend/notification-service/**','ticketera/backend/notification-service/Dockerfile']
+
+      - id: mk
+        run: |
+          MATRIX='{"include":[]}'
+          add(){ MATRIX=$(jq -c --arg n "$1" --arg p "$2" '.include += [{"name":$n,"path":$p}]'<<<"$MATRIX"); }
+          sudo apt-get update && sudo apt-get install -y jq
+          [ "${{ steps.changes.outputs.frontend }}"      = "true" ] && add frontend      ticketera/frontend
+          [ "${{ steps.changes.outputs.gateway }}"       = "true" ] && add gateway       ticketera/backend/gateway
+          [ "${{ steps.changes.outputs.auth }}"          = "true" ] && add auth          ticketera/backend/auth-service
+          [ "${{ steps.changes.outputs.events }}"        = "true" ] && add events        ticketera/backend/event-service
+          [ "${{ steps.changes.outputs.tickets }}"       = "true" ] && add tickets       ticketera/backend/ticket-service
+          [ "${{ steps.changes.outputs.payments }}"      = "true" ] && add payments      ticketera/backend/payment-service
+          [ "${{ steps.changes.outputs.notifications }}" = "true" ] && add notifications ticketera/backend/notification-service
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
   build:
     needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.frontend == 'true' ||
-      needs.detect-changes.outputs.gateway  == 'true' ||
-      needs.detect-changes.outputs.auth     == 'true' ||
-      needs.detect-changes.outputs.event    == 'true' ||
-      needs.detect-changes.outputs.ticket   == 'true' ||
-      needs.detect-changes.outputs.payment  == 'true' ||
-      needs.detect-changes.outputs.notif    == 'true'
+    if: ${{ fromJSON(needs.detect-changes.outputs.matrix).include != null && fromJSON(needs.detect-changes.outputs.matrix).include[0] != null }}
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        svc:
-          - { name: frontend, path: "ticketera/frontend" }
-          - { name: gateway,  path: "ticketera/backend/gateway" }
-          - { name: auth,     path: "ticketera/backend/auth-service" }
-          - { name: event,    path: "ticketera/backend/event-service" }
-          - { name: ticket,   path: "ticketera/backend/ticket-service" }
-          - { name: payment,  path: "ticketera/backend/payment-service" }
-          - { name: notif,    path: "ticketera/backend/notification-service" }
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      - name: Build (no push) ${{ matrix.svc.name }}
+      - name: Docker build ${{ matrix.name }}
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.svc.path }}
-          file: ${{ matrix.svc.path }}/Dockerfile
+          context: ${{ matrix.path }}
+          file: ${{ matrix.path }}/Dockerfile
           push: false
           load: true
           cache-from: type=gha

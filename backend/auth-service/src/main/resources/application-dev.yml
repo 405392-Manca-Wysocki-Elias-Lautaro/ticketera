@@ -1,5 +1,6 @@
 spring:
-  application.name: auth-service
+  application:
+    name: auth-service
   main.banner-mode: "off"
   sql.init.mode: never
 
@@ -30,6 +31,7 @@ spring:
     locations:
       - classpath:db/migration/auth
       - classpath:db/r/auth
+    clean-disabled: true
 
 logging.level:
   org.springframework.jdbc.core: DEBUG

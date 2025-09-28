@@ -1,5 +1,6 @@
 spring:
-  application.name: notification-service
+  application:
+    name: notification-service
   main.banner-mode: "off"
   sql.init.mode: never
 
@@ -30,6 +31,7 @@ spring:
     locations:
       - classpath:db/migration/notifications
       - classpath:db/r/notifications
+    clean-disabled: true
 
 logging.level:
   org.springframework.jdbc.core: DEBUG

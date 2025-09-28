@@ -556,27 +556,31 @@ Notas:
 
 - **Levantar todo en segundo plano**  
   ```bash
-  docker compose -f docker-compose.dev.yml up -d
+  docker compose --env-file .env.dev -f docker-compose.dev.yml up -d --build
   ```
-- **Ver logs en vivo (gateway)**  
+- **Ver logs en vivo (gateway)(verás Flyway migrando)**    
   ```bash
-  docker compose -f docker-compose.dev.yml logs -f gateway-dev
+  docker compose --env-file .env.dev -f docker-compose.dev.yml logs -f gateway-dev
+  ```
+  **Ver logs en vivo (postgres)**  
+  ```bash
+  docker compose --env-file .env.dev -f docker-compose.dev.yml logs -f postgres
   ```
 - **Entrar al contenedor (shell)**
   ```bash
-  docker compose -f docker-compose.dev.yml exec gateway-dev sh
+  docker compose --env-file .env.dev -f docker-compose.dev.yml exec gateway-dev sh
   ```
 - **Reconstruir (si cambiaste base de imagen/cachés)**
   ```bash
-  docker compose -f docker-compose.dev.yml up -d --build --no-deps gateway-dev
+  docker compose --env-file .env.dev -f docker-compose.dev.yml up -d --build --no-deps gateway-dev
   ```
 - **Bajar todo (manteniendo volúmenes)**  
   ```bash
-  docker compose -f docker-compose.dev.yml down
+  docker compose --env-file .env.dev -f docker-compose.dev.yml down
   ```
 - **Bajar todo y borrar volúmenes (⚠ destruye datos de DB)**  
   ```bash
-  docker compose -f docker-compose.dev.yml down -v --remove-orphans
+  docker compose --env-file .env.dev -f docker-compose.dev.yml down -v --remove-orphans
   ```
 
 ### 7.2 Producción / Build local
