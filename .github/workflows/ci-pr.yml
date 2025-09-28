@@ -25,6 +25,7 @@ jobs:
             tickets:         'backend/ticket-service/**'
             payments:        'backend/payment-service/**'
             notifications:   'backend/notification-service/**'
+            orders:          'backend/order-service/**'   # 👈 NEW
 
       - name: Build dynamic backend matrix
         id: mk
@@ -36,7 +37,7 @@ jobs:
             '.include += [{"name":$name,"module":$module,"schema":$schema,"flywayTable":$table,"needsDb":$needsDb}]' <<<"$MATRIX"); }
 
           # gateway NO necesita DB para migrar
-          [ "${{ steps.filter.outputs.gateway }}" = "true" ] && add "gateway"       "backend/gateway"                         "public"         "flyway_schema_history" false
+          [ "${{ steps.filter.outputs.gateway }}" = "true" ] && add "gateway"       "backend/gateway"                       "public"         "flyway_schema_history" false
 
           # microservicios con schema propio (sí migran)
           [ "${{ steps.filter.outputs.auth }}" = "true" ]          && add "auth"          "backend/auth-service"           "auth"          "flyway_history_auth" true
@@ -44,6 +45,7 @@ jobs:
           [ "${{ steps.filter.outputs.tickets }}" = "true" ]       && add "tickets"       "backend/ticket-service"         "tickets"       "flyway_history_tickets" true
           [ "${{ steps.filter.outputs.payments }}" = "true" ]      && add "payments"      "backend/payment-service"        "payments"      "flyway_history_payments" true
           [ "${{ steps.filter.outputs.notifications }}" = "true" ] && add "notifications" "backend/notification-service"   "notifications" "flyway_history_notifications" true
+          [ "${{ steps.filter.outputs.orders }}" = "true" ]        && add "orders"        "backend/order-service"          "orders"        "flyway_history_orders" true   # 👈 NEW
 
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
@@ -90,10 +92,10 @@ jobs:
       - name: Flyway migrate (${{ matrix.schema }})
         if: ${{ matrix.needsDb == true }}
         run: |
-          ./mvnw -q -f "${{ matrix.module }}/pom.xml" -DskipTests \
-            -Dflyway.url=jdbc:postgresql://localhost:5432/ticketera_ci \
-            -Dflyway.user=ticketera_app \
-            -Dflyway.password=ci_pass \
+          mvn -q -f "${{ matrix.module }}/pom.xml" -DskipTests \
+            -Dflyway.url="jdbc:postgresql://localhost:5432/ticketera_ci" \
+            -Dflyway.user="ticketera_app" \
+            -Dflyway.password="ci_pass" \
             -Dflyway.schemas="${{ matrix.schema }}" \
             -Dflyway.defaultSchema="${{ matrix.schema }}" \
             -Dflyway.table="${{ matrix.flywayTable }}" \

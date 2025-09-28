@@ -21,6 +21,7 @@ jobs:
             tickets:        ['ticketera/backend/ticket-service/**','ticketera/backend/ticket-service/Dockerfile']
             payments:       ['ticketera/backend/payment-service/**','ticketera/backend/payment-service/Dockerfile']
             notifications:  ['ticketera/backend/notification-service/**','ticketera/backend/notification-service/Dockerfile']
+            orders:         ['ticketera/backend/order-service/**','ticketera/backend/order-service/Dockerfile']   # 👈 NEW
 
       - id: mk
         run: |
@@ -34,6 +35,7 @@ jobs:
           [ "${{ steps.changes.outputs.tickets }}"       = "true" ] && add tickets       ticketera/backend/ticket-service
           [ "${{ steps.changes.outputs.payments }}"      = "true" ] && add payments      ticketera/backend/payment-service
           [ "${{ steps.changes.outputs.notifications }}" = "true" ] && add notifications ticketera/backend/notification-service
+          [ "${{ steps.changes.outputs.orders }}"        = "true" ] && add orders        ticketera/backend/order-service     # 👈 NEW
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
   build:
