@@ -49,7 +49,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       # CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:8081"
-    depends_on: [ auth, events, tickets, payments, notifications ]
+    depends_on: [ auth, events, tickets, payments, notifications, orders ]
     networks: [ backend, frontend_net ]
 
   # === Microservicios ===
@@ -143,6 +143,25 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: notifications
       FLYWAY_TABLE: flyway_history_notifications
+      # RABBITMQ_HOST: rabbitmq
+      # RABBITMQ_USER: ${RABBIT_USER}
+      # RABBITMQ_PASS: ${RABBIT_PASS}
+    depends_on: [ postgres ]
+    networks: [ backend ]
+
+  orders:
+    build:
+      context: ./backend/order-service
+      dockerfile: ./Dockerfile
+      args:
+        JDK_IMAGE: ${JDK_IMAGE}
+        RUNTIME_IMAGE: eclipse-temurin:17-jre
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SCHEMA: orders
+      FLYWAY_TABLE: flyway_history_orders
       # RABBITMQ_HOST: rabbitmq
       # RABBITMQ_USER: ${RABBIT_USER}
       # RABBITMQ_PASS: ${RABBIT_PASS}
