@@ -1,3 +1,11 @@
+# [1.0.0-next.2](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.1...gateway-v1.0.0-next.2) (2025-09-28)
+
+
+### Features
+
+* **migrations:** add V1 initial migration per service ([29e7b24](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/29e7b24b7c431ba67b0fa8273ef5f5f053366659))
+* **orders:** scaffold orders service and initial schema ([3320b87](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3320b879154de19755d10e2cfc2717f637f9dcca))
+
 # 1.0.0-next.1 (2025-09-25)
 
 
