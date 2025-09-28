@@ -1,16 +1,42 @@
 spring:
   application:
-    name: notification   # cambia por el nombre del micro
-  datasource:
-    # leemos de env; si falta, usamos defaults de dev
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/appdb}
-    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:appuser}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:apppass}}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update   # solo para dev
-    show-sql: true       # opcional
+    name: notification-service
+  main.banner-mode: "off"
+  sql.init.mode: never
 
-# NO fijamos server.port -> queda en 8080 (default)
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:notifications},public
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    hikari:
+      schema: ${DB_SCHEMA:notifications}
+      maximum-pool-size: 30
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      default_schema: ${DB_SCHEMA:notifications}
+    properties:
+      hibernate.default_schema: ${DB_SCHEMA:notifications}
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    schemas: ${DB_SCHEMA:notifications}
+    default-schema: ${DB_SCHEMA:notifications}
+    table: ${FLYWAY_TABLE:flyway_history_notifications}
+    validate-on-migrate: true
+    baseline-on-migrate: false
+    locations:
+      - classpath:db/migration
+      - classpath:db/r
+
+logging.level:
+  root: INFO
+  org.hibernate.SQL: WARN
+  org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+management:
+  endpoints.web.exposure.include: "health,info"
+  endpoint.health.show-details: never

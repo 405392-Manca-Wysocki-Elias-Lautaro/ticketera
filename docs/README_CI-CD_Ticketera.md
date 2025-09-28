@@ -1,10 +1,9 @@
 # Ticketera · CI/CD & Workflows (Monorepo)
-
-> **Objetivo:** documentar cómo funciona el pipeline de integración y release del monorepo `ticketera` (frontend en React + backend en Java/Spring), qué hace cada workflow, cómo versionamos con semantic‑release, cómo publicamos imágenes en GHCR y cómo verificar todo con un smoke test.
+> **Objetivo:** documentar cómo funciona el pipeline de integración y release del monorepo `ticketera` (frontend en React + backend en Java/Spring), qué hace cada workflow, cómo versionamos con semantic-release, cómo publicamos imágenes en GHCR y cómo verificar todo con un smoke test.
 
 ---
 
-## 📦 Estructura del repo
+## 📦 Estructura del repositorio
 
 ```
 /ticketera
@@ -26,7 +25,7 @@ PULL_REQUEST_TEMPLATE.md     # Template de PR
 
 ## 🌿 Estrategia de ramas
 
-- `main` → estable (releases de producción). Llega **solo** por PR.
+- `main` → rama estable (releases de producción). Llega **solo** por PR.
 - `develop` → integración del sprint (**pre‑releases**).
 - `feature/*` → trabajo diario de cada dev.
 - `hotfix/*` → arreglos urgentes que salen a `main` y se backmergean a `develop`.
@@ -54,9 +53,9 @@ PULL_REQUEST_TEMPLATE.md     # Template de PR
 - **Trigger:** PR a `develop` o `main`.
 - **Pasos clave:**
   1. `dorny/paths-filter` marca flags por carpeta (frontend, gateway, auth, …) para ejecutar **solo** lo que cambió.
-  2. **Frontend (React):** Node 20 + cache npm → `npm ci` → `npm run lint` → `npm test` (si existe) → `npm run build`.
-  3. **Backend (Java/Spring):** JDK 21 + cache Maven → `mvn verify` (o `./mvnw verify`) **por servicio tocado**.
-- **Objetivo:** PR queda **verde** si el código compila, pasa tests y no rompimos nada de lo que tocamos.
+  2. **Frontend (React):** Node.js v20.x + cache npm → `npm ci` → `npm run lint` → `npm test` (si existe) → `npm run build`.
+  3. **Backend (Java/Spring):** JDK 17 (Temurin) + cache Maven → `mvn verify` (o `./mvnw verify`) **por servicio tocado**.
+- **Objetivo:** el PR queda validado si el código compila, pasa tests y no rompe lo que fue modificado.
 
 ### 2) `docker-ci-pr.yml` — Build Docker en PR
 - **Trigger:** PR a `develop` o `main`.
@@ -145,14 +144,14 @@ export default {
 
 ### `CODEOWNERS` (ejemplo)
 ```
-*                                        @tu-usuario @tu-compa
-/ticketera/frontend/                     @tu-usuario
-/ticketera/backend/auth-service/         @tu-compa
-/ticketera/backend/event-service/        @tu-compa
-/ticketera/backend/ticket-service/       @tu-usuario
-/ticketera/backend/payment-service/      @tu-usuario
-/ticketera/backend/notification-service/ @tu-compa
-/ticketera/backend/gateway/              @tu-usuario
+*                                        @usuario1 @usuario2
+/ticketera/frontend/                     @usuario1
+/ticketera/backend/auth-service/         @usuario2
+/ticketera/backend/event-service/        @usuario2
+/ticketera/backend/ticket-service/       @usuario1
+/ticketera/backend/payment-service/      @usuario1
+/ticketera/backend/notification-service/ @usuario2
+/ticketera/backend/gateway/              @usuario1
 ```
 
 ### `PULL_REQUEST_TEMPLATE.md`
@@ -173,8 +172,8 @@ export default {
 - **`.dockerignore`** por módulo (evitar copiar `.git`, `node_modules`, `target`, etc.).
 - **Multi‑stage**:
   - Frontend: build en `node:20` → servir con `nginx:alpine`.
-  - Spring: build en `maven:3.9-eclipse-temurin-21` → run en `eclipse-temurin:21-jre`.
-- **Labels OCI** y `--build-arg VCS_REF=$GITHUB_SHA` si querés trazabilidad.
+  - Spring: build en `maven:3.9-eclipse-temurin-17` → run en `eclipse-temurin:17-jre`.
+- **Labels OCI** y `--build-arg VCS_REF=$GITHUB_SHA` opcional para trazabilidad.
 - **Cache de capas** activo en los workflows (rápidos).
 
 ---
@@ -217,15 +216,15 @@ export default {
 ### Paso 1 — PR de prueba a `develop`
 ```bash
 git checkout -b feature/smoke-test
-# tocá un archivo simple en ticketera/frontend (p. ej. README interno) o en 1 microservicio
+# modificar un archivo simple en ticketera/frontend o en 1 microservicio
 git add .
 git commit -m "feat(frontend): prueba de pipeline (smoke test)"
 git push -u origin feature/smoke-test
-# Abrí PR contra develop
+# Abrir PR contra develop
 ```
 **Esperado en PR:**
-- ✅ `ci-pr` (solo para lo tocado)
-- ✅ `docker-ci-pr` (construye imagen del módulo tocado)
+- ✅ `ci-pr` (solo para lo modificado)
+- ✅ `docker-ci-pr` (construye imagen del módulo modificado)
 - ✅ `commitlint`
 
 ### Paso 2 — Merge a `develop`
@@ -234,21 +233,21 @@ git push -u origin feature/smoke-test
   - En **Packages** del repo aparecerá la **imagen** del módulo con tag `develop-next-<sha>`.
 
 ### Paso 3 — PR `develop` → `main` (cierre)
-- Abrí PR y mergeá.
+- Abrir PR y mergear.
 - `release-main` debe:
   - Crear **Release estable** por módulo (`*-vX.Y.Z`).
   - Publicar imágenes en GHCR con tags `vX.Y.Z` y `latest`.
-- Verificalo en **Releases** y **Packages**.
+- Verificarlo en **Releases** y **Packages**.
 
 ### Paso 4 — Anti‑patrón (opcional)
-- Probá hacer un **push directo** a `develop`:
+- Intentar un **push directo** a `develop`:
   - El workflow `guard-branches` debe **fallar** con mensaje “Usá PR”.
 
 ### Paso 5 — Romper adrede (opcional)
-- Cambiá un `Dockerfile` mal (ej. borra una `RUN` necesaria) y levantá PR:
+- Modificar un `Dockerfile` con un error y levantar PR:
   - `docker-ci-pr` debe **fallar** (demuestra que la guardia funciona).
-- Hacé un commit con mal formato (ej. `Update`):
-  - `commitlint` debe **fallar** hasta que corrijas.
+- Hacer un commit con mal formato (ej. `Update`):
+  - `commitlint` debe **fallar** hasta que lo corrijas.
 
 ---
 
@@ -257,5 +256,8 @@ git push -u origin feature/smoke-test
 - **¿Qué es GHCR?** GitHub Container Registry: el “depósito” de imágenes Docker que integra con GitHub.
 - **¿Necesito secrets?** No, usamos `GITHUB_TOKEN` por defecto.
 - **¿Publica a npm?** No. En frontend usamos `@semantic-release/npm` solo para manejar versión/local changelog, **sin publicar**.
+- **¿Puedo cambiar los tags de imágenes?** Sí, ajustá los `tags:` en los jobs de Docker en `release-*`.
+- **¿Y si un servicio no debe publicar imagen?** Quitalo de la matriz de Docker o agregá una condición en `if:`.
+ersión/local changelog, **sin publicar**.
 - **¿Puedo cambiar los tags de imágenes?** Sí, ajustá los `tags:` en los jobs de Docker en `release-*`.
 - **¿Y si un servicio no debe publicar imagen?** Quitalo de la matriz de Docker o agregá una condición en `if:`.

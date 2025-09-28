@@ -1,5 +1,4 @@
-# .github/workflows/ci-pr.yml
-name: CI - PR
+name: CI - PR (matrix changed)
 
 on:
   pull_request:
@@ -7,78 +6,117 @@ on:
 
 jobs:
   detect-changes:
+    name: Detect changes
     runs-on: ubuntu-latest
     outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
-      gateway:  ${{ steps.filter.outputs.gateway }}
-      auth:     ${{ steps.filter.outputs.auth }}
-      event:    ${{ steps.filter.outputs.event }}
-      ticket:   ${{ steps.filter.outputs.ticket }}
-      payment:  ${{ steps.filter.outputs.payment }}
-      notif:    ${{ steps.filter.outputs.notif }}
+      matrix: ${{ steps.mk.outputs.matrix }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
-            frontend: ["ticketera/frontend/**"]
-            gateway:  ["ticketera/backend/gateway/**"]
-            auth:     ["ticketera/backend/auth-service/**"]
-            event:    ["ticketera/backend/event-service/**"]
-            ticket:   ["ticketera/backend/ticket-service/**"]
-            payment:  ["ticketera/backend/payment-service/**"]
-            notif:    ["ticketera/backend/notification-service/**"]
+            frontend:        'frontend/**'
+            gateway:         'backend/gateway/**'
+            auth:            'backend/auth-service/**'
+            events:          'backend/event-service/**'
+            tickets:         'backend/ticket-service/**'
+            payments:        'backend/payment-service/**'
+            notifications:   'backend/notification-service/**'
+            orders:          'backend/order-service/**'   # NEW
 
-  # ---------- Frontend (React) ----------
-  frontend:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    defaults: { run: { working-directory: ticketera/frontend } }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'ticketera/frontend/package-lock.json'
-      - run: npm ci
-      - run: npm run lint --if-present
-      - run: npm test --if-present -- --ci
-      - run: npm run build
+      - name: Build dynamic backend matrix
+        id: mk
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq >/dev/null
+          MATRIX='{"include":[]}'
+          add(){ MATRIX=$(jq -c --arg name "$1" --arg module "$2" --arg schema "$3" --arg table "$4" --argjson needsDb $5 \
+            '.include += [{"name":$name,"module":$module,"schema":$schema,"flywayTable":$table,"needsDb":$needsDb}]' <<<"$MATRIX"); }
 
-  # ---------- Backend (Java/Spring) ----------
+          # gateway NO necesita DB para migrar
+          [ "${{ steps.filter.outputs.gateway }}" = "true" ] && add "gateway"       "backend/gateway"                       "public"         "flyway_schema_history" false
+
+          # microservicios con schema propio (sí migran)
+          [ "${{ steps.filter.outputs.auth }}" = "true" ]          && add "auth"          "backend/auth-service"           "auth"          "flyway_history_auth" true
+          [ "${{ steps.filter.outputs.events }}" = "true" ]        && add "events"        "backend/event-service"          "events"        "flyway_history_events" true
+          [ "${{ steps.filter.outputs.tickets }}" = "true" ]       && add "tickets"       "backend/ticket-service"         "tickets"       "flyway_history_tickets" true
+          [ "${{ steps.filter.outputs.payments }}" = "true" ]      && add "payments"      "backend/payment-service"        "payments"      "flyway_history_payments" true
+          [ "${{ steps.filter.outputs.notifications }}" = "true" ] && add "notifications" "backend/notification-service"   "notifications" "flyway_history_notifications" true
+          [ "${{ steps.filter.outputs.orders }}" = "true" ]        && add "orders"        "backend/order-service"          "orders"        "flyway_history_orders" true  # NEW
+
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
   backend:
+    name: Backend - migrate & test (changed only)
     needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.gateway == 'true' ||
-      needs.detect-changes.outputs.auth    == 'true' ||
-      needs.detect-changes.outputs.event   == 'true' ||
-      needs.detect-changes.outputs.ticket  == 'true' ||
-      needs.detect-changes.outputs.payment == 'true' ||
-      needs.detect-changes.outputs.notif   == 'true'
+    if: ${{ fromJSON(needs.detect-changes.outputs.matrix).include[0] != null }}
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        svc:
-          - { name: gateway, path: "ticketera/backend/gateway" }
-          - { name: auth,    path: "ticketera/backend/auth-service" }
-          - { name: event,   path: "ticketera/backend/event-service" }
-          - { name: ticket,  path: "ticketera/backend/ticket-service" }
-          - { name: payment, path: "ticketera/backend/payment-service" }
-          - { name: notif,   path: "ticketera/backend/notification-service" }
-      max-parallel: 3
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ticketera_ci
+          POSTGRES_USER: ticketera_app
+          POSTGRES_PASSWORD: ci_pass
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd="pg_isready -U ticketera_app -d ticketera_ci"
+          --health-interval=5s --health-timeout=3s --health-retries=20
+
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 21
+
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
-      - name: Build & Test ${{ matrix.svc.name }}
-        working-directory: ${{ matrix.svc.path }}
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Install psql
+        if: ${{ matrix.needsDb == true }}
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Init DB (schemas/pgcrypto/grants)
+        if: ${{ matrix.needsDb == true }}
+        run: |
+          until pg_isready -h localhost -U ticketera_app -d ticketera_ci; do sleep 2; done
+          psql "postgresql://ticketera_app:ci_pass@localhost:5432/ticketera_ci" \
+            -f infra/postgres/dev/init.sql
+
+      - name: Flyway migrate (${{ matrix.schema }})
+        if: ${{ matrix.needsDb == true }}
+        run: |
+          mvn -q -f "${{ matrix.module }}/pom.xml" -DskipTests \
+            -Dflyway.url="jdbc:postgresql://localhost:5432/ticketera_ci" \
+            -Dflyway.user="ticketera_app" \
+            -Dflyway.password="ci_pass" \
+            -Dflyway.schemas="${{ matrix.schema }}" \
+            -Dflyway.defaultSchema="${{ matrix.schema }}" \
+            -Dflyway.table="${{ matrix.flywayTable }}" \
+            -Dflyway.locations="classpath:db/migration/${{ matrix.schema }},classpath:db/r/${{ matrix.schema }}" \
+            org.flywaydb:flyway-maven-plugin:migrate
+
+      # Tests para servicios con DB: apuntar a localhost y deshabilitar Flyway auto
+      - name: Build & Test (${{ matrix.name }}) [DB svc]
+        if: ${{ matrix.needsDb == true }}
+        working-directory: ${{ matrix.module }}
+        env:
+          SPRING_PROFILES_ACTIVE: ci
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ticketera_ci
+          SPRING_DATASOURCE_USERNAME: ticketera_app
+          SPRING_DATASOURCE_PASSWORD: ci_pass
+          SPRING_FLYWAY_ENABLED: 'false'   # ya migramos con el plugin
+          POSTGRES_DB: ticketera_ci
+          POSTGRES_USER: ticketera_app
+          POSTGRES_PASSWORD: ci_pass
+          DB_SCHEMA: ${{ matrix.schema }}
         run: |
           if [ -f mvnw ]; then
             chmod +x mvnw
@@ -86,3 +124,37 @@ jobs:
           else
             mvn -B -ntp verify
           fi
+
+      # Tests para servicios sin DB (gateway)
+      - name: Build & Test (${{ matrix.name }}) [no DB]
+        if: ${{ matrix.needsDb != true }}
+        working-directory: ${{ matrix.module }}
+        env:
+          SPRING_PROFILES_ACTIVE: ci
+        run: |
+          if [ -f mvnw ]; then
+            chmod +x mvnw
+            ./mvnw -B -ntp verify
+          else
+            mvn -B -ntp verify
+          fi
+
+  frontend:
+    name: Frontend (changed only)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm test --if-present -- --ci
+      - run: npm run build

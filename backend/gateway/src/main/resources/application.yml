@@ -50,6 +50,13 @@ spring:
           filters:
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
 
+        - id: orders
+          uri: http://orders:8080
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - RewritePath=/api/orders/?(?<segment>.*), /${segment}
+
       # CORS global (ajusta origen/esquemas)
       globalcors:
         corsConfigurations:
