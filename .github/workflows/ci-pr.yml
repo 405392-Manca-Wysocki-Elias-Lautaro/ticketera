@@ -25,7 +25,7 @@ jobs:
             tickets:         'backend/ticket-service/**'
             payments:        'backend/payment-service/**'
             notifications:   'backend/notification-service/**'
-            orders:          'backend/order-service/**'   # 👈 NEW
+            orders:          'backend/order-service/**'   # NEW
 
       - name: Build dynamic backend matrix
         id: mk
@@ -45,7 +45,7 @@ jobs:
           [ "${{ steps.filter.outputs.tickets }}" = "true" ]       && add "tickets"       "backend/ticket-service"         "tickets"       "flyway_history_tickets" true
           [ "${{ steps.filter.outputs.payments }}" = "true" ]      && add "payments"      "backend/payment-service"        "payments"      "flyway_history_payments" true
           [ "${{ steps.filter.outputs.notifications }}" = "true" ] && add "notifications" "backend/notification-service"   "notifications" "flyway_history_notifications" true
-          [ "${{ steps.filter.outputs.orders }}" = "true" ]        && add "orders"        "backend/order-service"          "orders"        "flyway_history_orders" true   # 👈 NEW
+          [ "${{ steps.filter.outputs.orders }}" = "true" ]        && add "orders"        "backend/order-service"          "orders"        "flyway_history_orders" true  # NEW
 
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
@@ -80,6 +80,7 @@ jobs:
           cache: maven
 
       - name: Install psql
+        if: ${{ matrix.needsDb == true }}
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Init DB (schemas/pgcrypto/grants)
@@ -102,14 +103,34 @@ jobs:
             -Dflyway.locations="classpath:db/migration/${{ matrix.schema }},classpath:db/r/${{ matrix.schema }}" \
             org.flywaydb:flyway-maven-plugin:migrate
 
-      - name: Build & Test (${{ matrix.name }})
+      # Tests para servicios con DB: apuntar a localhost y deshabilitar Flyway auto
+      - name: Build & Test (${{ matrix.name }}) [DB svc]
+        if: ${{ matrix.needsDb == true }}
         working-directory: ${{ matrix.module }}
         env:
           SPRING_PROFILES_ACTIVE: ci
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ticketera_ci
+          SPRING_DATASOURCE_USERNAME: ticketera_app
+          SPRING_DATASOURCE_PASSWORD: ci_pass
+          SPRING_FLYWAY_ENABLED: 'false'   # ya migramos con el plugin
           POSTGRES_DB: ticketera_ci
           POSTGRES_USER: ticketera_app
           POSTGRES_PASSWORD: ci_pass
           DB_SCHEMA: ${{ matrix.schema }}
+        run: |
+          if [ -f mvnw ]; then
+            chmod +x mvnw
+            ./mvnw -B -ntp verify
+          else
+            mvn -B -ntp verify
+          fi
+
+      # Tests para servicios sin DB (gateway)
+      - name: Build & Test (${{ matrix.name }}) [no DB]
+        if: ${{ matrix.needsDb != true }}
+        working-directory: ${{ matrix.module }}
+        env:
+          SPRING_PROFILES_ACTIVE: ci
         run: |
           if [ -f mvnw ]; then
             chmod +x mvnw
