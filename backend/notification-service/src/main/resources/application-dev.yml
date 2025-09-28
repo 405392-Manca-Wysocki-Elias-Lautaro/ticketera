@@ -3,6 +3,12 @@ spring:
     name: notification-service
   main.banner-mode: "off"
   sql.init.mode: never
+  
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: false
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:notifications},public
@@ -29,8 +35,8 @@ spring:
     validate-on-migrate: true
     baseline-on-migrate: false
     locations:
-      - classpath:db/migration/notifications
-      - classpath:db/r/notifications
+      - classpath:db/migration
+      - classpath:db/r
     clean-disabled: true
 
 logging.level:

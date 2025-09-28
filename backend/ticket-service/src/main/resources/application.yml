@@ -28,8 +28,8 @@ spring:
     validate-on-migrate: true
     baseline-on-migrate: false
     locations:
-      - classpath:db/migration/ticket
-      - classpath:db/r/ticket
+      - classpath:db/migration
+      - classpath:db/r
 
 logging.level:
   root: INFO

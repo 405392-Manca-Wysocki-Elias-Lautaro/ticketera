@@ -97,6 +97,7 @@ spring:
 | notification-dev | maven:3.9.8-eclipse-temurin-17 | 8086:8080, 5008:5005 | backend               | postgres                                                       |
 | payment-dev      | maven:3.9.8-eclipse-temurin-17 | 8085:8080, 5009:5005 | backend               | postgres                                                       |
 | ticket-dev       | maven:3.9.8-eclipse-temurin-17 | 8084:8080, 5010:5005 | backend               | postgres                                                       |
+| order-dev        | maven:3.9.8-eclipse-temurin-17 | 8087:8080, 5010:5005 | backend               | postgres                                                       |
 
 **Archivo**: `docker-compose.dev.yml`
 
@@ -277,6 +278,28 @@ services:
       - "8084:8080"
       - "5010:5005"
 
+  order-dev:
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command: >
+      bash -lc "
+        mvn -q -DskipTests dependency:go-offline &&
+        mvn -q -Dspring-boot.run.fork=false spring-boot:run
+      "
+    volumes:
+      - ./backend/order-service:/workspace
+      - m2cache:/root/.m2
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${ORDERS_DB:-orders}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    depends_on: [postgres]
+    networks: [backend]
+    ports:
+      - "8084:8080"
+      - "5010:5005"
+
 ```
 
 Puntos clave:
@@ -297,6 +320,7 @@ PAYMENTS_DB=
 POSTGRES_PASSWORD=
 POSTGRES_USER=
 TICKETS_DB=
+ORDERS_DB=
 ```
 
 ---
@@ -311,6 +335,7 @@ TICKETS_DB=
 | auth          | ./backend/auth-service         |                          | backend               | postgres                                       |
 | events        | ./backend/event-service        |                          | backend               | postgres                                       |
 | tickets       | ./backend/ticket-service       |                          | backend               | postgres                                       |
+| orders        | ./backend/orders-service       |                          | backend               | postgres                                       |
 | payments      | ./backend/payment-service      |                          | backend               | postgres                                       |
 | notifications | ./backend/notification-service |                          | backend               | postgres                                       |
 | frontend      | ./frontend                     | 8081:8081                | frontend_net          |                                                |
@@ -699,6 +724,7 @@ RABBIT_IMAGE=
 RABBIT_PASS=
 RABBIT_USER=
 TICKET_DB=
+ORDER_DB=
 ```
 
 ---

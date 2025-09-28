@@ -29,8 +29,8 @@ spring:
     validate-on-migrate: true
     baseline-on-migrate: false
     locations:
-      - classpath:db/migration/auth
-      - classpath:db/r/auth
+      - classpath:db/migration
+      - classpath:db/r
 
 logging.level:
   root: INFO
