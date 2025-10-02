@@ -125,7 +125,7 @@ Estos secrets se inyectan en los workflows y luego como variables de entorno en 
 ## 📌 Resumen
 
 - `.env.example` → plantilla comiteada (sin secretos).  
-- `.env` → valores reales (local/server), ignorado por git.  
+- `.env` → valores reales (local/server), ignorado por git.
 - `application.yml` → config común.  
 - `application-<profile>.yml` → config específica por entorno.  
 - `SPRING_PROFILES_ACTIVE` → decide qué configuración cargar.  
