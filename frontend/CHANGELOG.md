@@ -1,3 +1,13 @@
+# [1.0.0-next.2](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.1...frontend-v1.0.0-next.2) (2025-10-02)
+
+
+### Features
+
+* **lint:** allow constant exports in react-refresh rule ([794328a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/794328acccf8c695ef8106182c03d154c7c74cbb))
+* **migrations:** add V1 initial migration per service ([29e7b24](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/29e7b24b7c431ba67b0fa8273ef5f5f053366659))
+* **orders:** scaffold orders service and initial schema ([3320b87](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3320b879154de19755d10e2cfc2717f637f9dcca))
+* **pwa:** add Progressive Web App support with manifest, icons, and service worker configuration ([9277794](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9277794c05cf239c039c219e5f9d8e54c5366aaa))
+
 # 1.0.0-next.1 (2025-09-25)
 
 
