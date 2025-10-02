@@ -15,13 +15,5 @@ module.exports = {
     rules: {
         'react/react-in-jsx-scope': 'off',
         'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
-    },
-    overrides: [
-        {
-            files: ['src/components/ui/button.tsx'],
-            rules: {
-                'react-refresh/only-export-components': 'off'
-            }
-        }
-    ]
+    }
 };
