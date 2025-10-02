@@ -7,7 +7,7 @@ module.exports = {
         'plugin:react/recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:react-hooks/recommended',
-        'prettier' // 👈 desactiva reglas de ESLint que choquen con Prettier
+        'prettier'
     ],
     settings: {
         react: { version: 'detect' },
@@ -15,5 +15,6 @@ module.exports = {
     rules: {
         'react/react-in-jsx-scope': 'off',
         '@typescript-eslint/no-unused-vars': ['warn'],
+        'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
     },
 }
