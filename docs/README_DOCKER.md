@@ -581,31 +581,43 @@ Notas:
 
 - **Levantar todo en segundo plano**  
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml up -d --build
+  docker compose up -d --build
+  ```
+  - **Levantar y reconstruir**
+  ```bash
+  docker compose up -d --build
+  ```
+  - **Levantar y reconstruir un servicio**
+  ```bash
+  docker compose up -d --build gateway-dev
+  ```
+  - **Reconstruir (si cambiaste base de imagen/cachés)**
+  ```bash
+  docker compose -d --build --no-deps gateway-dev
   ```
 - **Ver logs en vivo (gateway)(verás Flyway migrando)**    
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml logs -f gateway-dev
+  docker compose logs -f gateway-dev
   ```
   **Ver logs en vivo (postgres)**  
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml logs -f postgres
+  docker compose logs -f postgres
   ```
 - **Entrar al contenedor (shell)**
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml exec gateway-dev sh
+  docker compose exec gateway-dev sh
   ```
 - **Reconstruir (si cambiaste base de imagen/cachés)**
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml up -d --build --no-deps gateway-dev
+  docker compose -d --build --no-deps gateway-dev
   ```
 - **Bajar todo (manteniendo volúmenes)**  
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml down
+  docker compose down
   ```
 - **Bajar todo y borrar volúmenes (⚠ destruye datos de DB)**  
   ```bash
-  docker compose --env-file .env.dev -f docker-compose.dev.yml down -v --remove-orphans
+  docker compose down -v --remove-orphans
   ```
 
 ### 7.2 Producción / Build local
@@ -613,16 +625,16 @@ Notas:
 - **Compilar y levantar**  
   ```bash
   # Asegurate de tener .env con POSTGRES_IMAGE, JDK_IMAGE, PUBLIC_HTTP_PORT, etc.
-  docker compose up -d --build
+  docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
   ```
 - **Ver estado**  
   ```bash
-  docker compose ps
-  docker compose logs -f gateway
+  docker compose --env-file .env.prod -f docker-compose.prod.yml ps
+  docker compose --env-file .env.prod -f docker-compose.prod.yml logs -f gateway
   ```
 - **Bajar stack**  
   ```bash
-  docker compose down
+  docker compose --env-file .env.prod -f docker-compose.prod.yml down
   ```
 
 ### 7.3 Limpieza de recursos
