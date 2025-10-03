@@ -19,6 +19,13 @@ services:
       retries: 20
     networks: [ backend ]
 
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks: [ backend ]
 
   frontend-dev:
     image: ${NODE_IMAGE:-node:20}
