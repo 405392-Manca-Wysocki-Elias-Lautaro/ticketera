@@ -39,10 +39,30 @@ spring:
       - classpath:db/r
     clean-disabled: true
 
-logging.level:
-  org.springframework.jdbc.core: DEBUG
-  org.hibernate.SQL: DEBUG
-  org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  mail:
+    host: mailhog
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls.enable: false
+  
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.sendgrid.SendGridAutoConfiguration
+      - org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    root: INFO
+  file:
+    name: logs/notification-service.log
 
 management:
   endpoints.web.exposure.include: "health,info"
