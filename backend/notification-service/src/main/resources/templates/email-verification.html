@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="UTF-8" />
+    <title>Verificá tu cuenta</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f8f9fa; font-family:Arial, sans-serif;">
+    <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td align="center" style="padding:40px 0;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+                    style="background:white; border-radius:8px;">
+                    <tr>
+                        <td align="center"
+                            style="background:#007bff; color:white; padding:20px; border-radius:8px 8px 0 0;">
+                            <h2>Ticketera 🎟️</h2>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:30px; text-align:center;">
+                            <h3 th:text="'¡Hola ' + ${name} + '!'"></h3>
+                            <p>Gracias por registrarte. Hacé clic en el botón para verificar tu cuenta:</p>
+                            <a th:href="${verificationLink}" style="display:inline-block; margin-top:20px; background:#007bff; color:white;
+                        padding:12px 24px; border-radius:4px; text-decoration:none;">
+                                Verificar cuenta
+                            </a>
+                            <p style="color:#6c757d; font-size:12px; margin-top:30px;">
+                                Si no creaste una cuenta, podés ignorar este mensaje.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

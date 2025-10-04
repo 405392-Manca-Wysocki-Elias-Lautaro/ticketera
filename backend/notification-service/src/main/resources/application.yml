@@ -32,6 +32,20 @@ spring:
       - classpath:db/migration
       - classpath:db/r
 
+  mail:
+    host: smtp.sendgrid.net
+    port: 587
+    username: apikey
+    password: ${SENDGRID_API_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY}
+  
 logging.level:
   root: INFO
   org.hibernate.SQL: WARN
