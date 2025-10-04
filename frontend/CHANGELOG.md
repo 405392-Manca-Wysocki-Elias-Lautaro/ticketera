@@ -1,3 +1,10 @@
+# [1.0.0-next.3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.2...frontend-v1.0.0-next.3) (2025-10-04)
+
+
+### Features
+
+* **db:** full schema redesign with timestamps and soft delete ([a21fa79](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/a21fa79a5be807ba78a27a9788b71971608c9697))
+
 # [1.0.0-next.2](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.1...frontend-v1.0.0-next.2) (2025-10-02)
 
 
