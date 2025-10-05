@@ -1,5 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS events;
 
+-- Tabla de eventos
 CREATE TABLE events.events (
   id            bigserial PRIMARY KEY,
   organizer_id  bigint NOT NULL REFERENCES auth.organizers(id),
@@ -16,6 +17,7 @@ CREATE TABLE events.events (
   CONSTRAINT ck_events_status CHECK (status IN ('draft','published','archived'))
 );
 
+-- Tabla de permisos
 CREATE TABLE events.event_grants (
   id            bigserial PRIMARY KEY,
   event_id      bigint NOT NULL REFERENCES events.events(id) ON DELETE CASCADE,
@@ -29,18 +31,19 @@ CREATE TABLE events.event_grants (
   UNIQUE (event_id, membership_id)
 );
 
+-- Medios del evento
 CREATE TABLE events.event_media (
-  id        bigserial PRIMARY KEY,
-  event_id  bigint NOT NULL REFERENCES events.events(id) ON DELETE CASCADE,
-  url       text NOT NULL,
-  alt       text,
-  position  int NOT NULL DEFAULT 0,
+  id         bigserial PRIMARY KEY,
+  event_id   bigint NOT NULL REFERENCES events.events(id) ON DELETE CASCADE,
+  url        text NOT NULL,
+  alt        text,
+  position   int NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   deleted_at timestamptz
 );
 
--- VENUE base (plantilla)
+-- Venues
 CREATE TABLE events.venues (
   id            bigserial PRIMARY KEY,
   organizer_id  bigint REFERENCES auth.organizers(id),
@@ -57,7 +60,7 @@ CREATE TABLE events.venues (
   deleted_at    timestamptz
 );
 
--- FUNCIONES
+-- Funciones del evento
 CREATE TABLE events.event_occurrences (
   id        bigserial PRIMARY KEY,
   event_id  bigint NOT NULL REFERENCES events.events(id) ON DELETE CASCADE,
@@ -73,7 +76,7 @@ CREATE TABLE events.event_occurrences (
   CONSTRAINT ck_occ_status CHECK (status IN ('scheduled','on_sale','closed','canceled'))
 );
 
--- ÁREAS y ASIENTOS por evento/función
+-- Áreas del venue
 CREATE TABLE events.event_venue_areas (
   id            bigserial PRIMARY KEY,
   occurrence_id bigint NOT NULL REFERENCES events.event_occurrences(id) ON DELETE CASCADE,
@@ -90,6 +93,7 @@ CREATE TABLE events.event_venue_areas (
   )
 );
 
+-- Asientos
 CREATE TABLE events.event_venue_seats (
   id                  bigserial PRIMARY KEY,
   event_venue_area_id bigint NOT NULL REFERENCES events.event_venue_areas(id) ON DELETE CASCADE,
@@ -102,7 +106,7 @@ CREATE TABLE events.event_venue_seats (
   UNIQUE (event_venue_area_id, seat_label)
 );
 
--- Tipos de asiento y tickets
+-- Tipos de asiento
 CREATE TABLE events.seat_types (
   id          bigserial PRIMARY KEY,
   code        text NOT NULL UNIQUE,
@@ -113,6 +117,7 @@ CREATE TABLE events.seat_types (
   deleted_at  timestamptz
 );
 
+-- Tipos de ticket
 CREATE TABLE events.ticket_types (
   id          bigserial PRIMARY KEY,
   code        text NOT NULL UNIQUE,
@@ -123,38 +128,48 @@ CREATE TABLE events.ticket_types (
   deleted_at  timestamptz
 );
 
--- Inventario GA por occurrence/área
+-- Inventario GA
 CREATE TABLE events.area_allocations (
-  id              bigserial PRIMARY KEY,
-  occurrence_id   bigint NOT NULL REFERENCES events.event_occurrences(id) ON DELETE CASCADE,
+  id                 bigserial PRIMARY KEY,
+  occurrence_id      bigint NOT NULL REFERENCES events.event_occurrences(id) ON DELETE CASCADE,
   event_venue_area_id bigint NOT NULL REFERENCES events.event_venue_areas(id),
-  capacity        int NOT NULL,
-  sold            int NOT NULL DEFAULT 0,
-  created_at      timestamptz NOT NULL DEFAULT now(),
-  updated_at      timestamptz NOT NULL DEFAULT now(),
-  deleted_at      timestamptz,
+  capacity           int NOT NULL,
+  sold               int NOT NULL DEFAULT 0,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  deleted_at         timestamptz,
   UNIQUE (occurrence_id, event_venue_area_id),
   CONSTRAINT ck_alloc_not_exceed CHECK (sold <= capacity)
 );
 
+-- Organizadores
+CREATE TABLE events.organizers (
+  id            bigserial PRIMARY KEY,
+  name          text NOT NULL,
+  slug          text NOT NULL UNIQUE,
+  contact_email text,
+  phone_number  text,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
 -- Precios
 CREATE TABLE events.prices (
-  id             bigserial PRIMARY KEY,
-  occurrence_id  bigint NOT NULL REFERENCES events.event_occurrences(id) ON DELETE CASCADE,
-  ticket_type_id bigint NOT NULL REFERENCES events.ticket_types(id),
-  seat_type_id   bigint REFERENCES events.seat_types(id),
+  id                  bigserial PRIMARY KEY,
+  occurrence_id       bigint NOT NULL REFERENCES events.event_occurrences(id) ON DELETE CASCADE,
+  ticket_type_id      bigint NOT NULL REFERENCES events.ticket_types(id),
+  seat_type_id        bigint REFERENCES events.seat_types(id),
   event_venue_area_id bigint REFERENCES events.event_venue_areas(id),
   event_venue_seat_id bigint REFERENCES events.event_venue_seats(id),
-  amount_cents   bigint NOT NULL,
-  currency       text NOT NULL DEFAULT 'ARS',
-  starts_at      timestamptz,
-  ends_at        timestamptz,
-  created_at     timestamptz NOT NULL DEFAULT now(),
-  updated_at     timestamptz NOT NULL DEFAULT now(),
-  deleted_at     timestamptz,
-  CHECK (
-    (seat_type_id IS NOT NULL)::int +
-    (event_venue_area_id IS NOT NULL)::int +
-    (event_venue_seat_id IS NOT NULL)::int = 1
+  amount_cents        bigint NOT NULL,
+  currency            text NOT NULL DEFAULT 'ARS',
+  starts_at           timestamptz,
+  ends_at             timestamptz,
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  updated_at          timestamptz NOT NULL DEFAULT now(),
+  deleted_at          timestamptz,
+  CONSTRAINT ck_price_only_one CHECK (
+    ((seat_type_id IS NOT NULL)::int +
+     (event_venue_area_id IS NOT NULL)::int +
+     (event_venue_seat_id IS NOT NULL)::int) = 1
   )
 );
