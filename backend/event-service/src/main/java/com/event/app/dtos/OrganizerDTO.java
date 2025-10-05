@@ -1,7 +1,5 @@
 package com.event.app.dtos;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrganizerDTO {
 
+    private String id;
+
     private String name;
 
     private String slug;
@@ -19,5 +19,4 @@ public class OrganizerDTO {
 
     private String phoneNumber;
 
-    private LocalDateTime createdAt;
 }

@@ -6,6 +6,7 @@ import com.event.app.services.IOrganizerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class OrganizerController {
     }
 
     @PostMapping
-    public ResponseEntity<OrganizerDTO> createOrganizer(@RequestBody OrganizerDTO organizerDTO) {
+    public ResponseEntity<OrganizerDTO> createOrganizer(@Validated @RequestBody OrganizerDTO organizerDTO) {
         Organizer organizer = organizerService.createOrganizer(organizerDTO);
         OrganizerDTO response = modelMapper.map(organizer, OrganizerDTO.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -46,14 +47,13 @@ public class OrganizerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrganizerDTO> updateOrganizer(@PathVariable Long id, @RequestBody OrganizerDTO organizerDTO) {
+    public ResponseEntity<OrganizerDTO> updateOrganizer(@Validated @PathVariable Long id, @RequestBody OrganizerDTO organizerDTO) {
         Organizer updated = organizerService.updateOrganizer(id, organizerDTO);
         OrganizerDTO response = modelMapper.map(updated, OrganizerDTO.class);
         return ResponseEntity.ok(response);
     }
 
-    // Delete (lógico)
-    @PutMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrganizer(@PathVariable Long id) {
         organizerService.deleteOrganizer(id);
         return ResponseEntity.noContent().build();

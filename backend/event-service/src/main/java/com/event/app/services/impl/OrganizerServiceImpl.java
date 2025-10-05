@@ -9,6 +9,7 @@ import com.event.app.services.IOrganizerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,11 +25,12 @@ public class OrganizerServiceImpl implements IOrganizerService {
         this.modelMapper = modelMapper;
     }
 
-    //Faltan validacion de campos
     @Override
     public Organizer createOrganizer(OrganizerDTO organizerDTO) {
         Organizer organizer = modelMapper.map(organizerDTO, Organizer.class);
 
+        organizer.setCreatedAt(LocalDateTime.now());
+        organizer.setActive(true);
         OrganizerEntity entity = modelMapper.map(organizer, OrganizerEntity.class);
         OrganizerEntity saved = organizerRepository.save(entity);
 
@@ -53,8 +55,10 @@ public class OrganizerServiceImpl implements IOrganizerService {
         OrganizerEntity organizerEntity = organizerRepository.findById(id)
             .orElseThrow(() -> new OrganizerNotFoundException(id));
 
-        // Actualizar los campos con el DTO VER SI ESTO FUNCIONA CORRECTAMENETE
-        modelMapper.map(organizerDTO, organizerEntity);
+        organizerEntity.setName(organizerDTO.getName());
+        organizerEntity.setSlug(organizerDTO.getSlug());
+        organizerEntity.setContactEmail(organizerDTO.getContactEmail());
+        organizerEntity.setPhoneNumber(organizerDTO.getPhoneNumber());
 
         OrganizerEntity organizerUpdated = organizerRepository.save(organizerEntity);
         return modelMapper.map(organizerUpdated, Organizer.class);
