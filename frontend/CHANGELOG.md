@@ -1,3 +1,10 @@
+# [1.0.0-next.5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.4...frontend-v1.0.0-next.5) (2025-10-05)
+
+
+### Features
+
+* add dummy Notification repository placeholder ([c9f064c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c9f064c1a38e4268a4187ff4326c69c95862c069))
+
 # [1.0.0-next.4](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.3...frontend-v1.0.0-next.4) (2025-10-04)
 
 
