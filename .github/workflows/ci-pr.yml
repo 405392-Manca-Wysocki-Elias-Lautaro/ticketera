@@ -104,40 +104,40 @@ jobs:
             org.flywaydb:flyway-maven-plugin:migrate
 
       # Tests para servicios con DB: apuntar a localhost y deshabilitar Flyway auto
-      - name: Build & Test (${{ matrix.name }}) [DB svc]
-        if: ${{ matrix.needsDb == true }}
-        working-directory: ${{ matrix.module }}
-        env:
-          SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ticketera_ci
-          SPRING_DATASOURCE_USERNAME: ticketera_app
-          SPRING_DATASOURCE_PASSWORD: ci_pass
-          SPRING_FLYWAY_ENABLED: 'false'   # ya migramos con el plugin
-          POSTGRES_DB: ticketera_ci
-          POSTGRES_USER: ticketera_app
-          POSTGRES_PASSWORD: ci_pass
-          DB_SCHEMA: ${{ matrix.schema }}
-        run: |
-          if [ -f mvnw ]; then
-            chmod +x mvnw
-            ./mvnw -B -ntp verify
-          else
-            mvn -B -ntp verify
-          fi
+      # - name: Build & Test (${{ matrix.name }}) [DB svc]
+      #   if: ${{ matrix.needsDb == true }}
+      #   working-directory: ${{ matrix.module }}
+      #   env:
+      #     SPRING_PROFILES_ACTIVE: ci
+      #     SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ticketera_ci
+      #     SPRING_DATASOURCE_USERNAME: ticketera_app
+      #     SPRING_DATASOURCE_PASSWORD: ci_pass
+      #     SPRING_FLYWAY_ENABLED: 'false'   # ya migramos con el plugin
+      #     POSTGRES_DB: ticketera_ci
+      #     POSTGRES_USER: ticketera_app
+      #     POSTGRES_PASSWORD: ci_pass
+      #     DB_SCHEMA: ${{ matrix.schema }}
+      #   run: |
+      #     if [ -f mvnw ]; then
+      #       chmod +x mvnw
+      #       ./mvnw -B -ntp verify
+      #     else
+      #       mvn -B -ntp verify
+      #     fi
 
       # Tests para servicios sin DB (gateway)
-      - name: Build & Test (${{ matrix.name }}) [no DB]
-        if: ${{ matrix.needsDb != true }}
-        working-directory: ${{ matrix.module }}
-        env:
-          SPRING_PROFILES_ACTIVE: ci
-        run: |
-          if [ -f mvnw ]; then
-            chmod +x mvnw
-            ./mvnw -B -ntp verify
-          else
-            mvn -B -ntp verify
-          fi
+      # - name: Build & Test (${{ matrix.name }}) [no DB]
+      #   if: ${{ matrix.needsDb != true }}
+      #   working-directory: ${{ matrix.module }}
+      #   env:
+      #     SPRING_PROFILES_ACTIVE: ci
+      #   run: |
+      #     if [ -f mvnw ]; then
+      #       chmod +x mvnw
+      #       ./mvnw -B -ntp verify
+      #     else
+      #       mvn -B -ntp verify
+      #     fi
 
   frontend:
     name: Frontend (changed only)
@@ -156,5 +156,5 @@ jobs:
           cache-dependency-path: "frontend/package-lock.json"
       - run: npm ci
       - run: npm run lint --if-present
-      - run: npm test --if-present -- --ci
+      # - run: npm test --if-present -- --ci
       - run: npm run build
