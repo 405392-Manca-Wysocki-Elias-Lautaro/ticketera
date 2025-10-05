@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,7 +49,7 @@ public class OrganizerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrganizerDTO> updateOrganizer(@Valid @PathVariable Long id, @RequestBody OrganizerDTO organizerDTO) {
+    public ResponseEntity<OrganizerDTO> updateOrganizer(@PathVariable Long id, @Valid @RequestBody OrganizerDTO organizerDTO) {
         Organizer updated = organizerService.updateOrganizer(id, organizerDTO);
         OrganizerDTO response = modelMapper.map(updated, OrganizerDTO.class);
         return ResponseEntity.ok(response);
