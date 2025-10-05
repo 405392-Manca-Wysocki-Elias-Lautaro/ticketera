@@ -3,6 +3,9 @@ package com.event.app.controllers;
 import com.event.app.dtos.OrganizerDTO;
 import com.event.app.models.Organizer;
 import com.event.app.services.IOrganizerService;
+
+import jakarta.validation.Valid;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +28,7 @@ public class OrganizerController {
     }
 
     @PostMapping
-    public ResponseEntity<OrganizerDTO> createOrganizer(@Validated @RequestBody OrganizerDTO organizerDTO) {
+    public ResponseEntity<OrganizerDTO> createOrganizer(@Valid @RequestBody OrganizerDTO organizerDTO) {
         Organizer organizer = organizerService.createOrganizer(organizerDTO);
         OrganizerDTO response = modelMapper.map(organizer, OrganizerDTO.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -47,7 +50,7 @@ public class OrganizerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrganizerDTO> updateOrganizer(@Validated @PathVariable Long id, @RequestBody OrganizerDTO organizerDTO) {
+    public ResponseEntity<OrganizerDTO> updateOrganizer(@Valid @PathVariable Long id, @RequestBody OrganizerDTO organizerDTO) {
         Organizer updated = organizerService.updateOrganizer(id, organizerDTO);
         OrganizerDTO response = modelMapper.map(updated, OrganizerDTO.class);
         return ResponseEntity.ok(response);

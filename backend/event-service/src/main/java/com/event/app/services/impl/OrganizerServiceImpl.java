@@ -45,7 +45,7 @@ public class OrganizerServiceImpl implements IOrganizerService {
 
     @Override
     public List<Organizer> getAllOrganizers() {
-        return organizerRepository.findAll().stream()
+        return organizerRepository.findByActiveTrue().stream()
                 .map(entity -> modelMapper.map(entity, Organizer.class))
                 .collect(Collectors.toList());
     }
