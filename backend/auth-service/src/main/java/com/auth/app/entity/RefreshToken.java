@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "password_reset_tokens")
+@Table(name = "refresh_tokens")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,9 +37,11 @@ public class RefreshToken {
     @Column(name = "ip_address")
     private String ipAddress;
     
-    private boolean remembered;
+    @Builder.Default
+    private boolean remembered = false;
     
-    private boolean revoked;
+    @Builder.Default
+    private boolean revoked = false;
 
     @Column(name = "created_at", nullable = false,
             columnDefinition = "TIMESTAMPTZ DEFAULT now()")

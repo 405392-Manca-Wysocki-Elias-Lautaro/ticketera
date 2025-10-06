@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "password_reset_tokens")
+@Table(name = "login_attempts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,7 +39,7 @@ public class LoginAttemt {
     @Column(name = "user_agent")
     private String userAgent;
 
-    @Column(name = "created_at", nullable = false,
+    @Column(name = "attempted_at", nullable = false,
             columnDefinition = "TIMESTAMPTZ DEFAULT now()")
-    private OffsetDateTime createdAt;
+    private OffsetDateTime attemptedAt;
 }

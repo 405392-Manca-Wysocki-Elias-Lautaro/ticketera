@@ -1,4 +1,4 @@
-package com.auth.app.servicies.impl;
+package com.auth.app.services.impl;
 
 import java.time.OffsetDateTime;
 
@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.auth.app.entity.RefreshToken;
 import com.auth.app.repositories.RefreshTokenRepository;
+import com.auth.app.services.RefreshTokenService;
 
 @Service
-public class RefreshTokenServiceImpl {
+public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;

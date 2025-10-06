@@ -5,5 +5,5 @@ INSERT INTO roles (code, name, description) VALUES
     ('admin', 'Administrador', 'Administra todos los eventos de la organización'),
     ('manager', 'Manager', 'Gestiona uno o más eventos específicos'),
     ('staff', 'Staff', 'Operaciones en el evento como control de accesos'),
-    ('customer', 'Cliente', 'Usuario que compra tickets');
+    ('customer', 'Cliente', 'Usuario que compra tickets')
 ON CONFLICT (code) DO NOTHING;

@@ -7,6 +7,17 @@ spring:
   main.banner-mode: "off"
   sql.init.mode: never
 
+  profiles:
+    active: prod
+
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    exchange: notifications.exchange
+    routing-key: notifications.key
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:auth},public
     username: ${POSTGRES_USER}
@@ -34,6 +45,12 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/r
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration:
+    access: 900000    # 15 minutos
+    refresh: 604800000 # 7 días
 
 logging.level:
   root: INFO

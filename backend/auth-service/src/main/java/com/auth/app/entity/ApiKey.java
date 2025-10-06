@@ -50,6 +50,10 @@ public class ApiKey {
     @Column(name = "scope")
     private List<String> scopes;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean revoked = false;
+
     @Column(name = "created_at", nullable = false,
             columnDefinition = "TIMESTAMPTZ DEFAULT now()")
     private OffsetDateTime createdAt;
@@ -59,10 +63,6 @@ public class ApiKey {
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private boolean revoked = false;
 
     @PrePersist
     protected void onCreate() {

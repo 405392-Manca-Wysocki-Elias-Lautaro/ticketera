@@ -1,35 +1,39 @@
-package com.auth.app.servicies.impl;
+package com.auth.app.services.impl;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.auth.app.dto.request.RegisterRequest;
 import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.dto.response.UserResponse;
 import com.auth.app.entity.User;
+import com.auth.app.notification.NotificationSender;
 import com.auth.app.security.TokenProvider;
-import com.auth.app.servicies.RefreshTokenService;
-import com.auth.app.servicies.UserService;
+import com.auth.app.services.AuthService;
+import com.auth.app.services.RefreshTokenService;
+import com.auth.app.services.UserService;
 
 @Service
-public class AuthServiceImpl {
+public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final TokenProvider tokenProvider;
     private final ModelMapper modelMapper;
+    private final NotificationSender notificationSender;
 
     public AuthServiceImpl(
             UserService userService,
             RefreshTokenService refreshTokenService,
             TokenProvider tokenProvider,
-            ModelMapper modelMapper
+            ModelMapper modelMapper,
+            NotificationSender notificationSender
     ) {
         this.userService = userService;
         this.refreshTokenService = refreshTokenService;
         this.tokenProvider = tokenProvider;
         this.modelMapper = modelMapper;
+        this.notificationSender = notificationSender;
     }
 
     public AuthResponse register(RegisterRequest request, String userAgent, String ipAddress) {

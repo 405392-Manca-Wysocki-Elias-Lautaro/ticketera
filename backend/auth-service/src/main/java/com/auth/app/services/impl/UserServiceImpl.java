@@ -1,4 +1,4 @@
-package com.auth.app.servicies.impl;
+package com.auth.app.services.impl;
 
 import com.auth.app.entity.User;
 import com.auth.app.exception.exceptions.EmailAlreadyExistsException;
@@ -17,7 +17,7 @@ import com.auth.app.dto.request.RegisterRequest;
 import com.auth.app.dto.response.UserResponse;
 import com.auth.app.repositories.UserRepository;
 import com.auth.app.security.PasswordValidator;
-import com.auth.app.servicies.UserService;
+import com.auth.app.services.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {

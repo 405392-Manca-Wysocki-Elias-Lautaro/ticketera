@@ -7,6 +7,10 @@ spring:
   main.banner-mode: "off"
   sql.init.mode: never
 
+  notification:
+    url: http://localhost:8080
+    queue: notifications.queue
+
   devtools:
     restart:
       enabled: true
@@ -42,6 +46,12 @@ spring:
       - classpath:db/r
       - classpath:db/seed
     clean-disabled: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration:
+    access: 900000    # 15 minutos
+    refresh: 604800000 # 7 días
 
 logging.level:
   org.springframework.jdbc.core: DEBUG

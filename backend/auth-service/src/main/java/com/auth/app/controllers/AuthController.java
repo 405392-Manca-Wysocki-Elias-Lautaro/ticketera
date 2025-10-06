@@ -7,18 +7,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth.app.dto.request.RegisterRequest;
 import com.auth.app.dto.response.AuthResponse;
-import com.auth.app.servicies.AuthService;
+import com.auth.app.services.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request, HttpServletRequest httpRequest) {

@@ -1,24 +1,31 @@
 package com.auth.app.security;
 
+import com.auth.app.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 import javax.crypto.SecretKey;
-
-import com.auth.app.entity.User;
+import java.util.Date;
 
 @Component
 public class TokenProvider {
 
-    private final String jwtSecret = "miSuperClaveSecreta"; // en un env var
-    private final long jwtAccessTokenExpirationMs = 15 * 60 * 1000; // 15 min
-    private final long jwtRefreshTokenExpirationMs = 7 * 24 * 60 * 60 * 1000; // 7 días
-    private final SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    private final SecretKey key;
+    private final long accessTokenExpirationMs;
+    private final long refreshTokenExpirationMs;
+
+    public TokenProvider(
+            @Value("${jwt.secret}") String jwtSecret,
+            @Value("${jwt.expiration.access}") long jwtAccessTokenExpirationMs,
+            @Value("${jwt.expiration.refresh}") long jwtRefreshTokenExpirationMs
+    ) {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        this.accessTokenExpirationMs = jwtAccessTokenExpirationMs;
+        this.refreshTokenExpirationMs = jwtRefreshTokenExpirationMs;
+    }
 
     public String generateAccessToken(User user) {
         return Jwts.builder()
@@ -26,7 +33,7 @@ public class TokenProvider {
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtAccessTokenExpirationMs))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
@@ -35,9 +42,8 @@ public class TokenProvider {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshTokenExpirationMs))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 }
-

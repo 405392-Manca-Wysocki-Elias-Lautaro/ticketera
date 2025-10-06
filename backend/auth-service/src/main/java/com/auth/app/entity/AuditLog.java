@@ -32,8 +32,14 @@ public class AuditLog {
     @Column(nullable = false)
     private String action;
 
-    @Column(columnDefinition = "jsonb")
-    private String metadata; // podés mapearlo a String o a un Map con un converter
+    @Column
+    private String description;
+
+    @Column(columnDefinition = "ip_address")
+    private String ipAddress;
+    
+    @Column(columnDefinition = "user_agent")
+    private String userAgent;
 
     @Column(name = "created_at", nullable = false,
             columnDefinition = "TIMESTAMPTZ DEFAULT now()")

@@ -32,15 +32,15 @@ public class PasswordResetToken {
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
 
-    @Column(name = "expires_at", nullable = false)
-    private OffsetDateTime expiresAt;
-
     @Builder.Default
     private boolean used = false;
 
     @Column(name = "created_at", nullable = false,
             columnDefinition = "TIMESTAMPTZ DEFAULT now()")
     private OffsetDateTime createdAt;
+
+    @Column(name = "expires_at", nullable = false)
+    private OffsetDateTime expiresAt;
 
     @PrePersist
     protected void onCreate() {

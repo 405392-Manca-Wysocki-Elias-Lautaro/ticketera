@@ -1,4 +1,4 @@
-package com.auth.app.servicies;
+package com.auth.app.services;
 
 import com.auth.app.entity.RefreshToken;
 
