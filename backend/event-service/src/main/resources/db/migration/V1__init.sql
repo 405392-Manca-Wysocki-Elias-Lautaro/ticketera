@@ -2,11 +2,11 @@ CREATE SCHEMA IF NOT EXISTS events;
 
 CREATE TABLE events.events (
   id            bigserial PRIMARY KEY,
-  organizer_id  bigint NOT NULL REFERENCES auth.organizers(id),
+  organizer_id  bigint NOT NULL,
   title         text NOT NULL,
   slug          text NOT NULL,
   description   text,
-  category_id   bigint REFERENCES auth.categories(id),
+  category_id   bigint,
   cover_url     text,
   status        text NOT NULL DEFAULT 'draft',
   created_at    timestamptz NOT NULL DEFAULT now(),
@@ -19,7 +19,7 @@ CREATE TABLE events.events (
 CREATE TABLE events.event_grants (
   id            bigserial PRIMARY KEY,
   event_id      bigint NOT NULL REFERENCES events.events(id) ON DELETE CASCADE,
-  membership_id bigint NOT NULL REFERENCES auth.organizer_memberships(id) ON DELETE CASCADE,
+  membership_id bigint NOT NULL,
   can_manage    boolean NOT NULL DEFAULT false,
   can_sell      boolean NOT NULL DEFAULT false,
   can_check     boolean NOT NULL DEFAULT false,
@@ -43,7 +43,7 @@ CREATE TABLE events.event_media (
 -- VENUE base (plantilla)
 CREATE TABLE events.venues (
   id            bigserial PRIMARY KEY,
-  organizer_id  bigint REFERENCES auth.organizers(id),
+  organizer_id  bigint,
   name          text NOT NULL,
   description   text,
   address_line  text,
