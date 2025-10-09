@@ -1,4 +1,4 @@
-package com.notification.app.config;
+package com.notification.app.configs;
 
 public class RabbitMQConfig {
     

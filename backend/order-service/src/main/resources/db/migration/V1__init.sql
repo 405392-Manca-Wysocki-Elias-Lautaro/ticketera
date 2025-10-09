@@ -6,17 +6,20 @@ CREATE TABLE orders.customers (
   first_name text,
   last_name  text,
   phone      text,
-  user_id    bigint REFERENCES auth.users(id),
+  user_id    bigint,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  deleted_at timestamptz,
-  UNIQUE (user_id) WHERE user_id IS NOT NULL
+  deleted_at timestamptz
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_customers_user_id_not_null
+  ON orders.customers(user_id)
+  WHERE user_id IS NOT NULL;
 
 CREATE TABLE orders.orders (
   id           bigserial PRIMARY KEY,
   customer_id  bigint NOT NULL REFERENCES orders.customers(id),
-  organizer_id bigint NOT NULL REFERENCES auth.organizers(id),
+  organizer_id bigint NOT NULL,
   status       text NOT NULL DEFAULT 'pending',
   total_cents  bigint NOT NULL DEFAULT 0,
   currency     text NOT NULL DEFAULT 'ARS',
@@ -30,10 +33,10 @@ CREATE TABLE orders.orders (
 CREATE TABLE orders.order_items (
   id              bigserial PRIMARY KEY,
   order_id        bigint NOT NULL REFERENCES orders.orders(id) ON DELETE CASCADE,
-  occurrence_id   bigint NOT NULL REFERENCES events.event_occurrences(id),
-  event_venue_area_id bigint REFERENCES events.event_venue_areas(id),
-  event_venue_seat_id bigint REFERENCES events.event_venue_seats(id),
-  ticket_type_id  bigint NOT NULL REFERENCES events.ticket_types(id),
+  occurrence_id   bigint NOT NULL,
+  event_venue_area_id bigint,
+  event_venue_seat_id bigint,
+  ticket_type_id  bigint NOT NULL,
   unit_price_cents bigint NOT NULL,
   quantity         int NOT NULL DEFAULT 1,
   created_at       timestamptz NOT NULL DEFAULT now(),
@@ -48,7 +51,7 @@ CREATE TABLE orders.order_status_history (
   order_id    bigint NOT NULL REFERENCES orders.orders(id) ON DELETE CASCADE,
   from_status text,
   to_status   text NOT NULL,
-  changed_by  bigint REFERENCES auth.users(id),
+  changed_by  bigint,
   changed_at  timestamptz NOT NULL DEFAULT now(),
   note        text
 );

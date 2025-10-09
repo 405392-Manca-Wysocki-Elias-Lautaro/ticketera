@@ -86,6 +86,28 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    urls:
+      - name: Auth Service
+        url: http://localhost:8082/v3/api-docs
+      - name: Event Service
+        url: http://localhost:8083/v3/api-docs
+      - name: Ticket Service
+        url: http://localhost:8084/v3/api-docs
+      - name: Payment Service
+        url: http://localhost:8085/v3/api-docs
+      - name: Notification Service
+        url: http://localhost:8086/v3/api-docs
+      - name: Order Service
+        url: http://localhost:8087/v3/api-docs
+
+  cors:
+    enabled: true
+
 management:
   endpoints:
     web:

@@ -2,11 +2,11 @@ CREATE SCHEMA IF NOT EXISTS tickets;
 
 CREATE TABLE tickets.tickets (
   id             bigserial PRIMARY KEY,
-  order_item_id  bigint NOT NULL REFERENCES orders.order_items(id) ON DELETE CASCADE,
-  occurrence_id  bigint NOT NULL REFERENCES events.event_occurrences(id),
-  event_venue_area_id bigint REFERENCES events.event_venue_areas(id),
-  event_venue_seat_id bigint REFERENCES events.event_venue_seats(id),
-  ticket_type_id bigint NOT NULL REFERENCES events.ticket_types(id),
+  order_item_id  bigint NOT NULL,
+  occurrence_id  bigint NOT NULL,
+  event_venue_area_id bigint,
+  event_venue_seat_id bigint,
+  ticket_type_id bigint NOT NULL,
   code           text NOT NULL UNIQUE,
   status         text NOT NULL DEFAULT 'issued',
   issued_at      timestamptz NOT NULL DEFAULT now(),
@@ -18,21 +18,21 @@ CREATE TABLE tickets.tickets (
 );
 
 CREATE TABLE tickets.ticket_status_history (
-  id          bigserial PRIMARY KEY,
-  ticket_id   bigint NOT NULL REFERENCES tickets.tickets(id) ON DELETE CASCADE,
-  from_status text,
-  to_status   text NOT NULL,
-  changed_by  bigint REFERENCES auth.users(id),
-  changed_at  timestamptz NOT NULL DEFAULT now(),
-  note        text
+  id                bigserial PRIMARY KEY,
+  ticket_id         bigint NOT NULL REFERENCES tickets.tickets(id) ON DELETE CASCADE,
+  from_status       text,
+  to_status         text NOT NULL,
+  last_updated_user bigint,
+  updated_user      timestamptz NOT NULL DEFAULT now(),
+  note              text
 );
 
 CREATE TABLE tickets.holds (
   id            bigserial PRIMARY KEY,
-  customer_id   bigint REFERENCES orders.customers(id),
-  occurrence_id bigint NOT NULL REFERENCES events.event_occurrences(id),
-  event_venue_area_id bigint REFERENCES events.event_venue_areas(id),
-  event_venue_seat_id bigint REFERENCES events.event_venue_seats(id),
+  customer_id   bigint,
+  occurrence_id bigint NOT NULL,
+  event_venue_area_id bigint,
+  event_venue_seat_id bigint,
   quantity      int NOT NULL DEFAULT 1,
   expires_at    timestamptz NOT NULL,
   status        text NOT NULL DEFAULT 'active',
