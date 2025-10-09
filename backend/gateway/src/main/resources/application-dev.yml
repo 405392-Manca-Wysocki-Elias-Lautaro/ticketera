@@ -76,12 +76,51 @@ spring:
           filters:
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
 
+        - id: openapi-auth
+          uri: http://auth-dev:8080
+          predicates:
+            - Path=/v3/api-docs/auth
+          filters:
+            - RewritePath=/v3/api-docs/auth, /v3/api-docs
+        - id: openapi-events
+          uri: http://event-dev:8080
+          predicates:
+            - Path=/v3/api-docs/events
+          filters:
+            - RewritePath=/v3/api-docs/events, /v3/api-docs
+        - id: openapi-tickets
+          uri: http://ticket-dev:8080
+          predicates:
+            - Path=/v3/api-docs/tickets
+          filters:
+            - RewritePath=/v3/api-docs/tickets, /v3/api-docs
+        - id: openapi-payments
+          uri: http://payment-dev:8080
+          predicates:
+            - Path=/v3/api-docs/payments
+          filters:
+            - RewritePath=/v3/api-docs/payments, /v3/api-docs
+        - id: openapi-notifications
+          uri: http://notification-dev:8080
+          predicates:
+            - Path=/v3/api-docs/notifications
+          filters:
+            - RewritePath=/v3/api-docs/notifications, /v3/api-docs
+        - id: openapi-orders
+          uri: http://order-dev:8080
+          predicates:
+            - Path=/v3/api-docs/orders
+          filters:
+            - RewritePath=/v3/api-docs/orders, /v3/api-docs
+
       globalcors:
+        add-to-simple-url-handler-mapping: true
         corsConfigurations:
           "[/**]":
             allowedOrigins:
               - "http://localhost:5173"
               - "http://localhost:8081"
+              - "http://localhost:8080"
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
@@ -89,22 +128,26 @@ spring:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
   swagger-ui:
     urls:
-      - name: Auth Service
-        url: http://localhost:8082/v3/api-docs
-      - name: Event Service
-        url: http://localhost:8083/v3/api-docs
-      - name: Ticket Service
-        url: http://localhost:8084/v3/api-docs
-      - name: Payment Service
-        url: http://localhost:8085/v3/api-docs
-      - name: Notification Service
-        url: http://localhost:8086/v3/api-docs
-      - name: Order Service
-        url: http://localhost:8087/v3/api-docs
-
+      - name: auth
+        url: /v3/api-docs/auth
+      - name: events
+        url: /v3/api-docs/events
+      - name: tickets
+        url: /v3/api-docs/tickets
+      - name: payments
+        url: /v3/api-docs/payments
+      - name: notifications
+        url: /v3/api-docs/notifications
+      - name: orders
+        url: /v3/api-docs/orders
+    persist-authorization: true
+    try-it-out-enabled: true
+    display-request-duration: true
+    disable-swagger-default-url: true
+    config-url: /v3/api-docs/swagger-config
+  server-url: http://localhost:8080
   cors:
     enabled: true
 
