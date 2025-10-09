@@ -47,6 +47,9 @@ spring:
       - classpath:db/seed
     clean-disabled: true
 
+notification:
+  url: ${NOTIFICATION_URL}
+
 jwt:
   secret: ${JWT_SECRET}
   expiration:
