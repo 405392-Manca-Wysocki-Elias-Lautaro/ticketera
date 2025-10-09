@@ -1,3 +1,26 @@
+# [1.0.0-next.3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.2...gateway-v1.0.0-next.3) (2025-10-09)
+
+
+### Bug Fixes
+
+* **sql:** update init scripts to remove cross-schema references ([deebe81](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/deebe81a8c048783fd82fa2f4b4967c3ad6ed1ac))
+
+
+### Features
+
+* add DTOs and controllers for notifications and mail testing ([4ac0f39](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4ac0f3953b50bc891f5b067ea0bd09784565a421))
+* add dummy Notification repository placeholder ([c9f064c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c9f064c1a38e4268a4187ff4326c69c95862c069))
+* add HTML email templates for notifications ([a1a37ae](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/a1a37ae5c164492ea2b6c8fb182b0da2a5076242))
+* add Lombok, SendGrid, Thymeleaf, Mail starter and Jakarta validations ([0a46200](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/0a46200fc60407b6c1958d22527715d046db1c92))
+* add mail service with SMTP, SendGrid and FakeMail implementations ([4c71c48](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4c71c4886ba5c6f578eab97016efdc830b9b458f))
+* add notification channel and email strategy classes ([4efaf85](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4efaf85c84efb7d06d6051b153880eb903a9252a))
+* add Notification entity and enums for channel and type ([39a2e25](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/39a2e259a53c5860146abb548860597036420b93))
+* add notification, email and template services with impl ([abe685a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/abe685a54d4847d2ad92e94efcfb488a6b1ea301))
+* **db:** full schema redesign with timestamps and soft delete ([a21fa79](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/a21fa79a5be807ba78a27a9788b71971608c9697))
+* **feat(swagger:** configure aggregated OpenAPI docs via gateway ([09fe5d9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/09fe5d9db9947a73d1976cc0fe4764f6d7a9b2a4))
+* **lint:** allow constant exports in react-refresh rule ([794328a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/794328acccf8c695ef8106182c03d154c7c74cbb))
+* **pwa:** add Progressive Web App support with manifest, icons, and service worker configuration ([9277794](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9277794c05cf239c039c219e5f9d8e54c5366aaa))
+
 # [1.0.0-next.2](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.1...gateway-v1.0.0-next.2) (2025-09-28)
 
 
