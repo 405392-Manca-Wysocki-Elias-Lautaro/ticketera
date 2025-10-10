@@ -19,10 +19,11 @@ public class PasswordValidator {
 
     public static void validate(String password) {
         if (BLACKLIST.contains(password.toLowerCase())) {
-            throw new WeakPasswordException("PASSWORD_NOT_STRONG");
+            throw new WeakPasswordException("WEAK_PASSWORD");
         }
+        
         if (!STRONG_PASSWORD_REGEX.matcher(password).matches()) {
-            throw new WeakPasswordException("PASSWORD_NOT_STRONG");
+            throw new WeakPasswordException("COMMON_PASSWORD");
         }
     }
 }
