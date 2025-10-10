@@ -6,7 +6,10 @@ import com.notification.app.dto.EmailRequest;
 import com.notification.app.dto.GenericNotificationDTO;
 import com.notification.app.services.EmailService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class EmailVerificationStrategy implements EmailNotificationStrategy {
 
     private final EmailService emailService;
@@ -26,7 +29,8 @@ public class EmailVerificationStrategy implements EmailNotificationStrategy {
             EmailRequest.builder()
                 .to(dto.getTo())
                 .firstName((String) dto.getVariables().get("firstName"))
-                .token((String) dto.getVariables().get("token"))
+                .firstName((String) dto.getVariables().get("lastName"))
+                .link((String) dto.getVariables().get("link"))
                 .build()
         );
     }

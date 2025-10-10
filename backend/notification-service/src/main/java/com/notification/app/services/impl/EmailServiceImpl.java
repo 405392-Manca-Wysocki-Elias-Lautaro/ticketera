@@ -2,6 +2,7 @@ package com.notification.app.services.impl;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.notification.app.dto.EmailRequest;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EmailServiceImpl implements EmailService {
 
+    @Autowired
     private final MailService mailService;
     private final TemplateService templateService;
 
@@ -29,11 +31,17 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendVerificationEmail(EmailRequest req) {
-        String html = templateService.render("email-verification.html", Map.of(
-            "name", req.getFirstName(),
-            "link", "https://tuapp.com/api/auth/verify?token=" + req.getToken()
-        ));
+        try {
+            String html = templateService.render("email-verification.html", Map.of(
+                    "name", req.getFirstName(),
+                    // "lastName", req.getLastName(),
+                    "link", req.getLink()
+            ));
 
-        mailService.send(req.getTo(), "Verificá tu cuenta", html);
+            mailService.send(req.getTo(), "Verificá tu cuenta", html);
+        } catch (Exception e) {
+
+            throw new RuntimeException("Error loading email template", e);
+        }
     }
 }

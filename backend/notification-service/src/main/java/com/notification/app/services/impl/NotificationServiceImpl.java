@@ -20,7 +20,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void send(GenericNotificationDTO dto) {
-        log.info("📢 Sending notification via {} to {}", dto.getChannel(), dto.getTo());
+        log.info("📢 Sending notification via {} to {} link {}", dto.getChannel(), dto.getTo(), dto.getVariables());
 
         strategies.stream()
             .filter(s -> s.getChannelType() == dto.getChannel())

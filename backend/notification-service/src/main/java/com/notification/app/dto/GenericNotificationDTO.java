@@ -5,6 +5,7 @@ import java.util.Map;
 import com.notification.app.entity.NotificationChannel;
 import com.notification.app.entity.NotificationType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 @Data
@@ -42,7 +42,6 @@ public class GenericNotificationDTO {
     private String template;
 
     /** Mensaje plano o HTML (para casos sin template) */
-    @NotEmpty(message = "El mensaje no puede estar vacío")
     private String message;
 
     /** Variables dinámicas para renderizar la plantilla */
