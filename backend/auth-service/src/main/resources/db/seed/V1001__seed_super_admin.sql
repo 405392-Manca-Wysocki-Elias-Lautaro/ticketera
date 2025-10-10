@@ -13,7 +13,7 @@ VALUES (
     'Manca', 
     'eliasmanca20@gmail.com',
     '$2a$10$WWGU6Iju3fzygH/TooGX9OULCP8XRye7jT4CJMebYDg.7VqICukxi', 
-    (SELECT id FROM roles WHERE code = 'super_admin'),
+    (SELECT id FROM roles WHERE code = 'SUPER_ADMIN'),
     true,
     true, 
     now()
