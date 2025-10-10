@@ -1,6 +1,7 @@
 package com.auth.app.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<AuthResponse> register(@Validated @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         String userAgent = httpRequest.getHeader("User-Agent");
         String ipAddress = httpRequest.getRemoteAddr();
 

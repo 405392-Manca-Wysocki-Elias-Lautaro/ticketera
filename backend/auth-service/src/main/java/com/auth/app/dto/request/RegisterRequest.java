@@ -1,11 +1,18 @@
 package com.auth.app.dto.request;
 
+import com.auth.app.validation.PasswordMatches;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@PasswordMatches
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterRequest {
 
     @NotBlank(message = "El nombre es obligatorio")
