@@ -1,3 +1,16 @@
+# [1.0.0-next.6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.5...frontend-v1.0.0-next.6) (2025-10-10)
+
+
+### Bug Fixes
+
+* **notification:** improve email verification and template handling ([358f681](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/358f681957f6a0f67b5a510ab46c45f22acd7c7a))
+* **sql:** update init scripts to remove cross-schema references ([deebe81](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/deebe81a8c048783fd82fa2f4b4967c3ad6ed1ac))
+
+
+### Features
+
+* **feat(swagger:** configure aggregated OpenAPI docs via gateway ([09fe5d9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/09fe5d9db9947a73d1976cc0fe4764f6d7a9b2a4))
+
 # [1.0.0-next.5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.4...frontend-v1.0.0-next.5) (2025-10-05)
 
 
