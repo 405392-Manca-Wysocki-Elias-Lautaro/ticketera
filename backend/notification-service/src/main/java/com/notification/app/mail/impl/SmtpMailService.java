@@ -1,8 +1,5 @@
 package com.notification.app.mail.impl;
 
-import java.util.Map;
-
-import com.notification.app.dto.GenericNotificationDTO;
 import com.notification.app.mail.MailService;
 
 import jakarta.mail.MessagingException;

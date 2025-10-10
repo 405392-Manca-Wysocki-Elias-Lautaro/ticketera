@@ -6,11 +6,14 @@ import com.notification.app.entity.NotificationChannel;
 import com.notification.app.entity.NotificationType;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 import com.notification.app.strategies.NotificationChannelStrategy;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class EmailChannelStrategy implements NotificationChannelStrategy {
 
     private final List<EmailNotificationStrategy> emailStrategies;

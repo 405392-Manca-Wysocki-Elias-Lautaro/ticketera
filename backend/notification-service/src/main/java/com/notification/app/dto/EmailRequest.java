@@ -10,4 +10,5 @@ public class EmailRequest {
     private String lastName;
     private String to;
     private String token;
+    private String link;
 }

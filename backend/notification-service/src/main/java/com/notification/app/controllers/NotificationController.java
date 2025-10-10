@@ -33,8 +33,8 @@ public class NotificationController {
      */
     @PostMapping
     public ResponseEntity<String> sendNotification(@Validated @RequestBody GenericNotificationDTO dto) {
-        log.info("📨 New notification request received: type={}, channel={}, to={}",
-                dto.getType(), dto.getChannel(), dto.getTo());
+        log.info("📨 New notification request received: type={}, channel={}, to={}, variables={}",
+                dto.getType(), dto.getChannel(), dto.getTo(), dto.getVariables());
 
         try {
             notificationService.send(dto);
