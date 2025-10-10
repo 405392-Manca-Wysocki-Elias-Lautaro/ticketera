@@ -11,6 +11,6 @@ import lombok.Data;
 public class NotificationDTO implements Serializable {
     private String channel;
     private String type;
-    private String recipient;
-    private Map<String, Object> data;
+    private String to;
+    private Map<String, Object> variables;
 }

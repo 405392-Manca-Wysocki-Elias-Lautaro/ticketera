@@ -25,7 +25,7 @@ public class RestNotificationSender implements NotificationSender {
 
     @Override
     public void send(NotificationDTO notification) {
-        String endpoint = notificationUrl + "/api/notifications";
+        String endpoint = notificationUrl;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
