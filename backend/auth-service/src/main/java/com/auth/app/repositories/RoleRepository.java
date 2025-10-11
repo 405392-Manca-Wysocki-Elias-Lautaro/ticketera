@@ -2,9 +2,11 @@ package com.auth.app.repositories;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.auth.app.entity.Role;
-import com.auth.app.entity.RoleCode;
+import java.util.UUID;
 
-public interface  RoleRepository extends JpaRepository<Role, Long> {
+import com.auth.app.domain.entity.Role;
+import com.auth.app.domain.entity.RoleCode;
+
+public interface  RoleRepository extends JpaRepository<Role, UUID> {
     Optional<Role> findByCode(RoleCode code);
 }

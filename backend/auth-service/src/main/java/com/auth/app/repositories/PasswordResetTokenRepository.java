@@ -2,8 +2,10 @@ package com.auth.app.repositories;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.auth.app.entity.PasswordResetToken;
+import java.util.UUID;
 
-public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
+import com.auth.app.domain.entity.PasswordResetToken;
+
+public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, UUID> {
     Optional<PasswordResetToken> findByTokenHash(String token);
 }

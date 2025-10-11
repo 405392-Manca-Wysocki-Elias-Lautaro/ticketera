@@ -1,8 +1,10 @@
 package com.auth.app.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.auth.app.entity.AuditLog;
+import java.util.UUID;
 
-public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
+import com.auth.app.domain.entity.AuditLog;
+
+public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
     
 }
