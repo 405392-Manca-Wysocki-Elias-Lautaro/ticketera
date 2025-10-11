@@ -17,7 +17,27 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
-    networks: [ backend ]
+    networks: [ backend_net ]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_data:/var/log/rabbitmq
+    ports:
+      - "5672:5672"     # puerto AMQP (comunicación entre microservicios)
+      - "15672:15672"   # panel web http://localhost:15672
+    networks: [ backend_net ]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   mailhog:
     image: mailhog/mailhog
@@ -25,7 +45,7 @@ services:
     ports:
       - "1025:1025" # SMTP
       - "8025:8025" # Web UI
-    networks: [ backend ]
+    networks: [ backend_net ]
 
   frontend-dev:
     container_name: frontend-dev
@@ -36,7 +56,7 @@ services:
       - ./frontend:/app
     ports:
       - "5173:5173"
-    networks: [ frontend_net, backend ]
+    networks: [ frontend_net, backend_net ]
 
   gateway-dev:
     container_name: gateway-dev
@@ -64,14 +84,14 @@ services:
       SERVICES_PAYMENT_BASE_URL: http://payment-dev:8080
       SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
-    depends_on:
-      - auth-dev
-      - event-dev
-      - ticket-dev
-      - payment-dev
-      - notification-dev
-      - order-dev
-    networks: [backend]
+    # depends_on:
+    #   - auth-dev
+    #   - event-dev
+    #   - ticket-dev
+    #   - payment-dev
+    #   - notification-dev
+    #   - order-dev
+    networks: [backend_net]
     ports:
       - "8080:8080"
       - "5005:5005"
@@ -103,8 +123,17 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8082:8080"
       - "5006:5005"
@@ -135,8 +164,17 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8083:8080"
       - "5007:5005"
@@ -167,8 +205,17 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8084:8080"
       - "5010:5005"
@@ -199,8 +246,17 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payment-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payment-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8085:8080"
       - "5009:5005"
@@ -231,8 +287,17 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8086:8080"
       - "5008:5005"
@@ -263,16 +328,28 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8087:8080"
       - "5011:5005"
 
 networks:
-  backend:
+  backend_net:
+    driver: bridge
   frontend_net:
 
 volumes:
   ticketera_dev_pgdata:
   m2cache:
+  rabbitmq_data:
+

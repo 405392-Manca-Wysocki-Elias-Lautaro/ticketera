@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.notification.app.dto.EmailRequest;
 import com.notification.app.dto.GenericNotificationDTO;
 import com.notification.app.entity.NotificationType;
+import com.notification.app.exceptions.custom.InvalidTemplateVariablesException;
 import com.notification.app.services.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +27,17 @@ public class EmailVerificationStrategy implements EmailNotificationStrategy {
 
     @Override
     public void send(GenericNotificationDTO dto) {
-        emailService.sendVerificationEmail(
-            EmailRequest.builder()
-                .to(dto.getTo())
-                .firstName((String) dto.getVariables().get("firstName"))
-                .firstName((String) dto.getVariables().get("lastName"))
-                .link((String) dto.getVariables().get("link"))
-                .build()
-        );
+        try {
+            EmailRequest request = EmailRequest.builder()
+                    .to(dto.getTo())
+                    .firstName((String) dto.getVariables().get("firstName"))
+                    .link((String) dto.getVariables().get("link"))
+                    .build();
+
+            emailService.sendVerificationEmail(request);
+        } catch (Exception e) {
+            log.error("❌ Invalid variables for email verification: {}", e.getMessage(), e);
+            throw new InvalidTemplateVariablesException(e);
+        }
     }
 }

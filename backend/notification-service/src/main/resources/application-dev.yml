@@ -58,6 +58,18 @@ spring:
       - org.springframework.boot.autoconfigure.sendgrid.SendGridAutoConfiguration
       - org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    queue: notifications.queue
+    routing-key: notifications.key
+
 logging:
   level:
     org.springframework.jdbc.core: DEBUG

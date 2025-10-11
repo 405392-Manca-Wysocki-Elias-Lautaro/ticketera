@@ -1,5 +1,6 @@
 package com.notification.app.mail.impl;
 
+import com.notification.app.exceptions.custom.EmailSendException;
 import com.notification.app.mail.MailService;
 
 import jakarta.mail.MessagingException;
@@ -34,7 +35,8 @@ public class SmtpMailService implements MailService {
             mailSender.send(message);
             log.info("✅ Email sent to {}", to);
         } catch (MessagingException e) {
-            log.error("Error sending email: {}", e.getMessage());
+            log.error("Error sending email: {}", e.getMessage(), e);
+            throw new EmailSendException(e);
         }
     }
 }
