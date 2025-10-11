@@ -27,3 +27,13 @@ INSERT INTO events.occurrences (id, event_id, venue_id, starts_at, ends_at, stat
 VALUES
   ('dddddddd-1111-1111-1111-dddddddddddd', 'cccccccc-1111-1111-1111-cccccccccccc', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '2025-11-15 20:00:00-03', '2025-11-15 23:00:00-03', 'draft', 'fito-paez-monumental-2025', true),
   ('dddddddd-2222-2222-2222-dddddddddddd', 'cccccccc-2222-2222-2222-cccccccccccc', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', '2025-10-25 18:00:00-03', '2025-10-25 20:00:00-03', 'draft', 'newells-vs-central-2025', true);
+
+-- Seat Types
+INSERT INTO events.seat_types (id, code, name, description)
+VALUES
+  ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'VIP', 'VIP', 'Asientos en la zona VIP'),
+  ('eeeeeeee-2222-2222-2222-eeeeeeeeeeee', 'PLATEA', 'Platea', 'Asientos en la platea'),
+  ('eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'GENERAL', 'General', 'Asientos en la zona general'),
+  ('eeeeeeee-4444-4444-4444-eeeeeeeeeeee', 'CAMPO', 'Campo', 'Asientos en la zona campo'),
+  ('eeeeeeee-5555-5555-5555-eeeeeeeeeeee', 'PULLMAN', 'Pullman', 'Asientos tipo butaca premium, generalmente reclinables y con mayor comodidad, ubicados en zonas preferenciales.');
+  

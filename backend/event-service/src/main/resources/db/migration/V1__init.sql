@@ -61,3 +61,11 @@ CREATE TABLE events.occurrences (
   created_at    timestamptz NOT NULL DEFAULT now(),
   active        boolean NOT NULL DEFAULT true
 );
+
+-- Seat Types
+CREATE TABLE events.seat_types (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code        text NOT NULL UNIQUE,
+  name        text NOT NULL,
+  description text
+);
