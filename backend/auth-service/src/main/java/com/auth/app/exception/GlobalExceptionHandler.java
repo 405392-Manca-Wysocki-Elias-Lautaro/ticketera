@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.auth.app.exception.exceptions.EmailAlreadyExistsException;
 import com.auth.app.exception.exceptions.EntityNotFoundException;
 import com.auth.app.exception.exceptions.InvalidCredentialsException;
+import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
+import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
 import com.auth.app.exception.exceptions.TokenExpiredException;
+import com.auth.app.exception.exceptions.UserAlreadyVerifiedException;
 import com.auth.app.exception.exceptions.WeakPasswordException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -122,6 +125,30 @@ public class GlobalExceptionHandler {
                 ? ErrorCatalog.COMMON_PASSWORD
                 : ErrorCatalog.WEAK_PASSWORD;
 
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(UserAlreadyVerifiedException.class)
+    public ResponseEntity<ApiError> handleUserAlreadyVerified(UserAlreadyVerifiedException ex, HttpServletRequest request) {
+        log.warn("User already verified at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.USER_ALREADY_VERIFIED;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(InvalidOrUnknownTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidOrUnknownToken(InvalidOrUnknownTokenException ex, HttpServletRequest request) {
+        log.warn("Invalid or unknown verification token at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.INVALID_OR_UNKNOWN_TOKEN;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(TokenAlreadyUsedException.class)
+    public ResponseEntity<ApiError> handleTokenAlreadyUsed(TokenAlreadyUsedException ex, HttpServletRequest request) {
+        log.warn("Token already used at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.TOKEN_ALREADY_USED;
         return ResponseEntity.status(error.getStatus())
                 .body(buildError(error, request.getRequestURI(), null));
     }

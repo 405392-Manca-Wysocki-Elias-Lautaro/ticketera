@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiErrorResponse {
+public class ApiError {
     private int status;
     private String error;
     private String message;
