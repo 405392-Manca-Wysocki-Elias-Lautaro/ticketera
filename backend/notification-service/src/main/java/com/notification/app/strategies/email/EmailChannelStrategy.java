@@ -4,6 +4,8 @@ import java.util.List;
 import com.notification.app.dto.GenericNotificationDTO;
 import com.notification.app.entity.NotificationChannel;
 import com.notification.app.entity.NotificationType;
+import com.notification.app.exceptions.custom.InvalidNotificationChannelException;
+import com.notification.app.exceptions.custom.UnsupportedNotificationTypeException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,16 +31,13 @@ public class EmailChannelStrategy implements NotificationChannelStrategy {
         NotificationChannel channel = dto.getChannel();
 
         if (!type.supports(channel)) {
-            throw new IllegalArgumentException(
-                    "❌ Invalid channel " + channel + " for notification type " + type
-            );
+            throw new InvalidNotificationChannelException();
         }
 
         emailStrategies.stream()
                 .filter(s -> s.getType().equals(dto.getType()))
                 .findFirst()
-                .orElseThrow(()
-                        -> new UnsupportedOperationException("Unsupported email type: " + dto.getType()))
+                .orElseThrow(UnsupportedNotificationTypeException::new)
                 .send(dto);
     }
 }

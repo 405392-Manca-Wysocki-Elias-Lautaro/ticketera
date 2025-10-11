@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.notification.app.dto.EmailRequest;
 import com.notification.app.dto.GenericNotificationDTO;
 import com.notification.app.entity.NotificationType;
+import com.notification.app.exceptions.custom.InvalidTemplateVariablesException;
 import com.notification.app.services.EmailService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,18 @@ public class UserWelcomeStrategy implements EmailNotificationStrategy {
 
     @Override
     public void send(GenericNotificationDTO dto) {
-        emailService.sendUserWelcomeEmail(
-            EmailRequest.builder()
-                .to(dto.getTo())
-                .firstName((String) dto.getVariables().get("firstName"))
-                .link((String) dto.getVariables().get("link"))
-                .build()
-        );
-    }
-}
+        try {
+            EmailRequest request = EmailRequest.builder()
+                    .to(dto.getTo())
+                    .firstName((String) dto.getVariables().get("firstName"))
+                    .link((String) dto.getVariables().get("link"))
+                    .build();
 
+            emailService.sendUserWelcomeEmail(request);
+        } catch (Exception e) {
+            log.error("❌ Invalid variables for user welcome email: {}", e.getMessage(), e);
+            throw new InvalidTemplateVariablesException(e);
+        }
+    }
+
+}

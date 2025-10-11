@@ -64,13 +64,13 @@ services:
       SERVICES_PAYMENT_BASE_URL: http://payment-dev:8080
       SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
-    depends_on:
-      - auth-dev
-      - event-dev
-      - ticket-dev
-      - payment-dev
-      - notification-dev
-      - order-dev
+    # depends_on:
+    #   - auth-dev
+    #   - event-dev
+    #   - ticket-dev
+    #   - payment-dev
+    #   - notification-dev
+    #   - order-dev
     networks: [backend]
     ports:
       - "8080:8080"
