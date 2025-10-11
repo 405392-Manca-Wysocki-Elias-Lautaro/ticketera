@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.notification.app.dto.EmailRequest;
 import com.notification.app.dto.GenericNotificationDTO;
+import com.notification.app.exceptions.custom.NotificationProcessingException;
+import com.notification.app.exceptions.custom.TemplateRenderException;
 import com.notification.app.mail.MailService;
 import com.notification.app.services.EmailService;
 import com.notification.app.services.TemplateService;
@@ -25,37 +27,39 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void send(GenericNotificationDTO dto) {
-        String body = templateService.render(dto.getTemplate(), dto.getVariables());
-        mailService.send(dto.getTo(), dto.getSubject(), body);
+        try {
+            String body = templateService.render(dto.getTemplate(), dto.getVariables());
+            mailService.send(dto.getTo(), dto.getSubject(), body);
+        } catch (Exception e) {
+            throw new NotificationProcessingException(e);
+        }
     }
 
     @Override
     public void sendVerificationEmail(EmailRequest req) {
         try {
-            String html = templateService.render("email-verification.html", Map.of(
+            String html = templateService.render("email-verification", Map.of(
                     "name", req.getFirstName(),
                     "link", req.getLink()
             ));
 
             mailService.send(req.getTo(), "Verificá tu cuenta", html);
         } catch (Exception e) {
-
-            throw new RuntimeException("Error loading email template", e);
+            throw new TemplateRenderException(e);
         }
     }
 
     @Override
     public void sendUserWelcomeEmail(EmailRequest req) {
         try {
-            String html = templateService.render("user-welcome.html", Map.of(
+            String html = templateService.render("user-welcome", Map.of(
                     "name", req.getFirstName(),
                     "link", req.getLink()
             ));
 
             mailService.send(req.getTo(), "Verificá tu cuenta", html);
         } catch (Exception e) {
-
-            throw new RuntimeException("Error loading email template", e);
+            throw new TemplateRenderException(e);
         }
     }
 }

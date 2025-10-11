@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import com.notification.app.exceptions.custom.EmailSendException;
 import com.notification.app.mail.MailService;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -43,7 +44,7 @@ public class SendGridMailService implements MailService {
             log.info("📧 Mail sent to {} (status {})", to, response.getStatusCode());
         } catch (IOException e) {
             log.error("Error sending mail to {}: {}", to, e.getMessage());
-            throw new RuntimeException("Error sending mail", e);
+            throw new EmailSendException(e);
         }
     }
 }

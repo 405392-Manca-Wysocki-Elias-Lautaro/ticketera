@@ -2,6 +2,9 @@ project:
   version: @project.version@
 
 spring:
+  config:
+    activate:
+      on-profile: prod
   application:
     name: notification-service
   main.banner-mode: "off"
@@ -46,7 +49,19 @@ spring:
           auth: true
           starttls.enable: true
 
-  sendgrid:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    queue: notifications.queue
+    routing-key: notifications.key
+
+sendgrid:
     api-key: ${SENDGRID_API_KEY}
   
 logging.level:

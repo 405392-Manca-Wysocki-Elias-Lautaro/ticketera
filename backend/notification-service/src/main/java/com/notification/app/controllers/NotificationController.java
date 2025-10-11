@@ -6,14 +6,15 @@ import com.notification.app.services.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/")
 @RequiredArgsConstructor
+@Profile({"dev"})
 @Slf4j
 public class NotificationController {
 
