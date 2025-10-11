@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "venues", schema="events")
@@ -15,11 +16,11 @@ import java.time.LocalDateTime;
 public class VenueEntity {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "organizer_id", nullable = false)
-    private Long organizerId;
+    private UUID organizerId;
 
     @Column(nullable = false)
     private String name;

@@ -1,7 +1,9 @@
 package com.event.app.exceptions;
 
+import java.util.UUID;
+
 public class CategoryNotFoundException extends RuntimeException {
-    public CategoryNotFoundException(Long id) {
+    public CategoryNotFoundException(UUID id) {
         super("Category not found with id " + id);
     }
 }

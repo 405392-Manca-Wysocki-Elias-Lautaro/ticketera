@@ -2,6 +2,7 @@ package com.event.app.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Venue {
 
-    private Long id;
+    private UUID id;
 
-    private Long organizerId;
+    private UUID organizerId;
 
     private String name;
 

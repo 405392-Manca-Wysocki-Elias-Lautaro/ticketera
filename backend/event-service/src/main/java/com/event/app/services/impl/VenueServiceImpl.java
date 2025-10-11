@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class VenueServiceImpl implements IVenueService {
     }
 
     @Override
-    public Optional<Venue> getVenueById(Long id) {
+    public Optional<Venue> getVenueById(UUID id) {
         return venueRepository.findById(id)
                 .filter(VenueEntity::getActive)
                 .map(entity -> modelMapper.map(entity, Venue.class));
@@ -52,7 +53,7 @@ public class VenueServiceImpl implements IVenueService {
     }
 
     @Override
-    public Venue updateVenue(Long id, VenueDTO venueDTO) {
+    public Venue updateVenue(UUID id, VenueDTO venueDTO) {
         VenueEntity venueEntity = venueRepository.findById(id)
             .filter(VenueEntity::getActive)
             .orElseThrow(() -> new VenueNotFoundException(id));
@@ -72,7 +73,7 @@ public class VenueServiceImpl implements IVenueService {
     }
 
     @Override
-    public void deleteVenue(Long id) {
+    public void deleteVenue(UUID id) {
         VenueEntity venueEntity = venueRepository.findById(id)
             .filter(VenueEntity::getActive)
             .orElseThrow(() -> new VenueNotFoundException(id));

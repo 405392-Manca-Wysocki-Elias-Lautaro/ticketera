@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "events", schema="events")
@@ -14,11 +15,11 @@ import java.time.LocalDateTime;
 public class EventEntity {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "organizer_id", nullable = false)
-    private Long organizerId;
+    private UUID organizerId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
@@ -30,7 +31,7 @@ public class EventEntity {
     private String description;
 
     @Column(name = "category_id")
-    private Long categoryId;
+    private UUID categoryId;
 
     @Column(name = "cover_url", columnDefinition = "TEXT")
     private String coverUrl;

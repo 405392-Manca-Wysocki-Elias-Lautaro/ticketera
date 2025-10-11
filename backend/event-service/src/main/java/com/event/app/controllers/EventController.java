@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,7 +35,7 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EventDTO> getEventById(@PathVariable Long id) {
+    public ResponseEntity<EventDTO> getEventById(@PathVariable UUID id) {
         return eventService.getEventById(id)
                 .map(event -> ResponseEntity.ok(modelMapper.map(event, EventDTO.class)))
                 .orElse(ResponseEntity.notFound().build());
@@ -49,14 +50,14 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventDTO> updateEvent(@PathVariable Long id, @Valid @RequestBody EventDTO eventDTO) {
+    public ResponseEntity<EventDTO> updateEvent(@PathVariable UUID id, @Valid @RequestBody EventDTO eventDTO) {
         Event updated = eventService.updateEvent(id, eventDTO);
         EventDTO response = modelMapper.map(updated, EventDTO.class);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEvent(@PathVariable UUID id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }

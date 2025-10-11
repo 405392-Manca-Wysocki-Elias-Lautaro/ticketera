@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,7 +35,7 @@ public class OrganizerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrganizerDTO> getOrganizerById(@PathVariable Long id) {
+    public ResponseEntity<OrganizerDTO> getOrganizerById(@PathVariable UUID id) {
         return organizerService.getOrganizerById(id)
                 .map(organizer -> ResponseEntity.ok(modelMapper.map(organizer, OrganizerDTO.class)))
                 .orElse(ResponseEntity.notFound().build());
@@ -49,14 +50,14 @@ public class OrganizerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrganizerDTO> updateOrganizer(@PathVariable Long id, @Valid @RequestBody OrganizerDTO organizerDTO) {
+    public ResponseEntity<OrganizerDTO> updateOrganizer(@PathVariable UUID id, @Valid @RequestBody OrganizerDTO organizerDTO) {
         Organizer updated = organizerService.updateOrganizer(id, organizerDTO);
         OrganizerDTO response = modelMapper.map(updated, OrganizerDTO.class);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrganizer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteOrganizer(@PathVariable UUID id) {
         organizerService.deleteOrganizer(id);
         return ResponseEntity.noContent().build();
     }

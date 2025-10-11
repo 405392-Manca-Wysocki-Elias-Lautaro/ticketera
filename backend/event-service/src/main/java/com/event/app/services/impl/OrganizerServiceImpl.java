@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class OrganizerServiceImpl implements IOrganizerService {
     }
 
     @Override
-    public Optional<Organizer> getOrganizerById(Long id) {
+    public Optional<Organizer> getOrganizerById(UUID id) {
         return organizerRepository.findById(id)
                 .filter(OrganizerEntity::getActive)
                 .map(entity -> modelMapper.map(entity, Organizer.class));
@@ -52,7 +53,7 @@ public class OrganizerServiceImpl implements IOrganizerService {
     }
 
     @Override
-    public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
+    public Organizer updateOrganizer(UUID id, OrganizerDTO organizerDTO) {
         OrganizerEntity organizerEntity = organizerRepository.findById(id)
             .filter(OrganizerEntity::getActive)
             .orElseThrow(() -> new OrganizerNotFoundException(id));
@@ -67,7 +68,7 @@ public class OrganizerServiceImpl implements IOrganizerService {
     }
 
     @Override
-    public void deleteOrganizer(Long id) {
+    public void deleteOrganizer(UUID id) {
         OrganizerEntity organizerEntity = organizerRepository.findById(id)
             .orElseThrow(() -> new OrganizerNotFoundException(id));
 

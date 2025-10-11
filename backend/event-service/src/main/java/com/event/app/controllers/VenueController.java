@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,7 +35,7 @@ public class VenueController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<VenueDTO> getVenueById(@PathVariable Long id) {
+    public ResponseEntity<VenueDTO> getVenueById(@PathVariable UUID id) {
         return venueService.getVenueById(id)
                 .map(venue -> ResponseEntity.ok(modelMapper.map(venue, VenueDTO.class)))
                 .orElse(ResponseEntity.notFound().build());
@@ -49,14 +50,14 @@ public class VenueController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VenueDTO> updateVenue(@PathVariable Long id, @Valid @RequestBody VenueDTO venueDTO) {
+    public ResponseEntity<VenueDTO> updateVenue(@PathVariable UUID id, @Valid @RequestBody VenueDTO venueDTO) {
         Venue updated = venueService.updateVenue(id, venueDTO);
         VenueDTO response = modelMapper.map(updated, VenueDTO.class);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVenue(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteVenue(@PathVariable UUID id) {
         venueService.deleteVenue(id);
         return ResponseEntity.noContent().build();
     }

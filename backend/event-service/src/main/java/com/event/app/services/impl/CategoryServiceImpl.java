@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +37,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public Optional<Category> getCategoryById(Long id) {
+    public Optional<Category> getCategoryById(UUID id) {
         return categoryRepository.findById(id)
                 .filter(CategoryEntity::getActive)
                 .map(entity -> modelMapper.map(entity, Category.class));
@@ -50,7 +51,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public Category updateCategory(Long id, CategoryDTO categoryDTO) {
+    public Category updateCategory(UUID id, CategoryDTO categoryDTO) {
         CategoryEntity categoryEntity = categoryRepository.findById(id)
             .filter(CategoryEntity::getActive)
             .orElseThrow(() -> new CategoryNotFoundException(id));
@@ -63,7 +64,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public void deleteCategory(Long id) {
+    public void deleteCategory(UUID id) {
         CategoryEntity categoryEntity = categoryRepository.findById(id)
             .filter(CategoryEntity::getActive)
             .orElseThrow(() -> new CategoryNotFoundException(id));

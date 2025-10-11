@@ -1,6 +1,7 @@
 package com.event.app.models;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,9 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Event {
 
-    private Long id;
+    private UUID id;
 
-    private Long organizerId;
+    private UUID organizerId;
 
     private String title;
 
@@ -20,7 +21,7 @@ public class Event {
 
     private String description;
 
-    private Long categoryId;
+    private UUID categoryId;
 
     private String coverUrl;
 

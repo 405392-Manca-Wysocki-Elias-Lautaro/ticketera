@@ -7,16 +7,17 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventDTO {
 
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "El ID del organizador es obligatorio")
-    private Long organizerId;
+    private UUID organizerId;
 
     @NotBlank(message = "El título es obligatorio")
     @Size(min = 3, max = 200, message = "El título debe tener entre 3 y 200 caracteres")
@@ -30,7 +31,7 @@ public class EventDTO {
     @Size(max = 2000, message = "La descripción no puede superar los 2000 caracteres")
     private String description;
 
-    private Long categoryId;
+    private UUID categoryId;
 
     @Size(max = 500, message = "La URL de portada no puede superar los 500 caracteres")
     private String coverUrl;

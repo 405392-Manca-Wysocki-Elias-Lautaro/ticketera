@@ -9,16 +9,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class VenueDTO {
 
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "El ID del organizador es obligatorio")
-    private Long organizerId;
+    private UUID organizerId;
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 3, max = 200, message = "El nombre debe tener entre 3 y 200 caracteres")

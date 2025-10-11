@@ -3,13 +3,14 @@ package com.event.app.repositories;
 import com.event.app.entities.VenueEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VenueRepository extends JpaRepository<VenueEntity, Long>{
+public interface VenueRepository extends JpaRepository<VenueEntity, UUID>{
     List<VenueEntity> findByActiveTrue();
-    List<VenueEntity> findByOrganizerIdAndActiveTrue(Long organizerId);
+    List<VenueEntity> findByOrganizerIdAndActiveTrue(UUID organizerId);
 }
 

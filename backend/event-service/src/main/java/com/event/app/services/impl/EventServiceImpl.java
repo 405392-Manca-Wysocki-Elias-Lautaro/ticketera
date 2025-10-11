@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class EventServiceImpl implements IEventService {
     }
 
     @Override
-    public Optional<Event> getEventById(Long id) {
+    public Optional<Event> getEventById(UUID id) {
         return eventRepository.findById(id)
                 .filter(EventEntity::getActive)
                 .map(entity -> modelMapper.map(entity, Event.class));
@@ -52,7 +53,7 @@ public class EventServiceImpl implements IEventService {
     }
 
     @Override
-    public Event updateEvent(Long id, EventDTO eventDTO) {
+    public Event updateEvent(UUID id, EventDTO eventDTO) {
         EventEntity eventEntity = eventRepository.findById(id)
             .filter(EventEntity::getActive)
             .orElseThrow(() -> new EventNotFoundException(id));
@@ -70,7 +71,7 @@ public class EventServiceImpl implements IEventService {
     }
 
     @Override
-    public void deleteEvent(Long id) {
+    public void deleteEvent(UUID id) {
         EventEntity eventEntity = eventRepository.findById(id)
             .filter(EventEntity::getActive)
             .orElseThrow(() -> new EventNotFoundException(id));

@@ -2,7 +2,7 @@ CREATE SCHEMA IF NOT EXISTS events;
 
 -- Organizers
 CREATE TABLE events.organizers (
-  id            bigserial PRIMARY KEY,
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name          text NOT NULL,
   slug          text NOT NULL UNIQUE,
   contact_email text NOT NULL,
@@ -13,8 +13,8 @@ CREATE TABLE events.organizers (
 
 -- Venues
 CREATE TABLE events.venues (
-  id            bigserial PRIMARY KEY,
-  organizer_id  bigint NOT NULL REFERENCES events.organizers(id),
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organizer_id  uuid NOT NULL REFERENCES events.organizers(id),
   name          text NOT NULL,
   description   text NOT NULL,
   address_line  text NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE events.venues (
 
 -- Categories
 CREATE TABLE events.categories (
-  id            bigserial PRIMARY KEY,
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name          text NOT NULL UNIQUE,
   description   text,
   active        boolean NOT NULL DEFAULT true
@@ -37,14 +37,27 @@ CREATE TABLE events.categories (
 
 -- Events
 CREATE TABLE events.events (
-  id            bigserial PRIMARY KEY,
-  organizer_id  bigint NOT NULL REFERENCES events.organizers(id),
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organizer_id  uuid NOT NULL REFERENCES events.organizers(id),
   title         text NOT NULL,
   slug          text NOT NULL UNIQUE,
   description   text,
-  category_id   bigint NOT NULL REFERENCES events.categories(id),
+  category_id   uuid NOT NULL REFERENCES events.categories(id),
   cover_url     text,
   status        text NOT NULL DEFAULT 'draft',
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  active        boolean NOT NULL DEFAULT true
+);
+
+-- Occurrences
+CREATE TABLE events.occurrences (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id      uuid NOT NULL REFERENCES events.events(id),
+  venue_id      uuid NOT NULL REFERENCES events.venues(id),
+  starts_at     timestamptz NOT NULL,
+  ends_at       timestamptz NOT NULL,
+  status        text NOT NULL DEFAULT 'draft',
+  slug          text NOT NULL UNIQUE,
   created_at    timestamptz NOT NULL DEFAULT now(),
   active        boolean NOT NULL DEFAULT true
 );
