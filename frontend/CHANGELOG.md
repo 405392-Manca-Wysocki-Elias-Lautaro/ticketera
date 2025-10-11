@@ -1,3 +1,10 @@
+# [1.0.0-next.7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.6...frontend-v1.0.0-next.7) (2025-10-11)
+
+
+### Features
+
+* **email:** add welcome user strategy and update verification template ([ce91619](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ce916196c81aa68dd3b323a4be9f910a387a588c))
+
 # [1.0.0-next.6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.5...frontend-v1.0.0-next.6) (2025-10-10)
 
 
