@@ -1,13 +1,14 @@
 -- Crear schema si no existe
 CREATE SCHEMA IF NOT EXISTS auth;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 SET search_path TO auth;
 
 -- =========================================================
 --  TABLE: roles
 -- =========================================================
-CREATE TABLE roles (
-    id              BIGSERIAL PRIMARY KEY,
+CREATE TABLE auth.roles (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code            VARCHAR(50) NOT NULL UNIQUE,
     name            VARCHAR(50) NOT NULL UNIQUE,
     description     TEXT,
@@ -18,17 +19,17 @@ CREATE TABLE roles (
 -- =========================================================
 --  TABLE: users
 -- =========================================================
-CREATE TABLE users (
-    id              BIGSERIAL PRIMARY KEY,
+CREATE TABLE auth.users (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name      VARCHAR(100) NOT NULL,
     last_name       VARCHAR(100) NOT NULL,
     email           VARCHAR(255) NOT NULL UNIQUE,
     email_verified  BOOLEAN DEFAULT FALSE,
+    is_active       BOOLEAN DEFAULT TRUE,
     password_hash   VARCHAR(255) NOT NULL,
-    role_id         BIGINT NOT NULL,
+    role_id         UUID NOT NULL,
     mfa_secret      VARCHAR(255),
     mfa_enabled     BOOLEAN DEFAULT FALSE,
-    is_active       BOOLEAN DEFAULT TRUE,
     last_login_at   TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW(),
@@ -39,9 +40,9 @@ CREATE TABLE users (
 -- =========================================================
 --  TABLE: email_verification_tokens
 -- =========================================================
-CREATE TABLE email_verification_tokens (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+CREATE TABLE auth.email_verification_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token_hash VARCHAR(255) NOT NULL UNIQUE,
     expires_at TIMESTAMPTZ NOT NULL,
     used BOOLEAN DEFAULT FALSE,
@@ -52,8 +53,8 @@ CREATE TABLE email_verification_tokens (
 --  TABLE: api_keys
 -- =========================================================
 CREATE TABLE auth.api_keys (
-    id              BIGSERIAL PRIMARY KEY,
-    organizer_id    BIGINT NOT NULL,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organizer_id    UUID NOT NULL,
     name            VARCHAR(255) NOT NULL,
     token_hash      VARCHAR(255) NOT NULL UNIQUE,
     revoked         BOOLEAN NOT NULL DEFAULT FALSE,
@@ -67,9 +68,9 @@ CREATE TABLE auth.api_keys (
 --  TABLE: api_key_scopes (colección de scopes)
 -- =========================================================
 CREATE TABLE auth.api_key_scopes (
-    api_key_id      BIGINT NOT NULL,
-    scope           VARCHAR(255) NOT NULL,
-    PRIMARY KEY (api_key_id, scope),
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    api_key_id  UUID NOT NULL,
+    scope       VARCHAR(255) NOT NULL,
     FOREIGN KEY (api_key_id)
         REFERENCES auth.api_keys (id)
         ON DELETE CASCADE
@@ -78,9 +79,9 @@ CREATE TABLE auth.api_key_scopes (
 -- =========================================================
 --  TABLE: refresh_tokens
 -- =========================================================
-CREATE TABLE refresh_tokens (
-    id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT NOT NULL,
+CREATE TABLE auth.refresh_tokens (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL,
     token_hash      VARCHAR(255) NOT NULL UNIQUE,
     user_agent      VARCHAR(100),
     ip_address      VARCHAR(45),
@@ -94,9 +95,9 @@ CREATE TABLE refresh_tokens (
 -- =========================================================
 --  TABLE: password_reset_tokens
 -- =========================================================
-CREATE TABLE password_reset_tokens (
-    id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT NOT NULL,
+CREATE TABLE auth.password_reset_tokens (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL,
     token_hash      VARCHAR(255) NOT NULL UNIQUE,
     used            BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
@@ -107,9 +108,9 @@ CREATE TABLE password_reset_tokens (
 -- =========================================================
 --  TABLE: login_attempts
 -- =========================================================
-CREATE TABLE login_attempts (
-    id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT,
+CREATE TABLE auth.login_attempts (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID,
     email           VARCHAR(255),
     success         BOOLEAN NOT NULL,
     ip_address      VARCHAR(45),
@@ -121,9 +122,9 @@ CREATE TABLE login_attempts (
 -- =========================================================
 --  TABLE: audit_logs
 -- =========================================================
-CREATE TABLE audit_logs (
-    id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT,
+CREATE TABLE auth.audit_logs (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID,
     action          VARCHAR(100) NOT NULL,
     description     TEXT,
     ip_address      VARCHAR(45),
