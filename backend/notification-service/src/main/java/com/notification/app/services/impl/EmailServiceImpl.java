@@ -34,7 +34,21 @@ public class EmailServiceImpl implements EmailService {
         try {
             String html = templateService.render("email-verification.html", Map.of(
                     "name", req.getFirstName(),
-                    // "lastName", req.getLastName(),
+                    "link", req.getLink()
+            ));
+
+            mailService.send(req.getTo(), "Verificá tu cuenta", html);
+        } catch (Exception e) {
+
+            throw new RuntimeException("Error loading email template", e);
+        }
+    }
+
+    @Override
+    public void sendUserWelcomeEmail(EmailRequest req) {
+        try {
+            String html = templateService.render("user-welcome.html", Map.of(
+                    "name", req.getFirstName(),
                     "link", req.getLink()
             ));
 
