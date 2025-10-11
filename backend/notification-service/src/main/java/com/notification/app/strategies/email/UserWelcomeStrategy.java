@@ -7,32 +7,30 @@ import com.notification.app.dto.GenericNotificationDTO;
 import com.notification.app.entity.NotificationType;
 import com.notification.app.services.EmailService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class EmailVerificationStrategy implements EmailNotificationStrategy {
+@RequiredArgsConstructor
+public class UserWelcomeStrategy implements EmailNotificationStrategy {
 
     private final EmailService emailService;
 
-    public EmailVerificationStrategy(EmailService emailService) {
-        this.emailService = emailService;
-    }
-
     @Override
     public NotificationType getType() {
-        return NotificationType.EMAIL_VERIFICATION;
+        return NotificationType.USER_WELCOME;
     }
 
     @Override
     public void send(GenericNotificationDTO dto) {
-        emailService.sendVerificationEmail(
+        emailService.sendUserWelcomeEmail(
             EmailRequest.builder()
                 .to(dto.getTo())
                 .firstName((String) dto.getVariables().get("firstName"))
-                .firstName((String) dto.getVariables().get("lastName"))
                 .link((String) dto.getVariables().get("link"))
                 .build()
         );
     }
 }
+

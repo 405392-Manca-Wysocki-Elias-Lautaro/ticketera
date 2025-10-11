@@ -35,7 +35,7 @@ public class EmailChannelStrategy implements NotificationChannelStrategy {
         }
 
         emailStrategies.stream()
-                .filter(s -> s.getType().equalsIgnoreCase(dto.getType().name()))
+                .filter(s -> s.getType().equals(dto.getType()))
                 .findFirst()
                 .orElseThrow(()
                         -> new UnsupportedOperationException("Unsupported email type: " + dto.getType()))
