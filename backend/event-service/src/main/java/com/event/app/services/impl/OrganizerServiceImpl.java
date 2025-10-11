@@ -40,6 +40,7 @@ public class OrganizerServiceImpl implements IOrganizerService {
     @Override
     public Optional<Organizer> getOrganizerById(Long id) {
         return organizerRepository.findById(id)
+                .filter(OrganizerEntity::getActive)
                 .map(entity -> modelMapper.map(entity, Organizer.class));
     }
 
@@ -53,6 +54,7 @@ public class OrganizerServiceImpl implements IOrganizerService {
     @Override
     public Organizer updateOrganizer(Long id, OrganizerDTO organizerDTO) {
         OrganizerEntity organizerEntity = organizerRepository.findById(id)
+            .filter(OrganizerEntity::getActive)
             .orElseThrow(() -> new OrganizerNotFoundException(id));
 
         organizerEntity.setName(organizerDTO.getName());
