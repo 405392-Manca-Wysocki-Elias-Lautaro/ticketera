@@ -2,7 +2,6 @@ package com.notification.app.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -11,12 +10,11 @@ import org.springframework.amqp.core.Queue;
 
 
 @Configuration
-@Profile("prod")
 public class RabbitConfig {
 
-    public static final String EXCHANGE = "notification.exchange";
-    public static final String QUEUE = "notification.email.queue";
-    public static final String ROUTING_KEY = "notification.email";
+    public static final String EXCHANGE = "notifications.exchange";
+    public static final String QUEUE = "notifications.queue";
+    public static final String ROUTING_KEY = "notifications.key";
 
     @Bean
     public DirectExchange notificationExchange() {
