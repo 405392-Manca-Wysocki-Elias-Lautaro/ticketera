@@ -50,13 +50,18 @@ spring:
           starttls.enable: true
 
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
-    username: guest
-    password: guest
-    # TODO: Configurar username y password
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
 
-  sendgrid:
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    queue: notifications.queue
+    routing-key: notifications.key
+
+sendgrid:
     api-key: ${SENDGRID_API_KEY}
   
 logging.level:

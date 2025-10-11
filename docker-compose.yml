@@ -19,6 +19,20 @@ services:
       retries: 20
     networks: [ backend ]
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"     # puerto AMQP (comunicación entre microservicios)
+      - "15672:15672"   # panel web http://localhost:15672
+    networks: [ backend ]
+
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
@@ -103,6 +117,10 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -135,6 +153,10 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -167,6 +189,10 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -199,6 +225,10 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payment-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payment-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -231,6 +261,10 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [postgres]
     networks: [backend]
     ports:
@@ -263,6 +297,10 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [postgres]
     networks: [backend]
     ports:

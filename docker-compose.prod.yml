@@ -8,9 +8,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       TZ: ${TZ:-America/Argentina/Cordoba}
-    # No expongas 5432 salvo necesidad puntual
-    # ports:
-    #   - "${PG_PORT:-5432}:5432"
     volumes:
       - ${PGDATA_VOL:-ticketera_prod_pgdata}:/var/lib/postgresql/data
       # Si es un volumen NUEVO y querés bootstrap de schemas/permisos/pgcrypto:
@@ -22,15 +19,16 @@ services:
       retries: 30
     networks: [ backend ]
 
-  # rabbitmq:
-  #   image: ${RABBIT_IMAGE}
-  #   container_name: rabbit
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
-  #     RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
-  #   ports:
-  #     - "15672:15672"
-  #   networks: [ backend ]
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "5672:5672"     # puerto AMQP (comunicación entre microservicios)
+      - "15672:15672"   # panel web http://localhost:15672
+    networks: [ backend ]
 
     # Frontend estático servido por Node 'serve'
   frontend:
@@ -67,9 +65,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: auth
       FLYWAY_TABLE: flyway_history_auth
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [ postgres ]
     networks: [ backend ]
 
@@ -86,9 +85,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: events
       FLYWAY_TABLE: flyway_history_events
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [ postgres ]
     networks: [ backend ]
 
@@ -105,9 +105,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: tickets
       FLYWAY_TABLE: flyway_history_tickets
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [ postgres ]
     networks: [ backend ]
 
@@ -124,9 +125,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: payments
       FLYWAY_TABLE: flyway_history_payments
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [ postgres ]
     networks: [ backend ]
 
@@ -143,9 +145,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: notifications
       FLYWAY_TABLE: flyway_history_notifications
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [ postgres ]
     networks: [ backend ]
 
@@ -162,9 +165,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_SCHEMA: orders
       FLYWAY_TABLE: flyway_history_orders
-      # RABBITMQ_HOST: rabbitmq
-      # RABBITMQ_USER: ${RABBIT_USER}
-      # RABBITMQ_PASS: ${RABBIT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     depends_on: [ postgres ]
     networks: [ backend ]
 
