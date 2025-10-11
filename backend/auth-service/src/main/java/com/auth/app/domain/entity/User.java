@@ -1,7 +1,10 @@
-package com.auth.app.entity;
+package com.auth.app.domain.entity;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
+
 import org.hibernate.annotations.SQLRestriction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,8 +31,8 @@ import lombok.NoArgsConstructor;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "first_name")
     private String firstName;
@@ -44,6 +47,10 @@ public class User {
     @Builder.Default
     private boolean emailVerified = false;
 
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private boolean isActive = true;
+
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -57,10 +64,6 @@ public class User {
     @Column(name = "mfa_enabled", nullable = false)
     @Builder.Default
     private boolean mfaEnabled = false;
-
-    @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private boolean isActive = true;
 
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;

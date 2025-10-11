@@ -1,6 +1,7 @@
-package com.auth.app.entity;
+package com.auth.app.domain.entity;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,11 +24,11 @@ import lombok.NoArgsConstructor;
 public class AuditLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "user_id")
-    private Long userId; // puede ser null (ON DELETE SET NULL)
+    private UUID userId;
 
     @Column(nullable = false)
     private String action;

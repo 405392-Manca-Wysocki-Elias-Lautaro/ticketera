@@ -1,6 +1,7 @@
-package com.auth.app.entity;
+package com.auth.app.domain.entity;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,8 +15,8 @@ import lombok.*;
 public class EmailVerificationToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     // Relación con User
     @ManyToOne(fetch = FetchType.LAZY)

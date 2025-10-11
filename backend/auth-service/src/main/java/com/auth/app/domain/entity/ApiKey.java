@@ -1,24 +1,11 @@
-package com.auth.app.entity;
+package com.auth.app.domain.entity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "api_keys",
@@ -32,11 +19,11 @@ import lombok.NoArgsConstructor;
 public class ApiKey {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "organizer_id", nullable = false)
-    private Long organizerId;
+    private UUID organizerId;
 
     @Column(nullable = false)
     private String name;
@@ -44,11 +31,8 @@ public class ApiKey {
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
 
-    // Postgres text[]
-    @ElementCollection
-    @CollectionTable(name = "api_key_scopes", joinColumns = @JoinColumn(name = "api_key_id"))
-    @Column(name = "scope")
-    private List<String> scopes;
+    @OneToMany(mappedBy = "apiKey", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ApiKeyScope> scopes;
 
     @Builder.Default
     @Column(nullable = false)
