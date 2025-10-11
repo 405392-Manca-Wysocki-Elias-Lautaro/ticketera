@@ -69,3 +69,27 @@ CREATE TABLE events.seat_types (
   name        text NOT NULL,
   description text
 );
+
+-- Venue Areas
+CREATE TABLE events.venue_areas (
+  id                   bigserial PRIMARY KEY,
+  venue_id             uuid NOT NULL REFERENCES events.venues(id),
+  name                 text NOT NULL,
+  is_general_admission boolean NOT NULL DEFAULT false,
+  capacity             int,
+  position             int
+);
+
+-- Venue Seats
+CREATE TABLE events.venue_seats (
+  id             bigserial PRIMARY KEY,
+  venue_area_id  bigint NOT NULL REFERENCES events.venue_areas(id),
+  seat_label     text NOT NULL,
+  row_label      text,
+  number_label   text
+);
+
+-- Indexes para mejorar el rendimiento
+CREATE INDEX idx_venue_areas_venue_id ON events.venue_areas(venue_id);
+CREATE INDEX idx_venue_seats_venue_area_id ON events.venue_seats(venue_area_id);
+
