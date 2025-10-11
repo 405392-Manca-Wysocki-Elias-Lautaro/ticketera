@@ -1,7 +1,6 @@
 package com.auth.app.services.application.impl;
 
 import java.util.Map;
-import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +17,10 @@ import com.auth.app.notification.entity.NotificationType;
 import com.auth.app.security.TokenProvider;
 import com.auth.app.security.TokenUtils;
 import com.auth.app.services.application.AuthService;
-import com.auth.app.services.domain.RefreshTokenService;
-import com.auth.app.services.domain.UserService;
 import com.auth.app.services.domain.AuditLogService;
 import com.auth.app.services.domain.EmailVerificatonService;
+import com.auth.app.services.domain.RefreshTokenService;
+import com.auth.app.services.domain.UserService;
 import com.auth.app.utils.EnvironmentUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -67,7 +66,6 @@ public class AuthServiceImpl implements AuthService {
                         .to(saved.getEmail())
                         .variables(Map.of(
                                 "firstName", saved.getFirstName(),
-                                "lastName", saved.getLastName(),
                                 "link", frontendUrl + "/verify?token=" + verifyEmailToken
                         ))
                         .build()
@@ -75,6 +73,30 @@ public class AuthServiceImpl implements AuthService {
 
         UserResponse userResponse = modelMapper.map(saved, UserResponse.class);
         return new AuthResponse(accessToken, refreshToken, userResponse);
+    }
+
+    @Override
+    public void resendVerificationEmail(String email) {
+
+        UserModel user = userService.findByEmail(email);
+
+        String verifyEmailToken = emailVerificationService.resendVerificationEmail(email);
+
+        if (EnvironmentUtils.isDev()) {
+            log.info("🗝️ Resend Verify Email Token: {}", verifyEmailToken);
+        }
+
+        notificationSender.send(
+                NotificationDTO.builder()
+                        .channel(NotificationChannel.EMAIL.toString())
+                        .type(NotificationType.EMAIL_VERIFICATION.toString())
+                        .to(email)
+                        .variables(Map.of(
+                                "firstName", user.getFirstName(),
+                                "link", frontendUrl + "/verify?token=" + verifyEmailToken
+                        ))
+                        .build()
+        );
     }
 
     @Override
@@ -101,4 +123,5 @@ public class AuthServiceImpl implements AuthService {
                         .build()
         );
     }
+    
 }

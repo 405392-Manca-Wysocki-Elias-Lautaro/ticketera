@@ -10,6 +10,7 @@ import com.auth.app.domain.entity.EmailVerificationToken;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.model.EmailVerificationTokenModel;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.exception.exceptions.EntityNotFoundException;
 import com.auth.app.repositories.EmailVerificationRepository;
 import com.auth.app.security.TokenUtils;
 import com.auth.app.services.domain.EmailVerificatonService;
@@ -41,7 +42,29 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
                 .build();
 
         emailVerificationTokenRepository.save(modelMapper.map(token, EmailVerificationToken.class));
-        return rawToken; // este se envía por correo
+        return rawToken;
+
+    }
+
+    
+    @Transactional
+    @Override
+    public String resendVerificationEmail(String email) {
+        UserModel user = userService.findByEmail(email);
+
+        if (user == null) {
+            throw new EntityNotFoundException(User.class, "email", email);
+        }
+        
+        if (user.isEmailVerified()) {
+            throw new IllegalStateException("User is already verified.");
+        }
+
+        var rawToken = this.generateToken(user);
+
+        log.info("🔁 Verification email resent to {}", email);
+
+        return rawToken;
 
     }
 

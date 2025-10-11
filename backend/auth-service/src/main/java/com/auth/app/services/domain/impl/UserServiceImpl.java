@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserModel create(UserModel userModel) {
         if (userRepository.existsByEmail(userModel.getEmail())) {
-            throw new EmailAlreadyExistsException(userModel.getEmail());
+            throw new EmailAlreadyExistsException();
         }
 
         PasswordValidator.validate(userModel.getPassword());
@@ -80,7 +80,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel getById(UUID id) {
+    public UserModel findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(user -> modelMapper.map(user, UserModel.class))
+                .orElseThrow(() -> new EntityNotFoundException(User.class, "email", email));
+    }
+
+    @Override
+    public UserModel findById(UUID id) {
         return userRepository.findById(id)
                 .map(user -> modelMapper.map(user, UserModel.class))
                 .orElseThrow(() -> new EntityNotFoundException(User.class, "id", id));

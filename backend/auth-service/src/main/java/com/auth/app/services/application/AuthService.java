@@ -6,5 +6,6 @@ import com.auth.app.dto.response.AuthResponse;
 
 public interface AuthService {
     AuthResponse register(RegisterRequest request, String userAgent, String ipAddress);
+    void resendVerificationEmail(String email);
     void verifyEmail(String rawToken, String ipAddress, String userAgent) ;
 }

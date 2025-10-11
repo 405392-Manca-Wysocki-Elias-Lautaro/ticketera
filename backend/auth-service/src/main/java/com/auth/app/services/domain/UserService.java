@@ -8,7 +8,8 @@ import com.auth.app.domain.model.UserModel;
 public interface UserService {
     UserModel create(UserModel request);
     UserModel update(UUID id, UserModel request);
-    UserModel getById(UUID id);
+    UserModel findByEmail(String email);
+    UserModel findById(UUID id);
     List<UserModel> getAll();
     void delete(UUID id);
 }
