@@ -47,6 +47,9 @@ spring:
       - classpath:db/seed
     clean-disabled: true
 
+frontend:
+  url: ${FRONTEND_URL}
+
 notification:
   url: ${NOTIFICATION_URL}
 
@@ -54,7 +57,6 @@ jwt:
   secret: ${JWT_SECRET}
   expiration:
     access: 900000    # 15 minutos
-    refresh: 604800000 # 7 días
 
 logging.level:
   org.springframework.jdbc.core: DEBUG

@@ -52,6 +52,9 @@ jwt:
     access: 900000    # 15 minutos
     refresh: 604800000 # 7 días
 
+frontend:
+  url: ${FRONTEND_URL}
+
 logging.level:
   root: INFO
   org.hibernate.SQL: WARN

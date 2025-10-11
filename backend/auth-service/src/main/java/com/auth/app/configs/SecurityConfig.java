@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/health",
                         "/register",
+                        "/verify",
                         "/login",
                         "/refresh-token",
                         "/v3/api-docs/**",
