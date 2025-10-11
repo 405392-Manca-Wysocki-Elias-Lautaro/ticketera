@@ -1,3 +1,11 @@
+# [1.0.0-next.8](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.7...frontend-v1.0.0-next.8) (2025-10-11)
+
+
+### Features
+
+* add RabbitMQ config and custom exception handling ([6e932bc](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/6e932bcc4ca96d975a82f608039bc2ebb61370b7))
+* add RabbitMQ listener and environment configuration ([bcdd8c1](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/bcdd8c12bb8d74b0d66f2da2d646c113644db851))
+
 # [1.0.0-next.7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.6...frontend-v1.0.0-next.7) (2025-10-11)
 
 
