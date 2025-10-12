@@ -11,6 +11,10 @@ import com.auth.app.domain.entity.User;
 import com.auth.app.domain.model.EmailVerificationTokenModel;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.exception.exceptions.EntityNotFoundException;
+import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
+import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
+import com.auth.app.exception.exceptions.TokenExpiredException;
+import com.auth.app.exception.exceptions.UserAlreadyVerifiedException;
 import com.auth.app.repositories.EmailVerificationRepository;
 import com.auth.app.security.TokenUtils;
 import com.auth.app.services.domain.EmailVerificatonService;
@@ -46,7 +50,6 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
 
     }
 
-    
     @Transactional
     @Override
     public String resendVerificationEmail(String email) {
@@ -55,9 +58,9 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
         if (user == null) {
             throw new EntityNotFoundException(User.class, "email", email);
         }
-        
+
         if (user.isEmailVerified()) {
-            throw new IllegalStateException("User is already verified.");
+            throw new UserAlreadyVerifiedException();
         }
 
         var rawToken = this.generateToken(user);
@@ -77,14 +80,14 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
         log.info("hashToken: {}", hash);
 
         EmailVerificationToken token = emailVerificationTokenRepository.findByTokenHash(hash)
-                .orElseThrow(() -> new RuntimeException("Invalid or unknown token"));
+                .orElseThrow(() -> new InvalidOrUnknownTokenException());
 
         if (token.getUsed()) {
-            throw new RuntimeException("Token already used");
+            throw new TokenAlreadyUsedException();
         }
 
         if (token.getExpiresAt().isBefore(OffsetDateTime.now())) {
-            throw new RuntimeException("Token expired");
+            throw new TokenExpiredException();
         }
 
         token.setUsed(true);
@@ -94,7 +97,7 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
         user.setEmailVerified(true);
         user.setActive(true);
         UserModel updated = userService.update(user.getId(), modelMapper.map(user, UserModel.class));
-        
+
         emailVerificationTokenRepository.deleteAllByUserIdExcept(user.getId(), token.getId());
 
         return updated;
