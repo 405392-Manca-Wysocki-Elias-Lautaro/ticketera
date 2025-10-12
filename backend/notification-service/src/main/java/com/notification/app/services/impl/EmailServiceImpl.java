@@ -57,7 +57,7 @@ public class EmailServiceImpl implements EmailService {
                     "link", req.getLink()
             ));
 
-            mailService.send(req.getTo(), "Verificá tu cuenta", html);
+            mailService.send(req.getTo(), "¡Bienvenido a Ticketly!", html);
         } catch (Exception e) {
             throw new TemplateRenderException(e);
         }

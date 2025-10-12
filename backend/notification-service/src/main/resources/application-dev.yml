@@ -63,12 +63,21 @@ spring:
     port: 5672
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASS:guest}
+    listener:
+      simple:
+        acknowledge-mode: auto          # auto/manual, según necesites ACK automático o controlado
+        default-requeue-rejected: false # evita reintentos infinitos
+        concurrency: 3                  # cuántos consumidores paralelos
+        max-concurrency: 10             # límite máximo de consumidores simultáneos
+        prefetch: 5                     # cuántos mensajes toma por consumidor antes de procesar
+        missing-queues-fatal: false     # evita crash si el exchange/queue aún no existe al iniciar
 
 rabbitmq:
   notifications:
     exchange: notifications.exchange
     queue: notifications.queue
-    routing-key: notifications.key
+    key: notifications.key
+    dlq: notifications.queue.dlq
 
 logging:
   level:
