@@ -1,7 +1,8 @@
 package com.auth.app.services.domain;
 
-import java.util.UUID;
+import com.auth.app.domain.enums.LogAction;
+import com.auth.app.domain.model.UserModel;
 
 public interface AuditLogService {
-    void logAction(UUID userId, String action, String description, String ip, String userAgent);
+    void logAction(UserModel user, LogAction action, String ipAddress, String userAgent);
 }
