@@ -1,8 +1,12 @@
 package com.auth.app.domain.model;
 
 import java.time.OffsetDateTime;
-import lombok.*;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -10,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LoginAttemptModel  {
     private UUID id;
-    private UUID userId;
+    private UserModel user;
     private String email;
     private String ipAddress;
     private boolean success;

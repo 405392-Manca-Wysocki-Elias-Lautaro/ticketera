@@ -125,6 +125,7 @@ CREATE TABLE auth.login_attempts (
 CREATE TABLE auth.audit_logs (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID,
+    action_code     VARCHAR(20) NOT NULL
     action          VARCHAR(100) NOT NULL,
     description     TEXT,
     ip_address      VARCHAR(45),
@@ -133,9 +134,23 @@ CREATE TABLE auth.audit_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE auth.trusted_devices (
+    id UUID     PRIMARY KEY gen_random_uuid(),
+    user_id     UUID NOT NULL,
+    ip_address  VARCHAR(50),
+    user_agent  TEXT,
+    location    TEXT,
+    last_login  TIMESTAMPTZ DEFAULT now(),
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+
 -- =========================================================
 --  INDEXES
 -- =========================================================
 CREATE INDEX idx_api_keys_organizer_id ON auth.api_keys (organizer_id);
 CREATE INDEX idx_api_keys_token_hash ON auth.api_keys (token_hash);
 CREATE INDEX idx_api_key_scopes_api_key_id ON auth.api_key_scopes (api_key_id);
+CREATE INDEX idx_trusted_devices_user_agent_ip ON auth.trusted_devices (user_id, user_agent, ip_address);
+CREATE INDEX idx_refresh_token_user_id ON refresh_tokens(user_id);
+CREATE INDEX idx_refresh_token_token_hash ON refresh_tokens(token_hash);
+CREATE INDEX idx_refresh_token_expires_at ON refresh_tokens(expires_at);
