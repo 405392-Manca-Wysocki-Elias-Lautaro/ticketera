@@ -2,10 +2,11 @@ package com.auth.app.services.domain.impl;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
 import java.util.UUID;
 
 import com.auth.app.domain.entity.Role;
-import com.auth.app.domain.entity.RoleCode;
+import com.auth.app.domain.enums.RoleCode;
 import com.auth.app.domain.model.RoleModel;
 import com.auth.app.repositories.RoleRepository;
 import com.auth.app.services.domain.RoleService;

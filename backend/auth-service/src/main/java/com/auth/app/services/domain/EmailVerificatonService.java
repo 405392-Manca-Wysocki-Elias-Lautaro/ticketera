@@ -5,5 +5,5 @@ import com.auth.app.domain.model.UserModel;
 public interface EmailVerificatonService {
     String generateToken(UserModel user);
     UserModel verifyToken(String rawToken);
-    String resendVerificationEmail(String email);
+    String generateNewVerificationToken(String email);
 }

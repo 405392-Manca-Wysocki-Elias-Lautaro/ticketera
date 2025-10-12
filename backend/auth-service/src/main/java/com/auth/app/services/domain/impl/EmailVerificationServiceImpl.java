@@ -52,7 +52,7 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
 
     @Transactional
     @Override
-    public String resendVerificationEmail(String email) {
+    public String generateNewVerificationToken(String email) {
         UserModel user = userService.findByEmail(email);
 
         if (user == null) {

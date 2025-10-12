@@ -3,6 +3,8 @@ package com.auth.app.domain.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.auth.app.domain.enums.RoleCode;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

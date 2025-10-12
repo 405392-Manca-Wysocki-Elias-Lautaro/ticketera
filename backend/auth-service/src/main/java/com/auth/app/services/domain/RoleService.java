@@ -1,8 +1,9 @@
 package com.auth.app.services.domain;
 
-import com.auth.app.domain.entity.RoleCode;
-import com.auth.app.domain.model.RoleModel;
 import java.util.UUID;
+
+import com.auth.app.domain.enums.RoleCode;
+import com.auth.app.domain.model.RoleModel;
 
 public interface RoleService {
     RoleModel findById(UUID id);

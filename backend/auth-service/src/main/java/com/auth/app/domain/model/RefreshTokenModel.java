@@ -2,7 +2,11 @@ package com.auth.app.domain.model;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -10,7 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 public class RefreshTokenModel {
     private UUID id;
-    private UUID userId;
+    private UserModel user;
     private String tokenHash;
     private String userAgent;
     private String ipAddress;

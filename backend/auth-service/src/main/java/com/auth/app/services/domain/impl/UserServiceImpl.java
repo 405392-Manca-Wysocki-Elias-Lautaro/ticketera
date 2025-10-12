@@ -1,8 +1,8 @@
 package com.auth.app.services.domain.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.app.domain.entity.Role;
-import com.auth.app.domain.entity.RoleCode;
 import com.auth.app.domain.entity.User;
+import com.auth.app.domain.enums.RoleCode;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.exception.exceptions.EmailAlreadyExistsException;
 import com.auth.app.exception.exceptions.EntityNotFoundException;
