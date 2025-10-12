@@ -7,7 +7,8 @@ public enum NotificationType {
     // 🔐 Autenticación
     EMAIL_VERIFICATION(EnumSet.of(NotificationChannel.EMAIL)),
     PASSWORD_RESET(EnumSet.of(NotificationChannel.EMAIL)),
-    USER_WELCOME(EnumSet.of(NotificationChannel.EMAIL));
+    USER_WELCOME(EnumSet.of(NotificationChannel.EMAIL)),
+    LOGIN_ALERT(EnumSet.of(NotificationChannel.EMAIL));
 
     private final Set<NotificationChannel> validChannels;
 
