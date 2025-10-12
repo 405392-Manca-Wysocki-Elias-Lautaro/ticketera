@@ -1,3 +1,10 @@
+# [1.0.0-next.9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.8...frontend-v1.0.0-next.9) (2025-10-12)
+
+
+### Features
+
+* update RabbitMQ JSON handling and DLQ in notification service ([61b1798](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/61b1798af546a9ee4adccf8c8b172ac53db7b25f))
+
 # [1.0.0-next.8](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.7...frontend-v1.0.0-next.8) (2025-10-11)
 
 
