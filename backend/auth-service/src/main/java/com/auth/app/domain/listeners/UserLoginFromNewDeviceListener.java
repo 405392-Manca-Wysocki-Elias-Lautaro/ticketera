@@ -30,9 +30,9 @@ public class UserLoginFromNewDeviceListener {
         var user = event.getUser();
 
         notificationSender.send(NotificationDTO.builder()
-                .to(user.getEmail())
-                .type(NotificationType.LOGIN_ALERT.name())
                 .channel(NotificationChannel.EMAIL.name())
+                .type(NotificationType.LOGIN_ALERT.name())
+                .to(user.getEmail())
                 .variables(Map.of(
                         "ipAddress", event.getIpAddress(),
                         "userAgent", event.getUserAgent(),

@@ -24,14 +24,13 @@ public class UserRegisteredListener {
     @EventListener
     public void handleUserRegistered(UserRegisteredEvent event) {
         notificationSender.send(NotificationDTO.builder()
-            .to(event.getUser().getEmail())
-            .type(NotificationType.EMAIL_VERIFICATION.name())
-            .channel(NotificationChannel.EMAIL.name())
-            .variables(Map.of(
-                "firstName", event.getUser().getFirstName(),
-                "link", event.getVerificationLink()
-            ))
-            .build());
+                .channel(NotificationChannel.EMAIL.name())
+                .type(NotificationType.EMAIL_VERIFICATION.name())
+                .to(event.getUser().getEmail())
+                .variables(Map.of(
+                        "firstName", event.getUser().getFirstName(),
+                        "link", event.getVerificationLink()
+                ))
+                .build());
     }
 }
-
