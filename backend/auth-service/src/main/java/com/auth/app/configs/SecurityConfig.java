@@ -25,17 +25,19 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/health",
-                        "/register",
-                        "/verify",
-                        "/login",
-                        "/refresh-token",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                ).permitAll()
-                .anyRequest().authenticated()
+                    .requestMatchers(
+                            "/health",
+                            "/register",
+                            "/resend-verification",
+                            "/verify",
+                            "/login",
+                            "/refresh-token",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html"
+                    ).permitAll()
+                    .anyRequest()
+                    .authenticated()
                 );
 
         return http.build();
