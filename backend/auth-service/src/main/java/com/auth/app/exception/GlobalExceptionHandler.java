@@ -10,12 +10,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.auth.app.exception.exceptions.AccountNotVerifiedException;
 import com.auth.app.exception.exceptions.EmailAlreadyExistsException;
 import com.auth.app.exception.exceptions.EntityNotFoundException;
 import com.auth.app.exception.exceptions.InvalidCredentialsException;
 import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
+import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
 import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
 import com.auth.app.exception.exceptions.TokenExpiredException;
+import com.auth.app.exception.exceptions.TooManyAttemptsException;
 import com.auth.app.exception.exceptions.UserAlreadyVerifiedException;
 import com.auth.app.exception.exceptions.WeakPasswordException;
 
@@ -149,6 +152,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleTokenAlreadyUsed(TokenAlreadyUsedException ex, HttpServletRequest request) {
         log.warn("Token already used at {}: {}", request.getRequestURI(), ex.getMessage());
         ErrorCatalog error = ErrorCatalog.TOKEN_ALREADY_USED;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(AccountNotVerifiedException.class)
+    public ResponseEntity<ApiError> handleAccountNotVerified(AccountNotVerifiedException ex, HttpServletRequest request) {
+        log.warn("Account not verified at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.ACCOUNT_NOT_VERIFIED;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidRefreshToken(InvalidRefreshTokenException ex, HttpServletRequest request) {
+        log.warn("Invalid refresh token at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.INVALID_REFRESH_TOKEN;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(TooManyAttemptsException.class)
+    public ResponseEntity<ApiError> handleTooManyAttempts(TooManyAttemptsException ex, HttpServletRequest request) {
+        log.warn("Too many login attempts at {}: {}", request.getRequestURI(), ex.getMessage());
+        var error = ErrorCatalog.TOO_MANY_ATTEMPTS;
         return ResponseEntity.status(error.getStatus())
                 .body(buildError(error, request.getRequestURI(), null));
     }

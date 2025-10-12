@@ -12,6 +12,8 @@ public final class ErrorCodes {
     public static final String TOKEN_EXPIRED = "TOKEN_EXPIRED";
     public static final String INVALID_TOKEN = "INVALID_TOKEN";
     public static final String TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS";
+    public static final String ACCOUNT_NOT_VERIFIED = "ACCOUNT_NOT_VERIFIED";
+    public static final String INVALID_REFRESH_TOKEN = "INVALID_REFRESH_TOKEN";
 
     // 📥 Validaciones
     public static final String VALIDATION_FAILED = "VALIDATION_FAILED";

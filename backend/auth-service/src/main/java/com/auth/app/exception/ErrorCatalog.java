@@ -20,6 +20,10 @@ public enum ErrorCatalog {
             "El token de acceso es inválido."),
     TOO_MANY_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, ErrorCodes.TOO_MANY_ATTEMPTS,
             "Demasiados intentos fallidos. Intenta nuevamente más tarde."),
+    ACCOUNT_NOT_VERIFIED(HttpStatus.FORBIDDEN, ErrorCodes.ACCOUNT_NOT_VERIFIED,
+            "Please verify your email before logging in."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, ErrorCodes.INVALID_REFRESH_TOKEN,
+            "Invalid or expired refresh token."),
     // 📥 Validaciones
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, ErrorCodes.VALIDATION_FAILED,
             "Uno o más campos no cumplen con los requisitos."),
@@ -36,7 +40,6 @@ public enum ErrorCatalog {
             "El usuario ya existe."),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, ErrorCodes.EMAIL_ALREADY_EXISTS,
             "El email ya está registrado."),
-            
     // ✅ Verificación de Email
     USER_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, ErrorCodes.USER_ALREADY_VERIFIED,
             "El usuario ya ha verificado su cuenta."),
@@ -46,7 +49,6 @@ public enum ErrorCatalog {
             "El token de verificación ya fue utilizado."),
     EMAIL_VERIFICATION_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, ErrorCodes.EMAIL_VERIFICATION_TOKEN_EXPIRED,
             "El token de verificación ha expirado."),
-
     // ⚙️ Infra / Integraciones
     DATABASE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, ErrorCodes.DATABASE_UNAVAILABLE,
             "La base de datos no está disponible en este momento."),
