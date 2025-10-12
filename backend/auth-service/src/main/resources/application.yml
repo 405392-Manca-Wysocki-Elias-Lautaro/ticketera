@@ -10,14 +10,6 @@ spring:
   profiles:
     active: prod
 
-  rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
-    exchange: notifications.exchange
-    routing-key: notifications.key
-
   datasource:
     url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:auth},public
     username: ${POSTGRES_USER}
@@ -45,6 +37,26 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/r
+  
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    template:
+      mandatory: true                  # importante para que Spring notifique si un mensaje no se pudo enrutar
+      retry:
+        enabled: true                  # activa reintentos en el publisher
+        initial-interval: 1000ms
+        max-attempts: 3
+        multiplier: 2.0
+        max-interval: 10000ms
+# Termina spring context
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    key: notifications.key
 
 jwt:
   secret: ${JWT_SECRET}
