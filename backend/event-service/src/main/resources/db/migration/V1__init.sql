@@ -1,5 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS events;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Organizers
 CREATE TABLE events.organizers (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -21,8 +23,8 @@ CREATE TABLE events.venues (
   city          text NOT NULL,
   state         text NOT NULL,
   country       text NOT NULL,
-  lat           numeric(10,8) NOT NULL,
-  lng           numeric(11,8) NOT NULL,
+  lat           decimal(9,6) NOT NULL,
+  lng           decimal(9,6) NOT NULL,
   active        boolean NOT NULL DEFAULT true,
   created_at    timestamptz NOT NULL DEFAULT now()
 );

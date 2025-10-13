@@ -54,7 +54,7 @@ public class VenueAreaController {
      * Obtener todas las áreas de venue
      */
     @GetMapping
-    public ResponseEntity<List<VenueAreaDTO>> getAllVenueAreas(
+    public ResponseEntity<List<VenueAreaDTO>> getAllVenueAreas( //VER CASO 
             @RequestParam(required = false) UUID venueId) {
         
         List<VenueArea> venueAreas;
@@ -62,7 +62,7 @@ public class VenueAreaController {
         if (venueId != null) {
             venueAreas = venueAreaService.getVenueAreasByVenueId(venueId);
         } else {
-            venueAreas = venueAreaService.getAllVenueAreas();
+            venueAreas = venueAreaService.getAllVenueAreas(); //Ver si saca todas las areas
         }
         
         List<VenueAreaDTO> response = venueAreas.stream()
