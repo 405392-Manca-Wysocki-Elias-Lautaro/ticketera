@@ -1,3 +1,10 @@
+# [1.0.0-next.10](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.9...frontend-v1.0.0-next.10) (2025-10-13)
+
+
+### Features
+
+* add login alert email template and notification strategy ([c595604](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c5956048c5bb82a7ce5e7480b03a5a84de30a80a))
+
 # [1.0.0-next.9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.8...frontend-v1.0.0-next.9) (2025-10-12)
 
 
