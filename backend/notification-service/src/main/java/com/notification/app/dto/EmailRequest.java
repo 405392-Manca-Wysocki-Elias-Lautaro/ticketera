@@ -9,6 +9,9 @@ public class EmailRequest {
     private String firstName;
     private String lastName;
     private String to;
+    private String ipAddress;
+    private String userAgent;
     private String token;
     private String link;
+    private String timestamp;
 }
