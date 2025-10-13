@@ -2,7 +2,6 @@ package com.notification.app.services.impl;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.notification.app.dto.EmailRequest;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
     private final MailService mailService;
     private final TemplateService templateService;
 
@@ -58,6 +56,24 @@ public class EmailServiceImpl implements EmailService {
             ));
 
             mailService.send(req.getTo(), "¡Bienvenido a Ticketly!", html);
+        } catch (Exception e) {
+            throw new TemplateRenderException(e);
+        }
+    }
+
+    @Override
+    public void sendLoginAlertEmail(EmailRequest req) {
+        try {
+            log.info("request: {}", req);
+            String html = templateService.render("login-alert", Map.of(
+                    "name", req.getFirstName(),
+                    "ipAddress", req.getIpAddress(),
+                    "userAgent", req.getUserAgent(),
+                    "timestamp", req.getTimestamp(),
+                    "link", req.getLink()
+            ));
+
+            mailService.send(req.getTo(), "Nuevo inicio de sesión detectado en tu cuenta Ticketly", html);
         } catch (Exception e) {
             throw new TemplateRenderException(e);
         }
