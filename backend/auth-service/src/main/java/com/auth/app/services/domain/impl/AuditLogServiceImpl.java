@@ -25,7 +25,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     public void logAction(UserModel user, LogAction action, String ip, String userAgent) {
         AuditLog log = AuditLog.builder()
                 .user(modelMapper.map(user, User.class))
-                .action(action.getCode())
+                .actionCode(action.getCode())
                 .action(action.name())
                 .description(action.getDescription())
                 .ipAddress(ip)

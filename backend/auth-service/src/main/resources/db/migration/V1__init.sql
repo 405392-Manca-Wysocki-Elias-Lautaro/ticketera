@@ -125,7 +125,7 @@ CREATE TABLE auth.login_attempts (
 CREATE TABLE auth.audit_logs (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID,
-    action_code     VARCHAR(20) NOT NULL
+    action_code     VARCHAR(20) NOT NULL,
     action          VARCHAR(100) NOT NULL,
     description     TEXT,
     ip_address      VARCHAR(45),
@@ -135,13 +135,14 @@ CREATE TABLE auth.audit_logs (
 );
 
 CREATE TABLE auth.trusted_devices (
-    id UUID     PRIMARY KEY gen_random_uuid(),
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID NOT NULL,
     ip_address  VARCHAR(50),
     user_agent  TEXT,
     location    TEXT,
     last_login  TIMESTAMPTZ DEFAULT now(),
-    created_at  TIMESTAMPTZ DEFAULT now()
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    version     BIGINT DEFAULT 0 NOT NULL
 );
 
 -- =========================================================

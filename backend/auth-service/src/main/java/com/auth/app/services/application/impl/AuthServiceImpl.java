@@ -141,8 +141,9 @@ public class AuthServiceImpl implements AuthService {
         boolean isNewDevice = trustedDevicesService.isNewDevice(user, ipAddress, userAgent);
 
         if (isNewDevice) {
+            //TODO: Enviar reset password token
             applicationEventPublisher.publishEvent(
-                    new UserLoginFromNewDeviceEvent(user, ipAddress, userAgent)
+                    new UserLoginFromNewDeviceEvent(user, ipAddress, userAgent, frontendUrl + "/verify?token=" + "12345")
             );
         }
 

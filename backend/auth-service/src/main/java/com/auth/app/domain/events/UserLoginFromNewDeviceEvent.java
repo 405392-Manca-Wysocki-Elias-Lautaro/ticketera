@@ -10,4 +10,5 @@ public class UserLoginFromNewDeviceEvent {
     private final UserModel user;
     private final String ipAddress;
     private final String userAgent;
+    private final String resetPasswordLink;
 }

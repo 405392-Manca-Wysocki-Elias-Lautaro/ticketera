@@ -2,10 +2,10 @@ package com.auth.app.services.domain.impl;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.app.domain.entity.TrustedDevice;
 import com.auth.app.domain.entity.User;
@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TrustedDevicesServiceImpl implements TrustedDevicesService {
 
     private final TrustedDevicesRepository trustedDeviceRepository;
@@ -35,7 +36,6 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
         }
 
         TrustedDevice newDevice = TrustedDevice.builder()
-                .id(UUID.randomUUID())
                 .user(modelMapper.map(user, User.class))
                 .ipAddress(ipAddress)
                 .userAgent(userAgent)
