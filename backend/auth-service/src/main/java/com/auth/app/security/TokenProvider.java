@@ -70,6 +70,20 @@ public class TokenProvider {
         return userService.findById(userId);
     }
 
+    public UserModel extractUserFromAuthorizationHeader(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new InvalidOrUnknownTokenException();
+        }
+
+        String token = authorizationHeader.substring(7);
+
+        validateAccessToken(token);
+
+        UUID userId = getUserIdFromToken(token);
+
+        return userService.findById(userId);
+    }
+
     public boolean validateAccessToken(String token) {
         try {
             Jwts.parserBuilder()

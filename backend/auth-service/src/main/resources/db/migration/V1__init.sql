@@ -135,15 +135,19 @@ CREATE TABLE auth.audit_logs (
 );
 
 CREATE TABLE auth.trusted_devices (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id     UUID NOT NULL,
-    ip_address  VARCHAR(50),
-    user_agent  TEXT,
-    location    TEXT,
-    last_login  TIMESTAMPTZ DEFAULT now(),
-    created_at  TIMESTAMPTZ DEFAULT now(),
-    version     BIGINT DEFAULT 0 NOT NULL
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    ip_address VARCHAR(50),
+    user_agent TEXT,
+    location TEXT,
+    trusted BOOLEAN NOT NULL DEFAULT TRUE,
+    revoked_at TIMESTAMPTZ,
+    last_login TIMESTAMPTZ DEFAULT now(),
+    created_at TIMESTAMPTZ DEFAULT now(),
+
+    version BIGINT NOT NULL DEFAULT 0
 );
+
 
 -- =========================================================
 --  INDEXES
@@ -155,3 +159,7 @@ CREATE INDEX idx_trusted_devices_user_agent_ip ON auth.trusted_devices (user_id,
 CREATE INDEX idx_refresh_token_user_id ON refresh_tokens(user_id);
 CREATE INDEX idx_refresh_token_token_hash ON refresh_tokens(token_hash);
 CREATE INDEX idx_refresh_token_expires_at ON refresh_tokens(expires_at);
+CREATE INDEX idx_trusted_devices_user_id ON auth.trusted_devices (user_id);
+CREATE INDEX idx_trusted_devices_fingerprint 
+    ON auth.trusted_devices (user_id, ip_address, user_agent)
+    WHERE trusted = TRUE;

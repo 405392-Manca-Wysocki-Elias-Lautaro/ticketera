@@ -49,6 +49,13 @@ public class TrustedDevice {
     @Column(columnDefinition = "TEXT")
     private String location;
 
+    @Column(name = "trusted", nullable = false)
+    @Builder.Default
+    private boolean trusted = true;
+
+    @Column(name = "revoked_at")
+    private OffsetDateTime revokedAt;
+
     @Column(name = "last_login")
     @UpdateTimestamp
     private OffsetDateTime lastLogin;

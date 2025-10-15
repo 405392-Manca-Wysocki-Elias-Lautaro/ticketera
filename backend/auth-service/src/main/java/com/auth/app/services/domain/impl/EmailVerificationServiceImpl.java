@@ -16,9 +16,9 @@ import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
 import com.auth.app.exception.exceptions.TokenExpiredException;
 import com.auth.app.exception.exceptions.UserAlreadyVerifiedException;
 import com.auth.app.repositories.EmailVerificationRepository;
-import com.auth.app.security.TokenUtils;
 import com.auth.app.services.domain.EmailVerificatonService;
 import com.auth.app.services.domain.UserService;
+import com.auth.app.utils.TokenUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

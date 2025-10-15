@@ -178,4 +178,16 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Override
+    public void logout(String authorizationHeader, String ipAddress, String userAgent) {
+
+        UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
+
+        refreshTokenService.revokeAllByUser(user);
+
+        auditLogService.logAction(user, LogAction.USER_LOGOUT, null, null);
+
+        trustedDevicesService.unregisterCurrentDevice(user, ipAddress, userAgent);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.auth.app.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -14,6 +15,7 @@ import com.auth.app.dto.response.ApiResponse;
 import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.services.application.AuthService;
 import com.auth.app.utils.ApiResponseFactory;
+import com.auth.app.utils.TokenUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -73,16 +75,28 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestHeader("Authorization") String authHeader,
+            @CookieValue("refreshToken") String refreshCookie,
             HttpServletRequest request
     ) {
         String ipAddress = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
 
-        String refreshToken = authorizationHeader.replace("Bearer ", "").trim();
+        String refreshToken = TokenUtils.extractRefreshToken(authHeader, refreshCookie);
 
         AuthResponse authResponse = authService.refresh(refreshToken, ipAddress, userAgent);
 
         return ApiResponseFactory.success("Tokens refreshed successfully.", authResponse);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String authHeader, HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+
+        authService.logout(authHeader, ipAddress, userAgent);
+        
+        return ApiResponseFactory.success("Logout successful.", null);
+    }
+
 }

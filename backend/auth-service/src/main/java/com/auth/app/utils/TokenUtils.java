@@ -1,9 +1,11 @@
-package com.auth.app.security;
+package com.auth.app.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+
+import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
 
 public class TokenUtils {
 
@@ -25,6 +27,29 @@ public class TokenUtils {
         } catch (Exception e) {
             throw new RuntimeException("Error hashing token", e);
         }
+    }
+
+    public static String extractRefreshToken(String authHeader, String refreshCookie) {
+        String refreshToken = null;
+
+        if (refreshCookie != null && !refreshCookie.isBlank()) {
+            refreshToken = refreshCookie;
+        } else if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            refreshToken = authHeader.substring(7).trim();
+        }
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        return refreshToken;
+    }
+
+    public static String extractBearerToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidRefreshTokenException();
+        }
+        return authHeader.substring(7).trim();
     }
 
 }

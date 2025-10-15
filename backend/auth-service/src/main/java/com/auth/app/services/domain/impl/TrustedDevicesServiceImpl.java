@@ -14,10 +14,12 @@ import com.auth.app.repositories.TrustedDevicesRepository;
 import com.auth.app.services.domain.TrustedDevicesService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class TrustedDevicesServiceImpl implements TrustedDevicesService {
 
     private final TrustedDevicesRepository trustedDeviceRepository;
@@ -45,6 +47,24 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
 
         trustedDeviceRepository.save(newDevice);
         return true;
+    }
+
+    @Override
+    public void unregisterCurrentDevice(UserModel user, String ipAddress, String userAgent) {
+
+        Optional<TrustedDevice> deviceOpt = trustedDeviceRepository
+                .findByUserAndDeviceFingerprint(user.getId(), ipAddress, userAgent);
+
+        if (deviceOpt.isPresent()) {
+            TrustedDevice device = deviceOpt.get();
+            device.setTrusted(false);
+            device.setRevokedAt(OffsetDateTime.now());
+            trustedDeviceRepository.save(device);
+
+            log.info("Trusted device revoked for user {} [{} - {}]", user.getEmail(), ipAddress, userAgent);
+        } else {
+            log.warn("No trusted device found to revoke for user {} [{} - {}]", user.getEmail(), ipAddress, userAgent);
+        }
     }
 
 }

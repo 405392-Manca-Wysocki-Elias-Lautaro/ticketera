@@ -13,9 +13,9 @@ import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
 import com.auth.app.repositories.RefreshTokenRepository;
-import com.auth.app.security.TokenUtils;
 import com.auth.app.services.domain.AuditLogService;
 import com.auth.app.services.domain.RefreshTokenService;
+import com.auth.app.utils.TokenUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
