@@ -14,8 +14,8 @@ import java.util.UUID;
 public class VenueAreaEntity {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "venue_id", nullable = false)
     private UUID venueId;

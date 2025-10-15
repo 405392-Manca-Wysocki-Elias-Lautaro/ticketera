@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VenueAreaDTO {
 
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "El ID del venue es obligatorio")
     private UUID venueId;

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VenueArea {
 
-    private Long id;
+    private UUID id;
 
     private UUID venueId;
 

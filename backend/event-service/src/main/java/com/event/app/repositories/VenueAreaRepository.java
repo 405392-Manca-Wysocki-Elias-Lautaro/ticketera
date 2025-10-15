@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VenueAreaRepository extends JpaRepository<VenueAreaEntity, Long> {
+public interface VenueAreaRepository extends JpaRepository<VenueAreaEntity, UUID> {
     List<VenueAreaEntity> findByVenueId(UUID venueId);
     List<VenueAreaEntity> findByVenueIdOrderByPositionAsc(UUID venueId);
 }

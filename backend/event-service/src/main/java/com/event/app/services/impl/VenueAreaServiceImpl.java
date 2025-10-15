@@ -45,13 +45,13 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
     }
 
     @Override
-    public Optional<VenueArea> getVenueAreaById(Long id) {
+    public Optional<VenueArea> getVenueAreaById(UUID id) {
         return venueAreaRepository.findById(id)
                 .map(entity -> modelMapper.map(entity, VenueArea.class));
     }
 
     @Override
-    public List<VenueArea> getAllVenueAreas() { //VER CASO DE USO
+    public List<VenueArea> getAllVenueAreas() {
         return venueAreaRepository.findAll().stream()
                 .map(entity -> modelMapper.map(entity, VenueArea.class))
                 .collect(Collectors.toList());
@@ -66,11 +66,10 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
 
     @Override
     @Transactional
-    public VenueArea updateVenueArea(Long id, VenueAreaDTO venueAreaDTO) {
+    public VenueArea updateVenueArea(UUID id, VenueAreaDTO venueAreaDTO) {
         VenueAreaEntity entity = venueAreaRepository.findById(id)
                 .orElseThrow(() -> new VenueAreaNotFoundException(id));
 
-        entity.setVenueId(venueAreaDTO.getVenueId());
         entity.setName(venueAreaDTO.getName());
         entity.setIsGeneralAdmission(venueAreaDTO.getIsGeneralAdmission());
         entity.setCapacity(venueAreaDTO.getCapacity());
@@ -82,7 +81,7 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
 
     @Override
     @Transactional
-    public void deleteVenueArea(Long id) {
+    public void deleteVenueArea(UUID id) {
         if (!venueAreaRepository.existsById(id)) {
             throw new VenueAreaNotFoundException(id);
         }
@@ -93,7 +92,7 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
     }
 
     @Override
-    public List<VenueSeat> getSeatsByVenueAreaId(Long venueAreaId) {
+    public List<VenueSeat> getSeatsByVenueAreaId(UUID venueAreaId) {
         // Verificar que el área existe
         if (!venueAreaRepository.existsById(venueAreaId)) {
             throw new VenueAreaNotFoundException(venueAreaId);
@@ -106,7 +105,7 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
 
     @Override
     @Transactional
-    public List<VenueSeat> generateSeats(Long venueAreaId, GenerateSeatsRequestDTO request) {
+    public List<VenueSeat> generateSeats(UUID venueAreaId, GenerateSeatsRequestDTO request) {
         // Verificar que el área existe
         VenueAreaEntity venueArea = venueAreaRepository.findById(venueAreaId)
                 .orElseThrow(() -> new VenueAreaNotFoundException(venueAreaId));

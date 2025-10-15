@@ -1,5 +1,6 @@
 package com.event.app.dtos;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VenueSeatDTO {
 
-    private Long id;
+    private UUID id;
 
-    private Long venueAreaId;
+    private UUID venueAreaId;
 
     private String seatLabel;
 

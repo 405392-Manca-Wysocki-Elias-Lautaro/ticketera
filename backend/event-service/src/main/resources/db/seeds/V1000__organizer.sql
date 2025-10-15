@@ -36,18 +36,17 @@ VALUES
   ('eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'GENERAL', 'General', 'Asientos en la zona general'),
   ('eeeeeeee-4444-4444-4444-eeeeeeeeeeee', 'CAMPO', 'Campo', 'Asientos en la zona campo'),
   ('eeeeeeee-5555-5555-5555-eeeeeeeeeeee', 'PULLMAN', 'Pullman', 'Asientos tipo butaca premium, generalmente reclinables y con mayor comodidad, ubicados en zonas preferenciales.');
-  
--- Insert de áreas del venue
-INSERT INTO events.venue_areas (venue_id, name, is_general_admission, capacity, position)
-VALUES
-  ('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'Campo', true, 5000, 1), -- Consultar position
-  ('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'Zona VIP', false, 150, 2);
 
--- Insert de asientos por área
+-- Venue Areas
+INSERT INTO events.venue_areas (id, venue_id, name, is_general_admission, capacity, position)
+VALUES
+  ('11111111-1111-1111-1111-111111111111', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'Campo', true, 5000, 1),
+  ('22222222-2222-2222-2222-222222222222', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'Zona VIP', false, 150, 2);
+
+-- Venue Seats
 INSERT INTO events.venue_seats (venue_area_id, seat_label, row_label, number_label)
 VALUES
-  (2, 'VIP-1', 'V', '1'),
-  (2, 'VIP-2', 'V', '2'),
-  (2, 'VIP-3', 'V', '3'),
-  (2, 'VIP-4', 'V', '4');
-
+  ('22222222-2222-2222-2222-222222222222', 'VIP-1', 'V', '1'),
+  ('22222222-2222-2222-2222-222222222222', 'VIP-2', 'V', '2'),
+  ('22222222-2222-2222-2222-222222222222', 'VIP-3', 'V', '3'),
+  ('22222222-2222-2222-2222-222222222222', 'VIP-4', 'V', '4');

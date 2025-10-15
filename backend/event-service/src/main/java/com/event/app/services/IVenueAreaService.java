@@ -13,19 +13,19 @@ public interface IVenueAreaService {
 
     VenueArea createVenueArea(VenueAreaDTO venueAreaDTO);
 
-    Optional<VenueArea> getVenueAreaById(Long id);
+    Optional<VenueArea> getVenueAreaById(UUID id);
 
-    List<VenueArea> getAllVenueAreas(); //VER ESTE CASO DE USO
+    List<VenueArea> getAllVenueAreas();
 
     List<VenueArea> getVenueAreasByVenueId(UUID venueId);
 
-    VenueArea updateVenueArea(Long id, VenueAreaDTO venueAreaDTO);
+    VenueArea updateVenueArea(UUID id, VenueAreaDTO venueAreaDTO);
 
-    void deleteVenueArea(Long id);
+    void deleteVenueArea(UUID id);
 
     // Endpoints especiales para Seats
-    List<VenueSeat> getSeatsByVenueAreaId(Long venueAreaId);
+    List<VenueSeat> getSeatsByVenueAreaId(UUID venueAreaId);
 
-    List<VenueSeat> generateSeats(Long venueAreaId, GenerateSeatsRequestDTO request);
+    List<VenueSeat> generateSeats(UUID venueAreaId, GenerateSeatsRequestDTO request);
 }
 

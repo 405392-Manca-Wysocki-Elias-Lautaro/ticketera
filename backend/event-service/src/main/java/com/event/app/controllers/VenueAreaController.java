@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/venue-areas")
+@RequestMapping("/venue/{venueId}/areas")
 public class VenueAreaController {
 
     private final IVenueAreaService venueAreaService;
@@ -34,7 +34,11 @@ public class VenueAreaController {
      * Crear una nueva área de venue
      */
     @PostMapping
-    public ResponseEntity<VenueAreaDTO> createVenueArea(@Valid @RequestBody VenueAreaDTO venueAreaDTO) {
+    public ResponseEntity<VenueAreaDTO> createVenueArea(
+            @PathVariable UUID venueId,
+            @Valid @RequestBody VenueAreaDTO venueAreaDTO) {
+        // Asegurar que el venueId del path coincida con el del body
+        venueAreaDTO.setVenueId(venueId);
         VenueArea venueArea = venueAreaService.createVenueArea(venueAreaDTO);
         VenueAreaDTO response = modelMapper.map(venueArea, VenueAreaDTO.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -43,27 +47,23 @@ public class VenueAreaController {
     /**
      * Obtener un área de venue por ID
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<VenueAreaDTO> getVenueAreaById(@PathVariable Long id) {
+    @GetMapping("/{areaId}")
+    public ResponseEntity<VenueAreaDTO> getVenueAreaById(
+            @PathVariable UUID venueId,
+            @PathVariable UUID id) {
         return venueAreaService.getVenueAreaById(id)
                 .map(venueArea -> ResponseEntity.ok(modelMapper.map(venueArea, VenueAreaDTO.class)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Obtener todas las áreas de venue
+     * Obtener todas las áreas de un venue específico
      */
     @GetMapping
-    public ResponseEntity<List<VenueAreaDTO>> getAllVenueAreas( //VER CASO 
-            @RequestParam(required = false) UUID venueId) {
+    public ResponseEntity<List<VenueAreaDTO>> getAllAreasByVenueId(
+            @PathVariable UUID venueId) {
         
-        List<VenueArea> venueAreas;
-        
-        if (venueId != null) {
-            venueAreas = venueAreaService.getVenueAreasByVenueId(venueId);
-        } else {
-            venueAreas = venueAreaService.getAllVenueAreas(); //Ver si saca todas las areas
-        }
+        List<VenueArea> venueAreas = venueAreaService.getVenueAreasByVenueId(venueId);
         
         List<VenueAreaDTO> response = venueAreas.stream()
                 .map(venueArea -> modelMapper.map(venueArea, VenueAreaDTO.class))
@@ -75,11 +75,14 @@ public class VenueAreaController {
     /**
      * Actualizar un área de venue
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{areaId}")
     public ResponseEntity<VenueAreaDTO> updateVenueArea(
-            @PathVariable Long id,
+            @PathVariable UUID venueId,
+            @PathVariable UUID areaId,
             @Valid @RequestBody VenueAreaDTO venueAreaDTO) {
-        VenueArea updated = venueAreaService.updateVenueArea(id, venueAreaDTO);
+        // Asegurar que el venueId del path coincida con el del body
+        venueAreaDTO.setVenueId(venueId);
+        VenueArea updated = venueAreaService.updateVenueArea(areaId, venueAreaDTO);
         VenueAreaDTO response = modelMapper.map(updated, VenueAreaDTO.class);
         return ResponseEntity.ok(response);
     }
@@ -87,9 +90,11 @@ public class VenueAreaController {
     /**
      * Eliminar un área de venue
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVenueArea(@PathVariable Long id) {
-        venueAreaService.deleteVenueArea(id);
+    @DeleteMapping("/{areaId}")
+    public ResponseEntity<Void> deleteVenueArea(
+            @PathVariable UUID venueId,
+            @PathVariable UUID areaId) {
+        venueAreaService.deleteVenueArea(areaId);
         return ResponseEntity.noContent().build();
     }
 
@@ -101,7 +106,9 @@ public class VenueAreaController {
      * Obtener todos los asientos de un área
      */
     @GetMapping("/{areaId}/seats")
-    public ResponseEntity<List<VenueSeatDTO>> getSeatsByAreaId(@PathVariable Long areaId) {
+    public ResponseEntity<List<VenueSeatDTO>> getSeatsByAreaId(
+            @PathVariable UUID venueId,
+            @PathVariable UUID areaId) {
         List<VenueSeat> seats = venueAreaService.getSeatsByVenueAreaId(areaId);
         List<VenueSeatDTO> response = seats.stream()
                 .map(seat -> modelMapper.map(seat, VenueSeatDTO.class))
@@ -114,7 +121,8 @@ public class VenueAreaController {
      */
     @PostMapping("/{areaId}/seats/generate")
     public ResponseEntity<List<VenueSeatDTO>> generateSeats(
-            @PathVariable Long areaId,
+            @PathVariable UUID venueId,
+            @PathVariable UUID areaId,
             @Valid @RequestBody GenerateSeatsRequestDTO request) {
         List<VenueSeat> seats = venueAreaService.generateSeats(areaId, request);
         List<VenueSeatDTO> response = seats.stream()
