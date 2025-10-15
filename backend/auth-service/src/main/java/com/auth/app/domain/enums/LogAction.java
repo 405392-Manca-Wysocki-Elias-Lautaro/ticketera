@@ -26,6 +26,7 @@ public enum LogAction {
     USER_PROFILE_UPDATED("USER_001", "User profile updated"),
     USER_PASSWORD_CHANGED("USER_002", "User password changed"),
     USER_ROLE_CHANGED("USER_003", "User role changed"),
+    USER_PASSWORD_CHANGE_FAILED("USER_004", "User password change failed"),
     // 🛡️ SECURITY
     LOGIN_RATE_LIMITED("SEC_001", "Login temporarily blocked due to multiple failed attempts"),
     UNAUTHORIZED_ACCESS_ATTEMPT("SEC_002", "Unauthorized access attempt detected"),

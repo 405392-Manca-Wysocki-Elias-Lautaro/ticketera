@@ -1,33 +1,47 @@
 package com.auth.app.services.application.impl;
 
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.auth.app.domain.entity.PasswordResetToken;
 import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.events.UserLoginFromNewDeviceEvent;
+import com.auth.app.domain.events.UserPasswordResetRequestedEvent;
 import com.auth.app.domain.events.UserRegisteredEvent;
 import com.auth.app.domain.events.UserVerifiedEvent;
+import com.auth.app.domain.model.PasswordResetTokenModel;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.dto.request.ChangePasswordRequest;
+import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
 import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.dto.response.UserResponse;
 import com.auth.app.exception.exceptions.AccountNotVerifiedException;
 import com.auth.app.exception.exceptions.InvalidCredentialsException;
+import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
+import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
+import com.auth.app.exception.exceptions.TokenExpiredException;
 import com.auth.app.exception.exceptions.TooManyAttemptsException;
 import com.auth.app.security.TokenProvider;
 import com.auth.app.services.application.AuthService;
 import com.auth.app.services.domain.AuditLogService;
 import com.auth.app.services.domain.EmailVerificatonService;
 import com.auth.app.services.domain.LoginAttemptService;
+import com.auth.app.services.domain.PasswordResetService;
 import com.auth.app.services.domain.RefreshTokenService;
 import com.auth.app.services.domain.TrustedDevicesService;
 import com.auth.app.services.domain.UserService;
 import com.auth.app.utils.EnvironmentUtils;
+import com.auth.app.utils.TokenUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
     private final LoginAttemptService loginAttemptService;
     private final TrustedDevicesService trustedDevicesService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final PasswordResetService passwordResetService;
 
     @Value("${frontend.url}")
     private String frontendUrl;
@@ -185,9 +200,76 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenService.revokeAllByUser(user);
 
-        auditLogService.logAction(user, LogAction.USER_LOGOUT, null, null);
+        auditLogService.logAction(user, LogAction.USER_LOGOUT, ipAddress, userAgent);
 
         trustedDevicesService.unregisterCurrentDevice(user, ipAddress, userAgent);
+    }
+
+    @Override
+    public void changePassword(String authorizationHeader, ChangePasswordRequest request, String ipAddress, String userAgent) {
+        UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            auditLogService.logAction(user, LogAction.USER_PASSWORD_CHANGE_FAILED, ipAddress, userAgent);
+            throw new InvalidCredentialsException();
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userService.update(user.getId(), user);
+        refreshTokenService.revokeAllByUser(user);
+
+        auditLogService.logAction(user, LogAction.USER_PASSWORD_CHANGED, ipAddress, userAgent);
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request, String ipAddress, String userAgent) {
+        Optional<UserModel> userOpt = userService.findOptionalByEmail(request.getEmail());
+
+        if (userOpt.isPresent()) {
+            UserModel user = userOpt.get();
+            PasswordResetTokenModel token = passwordResetService.createToken(user);
+
+            applicationEventPublisher.publishEvent(
+                    new UserPasswordResetRequestedEvent(token, frontendUrl)
+            );
+
+            auditLogService.logAction(user, LogAction.USER_PASSWORD_RESET_REQUEST, ipAddress, userAgent);
+        }
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest request, String ipAddress, String userAgent) {
+        String rawToken = request.getToken();
+        String hashed = TokenUtils.hashToken(rawToken);
+
+        // 1️⃣ Buscar token por hash
+        PasswordResetToken resetToken = passwordResetService.findByTokenHash(hashed)
+                .orElseThrow(() -> new InvalidOrUnknownTokenException());
+
+        // 2️⃣ Validar estado y expiración
+        if (resetToken.getExpiresAt().isBefore(OffsetDateTime.now())) {
+            throw new TokenExpiredException();
+        }
+        if(resetToken.isUsed()) {
+            throw new TokenAlreadyUsedException();
+        }
+
+        // 3️⃣ Cambiar la contraseña
+        UserModel user = modelMapper.map(resetToken.getUser(), UserModel.class);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userService.update(user.getId(), user);
+
+        // 4️⃣ Marcar el token como usado
+        resetToken.setUsed(true);
+        passwordResetService.update(resetToken);
+
+        // 5️⃣ Revocar refresh tokens (seguridad)
+        refreshTokenService.revokeAllByUser(user);
+
+        // 6️⃣ Auditoría
+        auditLogService.logAction(user, LogAction.USER_PASSWORD_RESET_COMPLETED, null, null);
+
+        log.info("Password reset successfully for user {}", user.getEmail());
     }
 
 }

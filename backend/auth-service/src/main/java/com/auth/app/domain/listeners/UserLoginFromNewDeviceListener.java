@@ -34,8 +34,8 @@ public class UserLoginFromNewDeviceListener {
         UserModel user = event.getUser();
 
         notificationSender.send(NotificationDTO.builder()
-                .channel(NotificationChannel.EMAIL.name())
-                .type(NotificationType.LOGIN_ALERT.name())
+                .channel(NotificationChannel.EMAIL)
+                .type(NotificationType.LOGIN_ALERT)
                 .to(user.getEmail())
                 .variables(Map.of(
                         "firstName", user.getFirstName(),

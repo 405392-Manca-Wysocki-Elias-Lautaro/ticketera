@@ -1,6 +1,7 @@
 package com.auth.app.services.domain.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -80,10 +81,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel findByEmail(String email) {
-        return userRepository.findByEmail(email)
+    public List<UserModel> getAll() {
+        return userRepository.findAll().stream()
                 .map(user -> modelMapper.map(user, UserModel.class))
-                .orElseThrow(() -> new EntityNotFoundException(User.class, "email", email));
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -94,9 +95,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserModel> getAll() {
-        return userRepository.findAll().stream()
+    public UserModel findByEmail(String email) {
+        return userRepository.findByEmail(email)
                 .map(user -> modelMapper.map(user, UserModel.class))
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new EntityNotFoundException(User.class, "email", email));
     }
+
+    @Override
+    public Optional<UserModel> findOptionalByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(user -> modelMapper.map(user, UserModel.class));
+    }
+
 }

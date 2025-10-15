@@ -24,8 +24,8 @@ public class UserRegisteredListener {
     @EventListener
     public void handleUserRegistered(UserRegisteredEvent event) {
         notificationSender.send(NotificationDTO.builder()
-                .channel(NotificationChannel.EMAIL.name())
-                .type(NotificationType.EMAIL_VERIFICATION.name())
+                .channel(NotificationChannel.EMAIL)
+                .type(NotificationType.EMAIL_VERIFICATION)
                 .to(event.getUser().getEmail())
                 .variables(Map.of(
                         "firstName", event.getUser().getFirstName(),

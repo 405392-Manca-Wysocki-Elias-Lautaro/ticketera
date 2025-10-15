@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginRequest {
 
-    @NotBlank(message = "El email es obligatorio")
-    @Email(message = "Debe ser un email válido")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Must be a valid email address")
     private String email;
 
-    @NotBlank(message = "La contraseña es obligatoria")
+    @NotBlank(message = "Password is required")
     private String password;
 
-    @NotNull(message = "Por favor, indique si desea recordar la sesión.")
+    @NotNull(message = "Please specify if you want to remember the session.")
     private boolean remembered;
 }

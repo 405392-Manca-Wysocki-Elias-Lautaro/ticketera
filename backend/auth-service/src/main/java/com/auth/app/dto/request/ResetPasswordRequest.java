@@ -2,7 +2,6 @@ package com.auth.app.dto.request;
 
 import com.auth.app.validation.PasswordMatches;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,19 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @PasswordMatches
-public class RegisterRequest {
+public class ResetPasswordRequest {
 
-    @NotBlank(message = "First name is required")
-    private String firstName;
+    @NotBlank(message = "Token is required")
+    private String token;
 
-    @NotBlank(message = "Last name is required")
-    private String lastName;
-
-    @NotBlank(message = "Email is required")
-    @Email(message = "Must be a valid email address")
-    private String email;
-
-    @NotBlank(message = "Password is required")
+    @NotBlank
     @Size(min = 12, message = "Password must be at least 12 characters long")
     private String password;
 

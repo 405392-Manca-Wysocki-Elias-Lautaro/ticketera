@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class PasswordResetTokenModel {
     private UUID id;
     private UserModel user;
-    private String tokenHash;
+    private String token;
     private boolean used;
     private OffsetDateTime createdAt;
     private OffsetDateTime expiresAt;

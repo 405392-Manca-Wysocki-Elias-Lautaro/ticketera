@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.auth.app.dto.request.ChangePasswordRequest;
+import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
 import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.ApiResponse;
 import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.services.application.AuthService;
@@ -37,7 +40,7 @@ public class AuthController {
         AuthResponse authResponse = authService.register(request, ipAddress, userAgent);
 
         return ApiResponseFactory.success(
-                "User registered successfully. Verification email sent.",
+                "User registered successfully. Verification email sent",
                 authResponse
         );
     }
@@ -45,7 +48,7 @@ public class AuthController {
     @PostMapping("/resend-verification")
     public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestParam String email) {
         authService.resendVerificationEmail(email);
-        return ApiResponseFactory.success("Verification email resent successfully.");
+        return ApiResponseFactory.success("Verification email resent successfully");
     }
 
     @PostMapping("/verify")
@@ -57,7 +60,7 @@ public class AuthController {
         String ipAddress = httpRequest.getRemoteAddr();
 
         authService.verifyEmail(token, ipAddress, userAgent);
-        return ApiResponseFactory.success("Email verified successfully.");
+        return ApiResponseFactory.success("Email verified successfully");
     }
 
     @PostMapping("/login")
@@ -70,33 +73,81 @@ public class AuthController {
 
         AuthResponse authResponse = authService.login(request, ip, userAgent);
 
-        return ApiResponseFactory.success("Login successful.", authResponse);
+        return ApiResponseFactory.success("Login successful", authResponse);
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             @RequestHeader("Authorization") String authHeader,
             @CookieValue("refreshToken") String refreshCookie,
-            HttpServletRequest request
+            HttpServletRequest httpRequest
     ) {
-        String ipAddress = request.getRemoteAddr();
-        String userAgent = request.getHeader("User-Agent");
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
 
         String refreshToken = TokenUtils.extractRefreshToken(authHeader, refreshCookie);
 
         AuthResponse authResponse = authService.refresh(refreshToken, ipAddress, userAgent);
 
-        return ApiResponseFactory.success("Tokens refreshed successfully.", authResponse);
+        return ApiResponseFactory.success("Tokens refreshed successfully", authResponse);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String authHeader, HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
-        String userAgent = request.getHeader("User-Agent");
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
 
         authService.logout(authHeader, ipAddress, userAgent);
-        
-        return ApiResponseFactory.success("Logout successful.", null);
+
+        return ApiResponseFactory.success("Logout successful", null);
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Validated @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        authService.forgotPassword(request, ipAddress, userAgent);
+
+        return ApiResponseFactory.success("If the email address is registered, a password reset link has been sent", null);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Validated @RequestBody ResetPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        authService.resetPassword(request, ipAddress, userAgent);
+
+        return ApiResponseFactory.success(
+                "Your password has been reset successfully.",
+                null
+        );
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @RequestHeader("Authorization") String authHeader,
+            @Validated @RequestBody ChangePasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        authService.changePassword(authHeader, request, ipAddress, userAgent);
+
+        return ApiResponseFactory.success(
+                "Your password has been updated successfully.",
+                null
+        );
+    }
 }

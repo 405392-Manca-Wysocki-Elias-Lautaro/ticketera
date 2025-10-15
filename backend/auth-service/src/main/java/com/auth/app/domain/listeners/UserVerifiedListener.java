@@ -30,8 +30,8 @@ public class UserVerifiedListener {
 
         notificationSender.send(
             NotificationDTO.builder()
-                .channel(NotificationChannel.EMAIL.name())
-                .type(NotificationType.USER_WELCOME.name())
+                .channel(NotificationChannel.EMAIL)
+                .type(NotificationType.USER_WELCOME)
                 .to(user.getEmail())
                 .variables(Map.of(
                         "firstName", user.getFirstName(),
