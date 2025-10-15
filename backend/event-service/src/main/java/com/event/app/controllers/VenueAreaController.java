@@ -37,7 +37,6 @@ public class VenueAreaController {
     public ResponseEntity<VenueAreaDTO> createVenueArea(
             @PathVariable UUID venueId,
             @Valid @RequestBody VenueAreaDTO venueAreaDTO) {
-        // Asegurar que el venueId del path coincida con el del body
         venueAreaDTO.setVenueId(venueId);
         VenueArea venueArea = venueAreaService.createVenueArea(venueAreaDTO);
         VenueAreaDTO response = modelMapper.map(venueArea, VenueAreaDTO.class);
@@ -50,8 +49,8 @@ public class VenueAreaController {
     @GetMapping("/{areaId}")
     public ResponseEntity<VenueAreaDTO> getVenueAreaById(
             @PathVariable UUID venueId,
-            @PathVariable UUID id) {
-        return venueAreaService.getVenueAreaById(id)
+            @PathVariable UUID areaId) {
+        return venueAreaService.getVenueAreaById(areaId)
                 .map(venueArea -> ResponseEntity.ok(modelMapper.map(venueArea, VenueAreaDTO.class)))
                 .orElse(ResponseEntity.notFound().build());
     }
