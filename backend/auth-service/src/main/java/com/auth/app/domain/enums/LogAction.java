@@ -13,8 +13,6 @@ public enum LogAction {
     USER_LOGIN("AUTH_003", "User logged in successfully"),
     USER_LOGIN_FAILED("AUTH_004", "User login attempt failed"),
     USER_LOGOUT("AUTH_005", "User logged out"),
-    USER_PASSWORD_RESET_REQUEST("AUTH_006", "User requested password reset"),
-    USER_PASSWORD_RESET_COMPLETED("AUTH_007", "User password reset completed"),
     // 🔐 TOKEN OPERATIONS
     ACCESS_TOKEN_GENERATED("TOKEN_001", "Access token generated"),
     REFRESH_TOKEN_ROTATED("TOKEN_002", "Refresh token rotated"),
@@ -27,6 +25,9 @@ public enum LogAction {
     USER_PASSWORD_CHANGED("USER_002", "User password changed"),
     USER_ROLE_CHANGED("USER_003", "User role changed"),
     USER_PASSWORD_CHANGE_FAILED("USER_004", "User password change failed"),
+    USER_PASSWORD_RESET_REQUEST("USER_006", "User requested password reset"),
+    USER_PASSWORD_RESET_COMPLETED("USER_007", "User password reset completed"),
+    USER_PROFILE_FETCHED("USER_008", "User password reset completed"),
     // 🛡️ SECURITY
     LOGIN_RATE_LIMITED("SEC_001", "Login temporarily blocked due to multiple failed attempts"),
     UNAUTHORIZED_ACCESS_ATTEMPT("SEC_002", "Unauthorized access attempt detected"),

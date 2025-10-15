@@ -43,7 +43,7 @@ CREATE TABLE auth.users (
 CREATE TABLE auth.email_verification_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash VARCHAR(255) NOT NULL UNIQUE,
+    token_hash TEXT NOT NULL UNIQUE,
     expires_at TIMESTAMPTZ NOT NULL,
     used BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -56,7 +56,7 @@ CREATE TABLE auth.api_keys (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organizer_id    UUID NOT NULL,
     name            VARCHAR(255) NOT NULL,
-    token_hash      VARCHAR(255) NOT NULL UNIQUE,
+    token_hash      TEXT NOT NULL UNIQUE,
     revoked         BOOLEAN NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_used_at    TIMESTAMPTZ,
@@ -82,9 +82,9 @@ CREATE TABLE auth.api_key_scopes (
 CREATE TABLE auth.refresh_tokens (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL,
-    token_hash      VARCHAR(255) NOT NULL UNIQUE,
-    user_agent      VARCHAR(100),
-    ip_address      VARCHAR(45),
+    token_hash      TEXT NOT NULL UNIQUE,
+    ip_address      VARCHAR(50),
+    user_agent      TEXT,
     remembered      BOOLEAN DEFAULT FALSE,
     revoked         BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
@@ -98,7 +98,7 @@ CREATE TABLE auth.refresh_tokens (
 CREATE TABLE auth.password_reset_tokens (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL,
-    token_hash      VARCHAR(255) NOT NULL UNIQUE,
+    token_hash      TEXT NOT NULL UNIQUE,
     used            BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     expires_at      TIMESTAMPTZ NOT NULL,
@@ -113,8 +113,8 @@ CREATE TABLE auth.login_attempts (
     user_id         UUID,
     email           VARCHAR(255),
     success         BOOLEAN NOT NULL,
-    ip_address      VARCHAR(45),
-    user_agent      VARCHAR(100),
+    ip_address      VARCHAR(50),
+    user_agent      TEXT,
     attempted_at    TIMESTAMPTZ DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
@@ -128,22 +128,22 @@ CREATE TABLE auth.audit_logs (
     action_code     VARCHAR(20) NOT NULL,
     action          VARCHAR(100) NOT NULL,
     description     TEXT,
-    ip_address      VARCHAR(45),
+    ip_address      VARCHAR(50),
     user_agent      TEXT,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE auth.trusted_devices (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    ip_address VARCHAR(50),
-    user_agent TEXT,
-    location TEXT,
-    trusted BOOLEAN NOT NULL DEFAULT TRUE,
-    revoked_at TIMESTAMPTZ,
-    last_login TIMESTAMPTZ DEFAULT now(),
-    created_at TIMESTAMPTZ DEFAULT now(),
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    ip_address  VARCHAR(50),
+    user_agent  TEXT,
+    location    TEXT,
+    trusted     BOOLEAN NOT NULL DEFAULT TRUE,
+    revoked_at  TIMESTAMPTZ,
+    last_login  TIMESTAMPTZ DEFAULT now(),
+    created_at  TIMESTAMPTZ DEFAULT now(),
 
     version BIGINT NOT NULL DEFAULT 0
 );

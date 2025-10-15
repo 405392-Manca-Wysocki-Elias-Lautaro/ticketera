@@ -43,10 +43,9 @@ public class TrustedDevice {
     @Column(name = "ip_address", length = 50)
     private String ipAddress;
 
-    @Column(name = "user_agent", columnDefinition = "TEXT")
+    @Column(name = "user_agent")
     private String userAgent;
 
-    @Column(columnDefinition = "TEXT")
     private String location;
 
     @Column(name = "trusted", nullable = false)

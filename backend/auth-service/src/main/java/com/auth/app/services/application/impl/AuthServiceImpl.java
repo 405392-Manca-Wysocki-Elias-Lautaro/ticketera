@@ -26,7 +26,6 @@ import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.dto.response.UserResponse;
 import com.auth.app.exception.exceptions.AccountNotVerifiedException;
 import com.auth.app.exception.exceptions.InvalidCredentialsException;
-import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
 import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
 import com.auth.app.exception.exceptions.TokenExpiredException;
@@ -242,15 +241,12 @@ public class AuthServiceImpl implements AuthService {
         String rawToken = request.getToken();
         String hashed = TokenUtils.hashToken(rawToken);
 
-        // 1️⃣ Buscar token por hash
-        PasswordResetToken resetToken = passwordResetService.findByTokenHash(hashed)
-                .orElseThrow(() -> new InvalidOrUnknownTokenException());
+        PasswordResetToken resetToken = passwordResetService.findByTokenHash(hashed);
 
-        // 2️⃣ Validar estado y expiración
         if (resetToken.getExpiresAt().isBefore(OffsetDateTime.now())) {
             throw new TokenExpiredException();
         }
-        if(resetToken.isUsed()) {
+        if (resetToken.isUsed()) {
             throw new TokenAlreadyUsedException();
         }
 
@@ -270,6 +266,18 @@ public class AuthServiceImpl implements AuthService {
         auditLogService.logAction(user, LogAction.USER_PASSWORD_RESET_COMPLETED, null, null);
 
         log.info("Password reset successfully for user {}", user.getEmail());
+    }
+
+    @Override
+    public UserResponse getCurrentUser(String authorizationHeader, String ipAddress, String userAgent) {
+
+        UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
+
+
+        auditLogService.logAction(user, LogAction.USER_PROFILE_FETCHED, ipAddress, userAgent);
+
+
+        return modelMapper.map(user, UserResponse.class);
     }
 
 }

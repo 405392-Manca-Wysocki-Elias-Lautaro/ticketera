@@ -1,7 +1,6 @@
 package com.auth.app.services.domain.impl;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import com.auth.app.domain.entity.PasswordResetToken;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.model.PasswordResetTokenModel;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.repositories.PasswordResetTokenRepository;
 import com.auth.app.services.domain.PasswordResetService;
 import com.auth.app.utils.TokenUtils;
@@ -45,8 +45,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     @Override
-    public Optional<PasswordResetToken> findByTokenHash(String tokenHash) {
-        return passwordResetRepository.findByTokenHash(tokenHash);
+    public PasswordResetToken findByTokenHash(String tokenHash) {
+        return passwordResetRepository.findByTokenHash(tokenHash)
+                .map(passwordResetToken -> modelMapper.map(passwordResetToken, PasswordResetToken.class))
+                .orElseThrow(() -> new InvalidOrUnknownTokenException());
     }
 
     @Override

@@ -45,8 +45,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshEntity.setTokenHash(hashedToken);
         refreshEntity.setExpiresAt(expiration);
         refreshEntity.setRemembered(remembered);
-        refreshEntity.setUserAgent(userAgent);
         refreshEntity.setIpAddress(ipAddress);
+        refreshEntity.setUserAgent(userAgent);
 
         refreshTokenRepository.save(refreshEntity);
 
@@ -59,14 +59,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenRepository.revokeAllByUserId(user.getId());
         log.info("Revoked all refresh tokens for user {}", user.getEmail());
         auditLogService.logAction(user, LogAction.TOKEN_REVOKED, null, null);
-
     }
 
     @Override
     public String rotateToken(UserModel user, String ipAddress, String userAgent, boolean remembered) {
         revokeAllByUser(user);
 
-        String rawToken = create(user, userAgent, ipAddress, remembered);
+        String rawToken = create(user, ipAddress, userAgent, remembered);
 
         auditLogService.logAction(user, LogAction.REFRESH_TOKEN_ROTATED, ipAddress, userAgent);
 

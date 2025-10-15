@@ -3,6 +3,7 @@ package com.auth.app.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,6 +17,7 @@ import com.auth.app.dto.request.RegisterRequest;
 import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.ApiResponse;
 import com.auth.app.dto.response.AuthResponse;
+import com.auth.app.dto.response.UserResponse;
 import com.auth.app.services.application.AuthService;
 import com.auth.app.utils.ApiResponseFactory;
 import com.auth.app.utils.TokenUtils;
@@ -68,10 +70,10 @@ public class AuthController {
             @Validated @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-        String ip = httpRequest.getRemoteAddr();
+        String ipAddress = httpRequest.getRemoteAddr();
         String userAgent = httpRequest.getHeader("User-Agent");
 
-        AuthResponse authResponse = authService.login(request, ip, userAgent);
+        AuthResponse authResponse = authService.login(request, ipAddress, userAgent);
 
         return ApiResponseFactory.success("Login successful", authResponse);
     }
@@ -150,4 +152,18 @@ public class AuthController {
                 null
         );
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+            @RequestHeader("Authorization") String authorizationHeader,
+            HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        UserResponse user = authService.getCurrentUser(authorizationHeader, ipAddress, userAgent);
+
+        return ApiResponseFactory.success("User retrieved successfully.", user);
+    }
+
 }

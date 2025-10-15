@@ -6,6 +6,7 @@ import com.auth.app.dto.request.LoginRequest;
 import com.auth.app.dto.request.RegisterRequest;
 import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.AuthResponse;
+import com.auth.app.dto.response.UserResponse;
 
 
 public interface AuthService {
@@ -18,4 +19,5 @@ public interface AuthService {
     void changePassword(String authorizationHeader, ChangePasswordRequest request, String ipAddress, String userAgent);
     void forgotPassword(ForgotPasswordRequest request, String ipAddress, String userAgent);
     void resetPassword(ResetPasswordRequest request, String ipAddress, String userAgent);
+    UserResponse getCurrentUser(String authorizationHeader, String ipAddress, String userAgent);
 }
