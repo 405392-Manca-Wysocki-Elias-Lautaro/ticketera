@@ -1,6 +1,9 @@
 package com.auth.app.services.application.impl;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -12,7 +15,8 @@ import org.springframework.stereotype.Service;
 import com.auth.app.domain.entity.PasswordResetToken;
 import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.events.UserLoginFromNewDeviceEvent;
-import com.auth.app.domain.events.UserPasswordResetRequestedEvent;
+import com.auth.app.domain.events.UserPasswordResetRequestEvent;
+import com.auth.app.domain.events.UserPasswordResetSuccessEvent;
 import com.auth.app.domain.events.UserRegisteredEvent;
 import com.auth.app.domain.events.UserVerifiedEvent;
 import com.auth.app.domain.model.PasswordResetTokenModel;
@@ -64,6 +68,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Value("${frontend.url}")
     private String frontendUrl;
+
+    @Value("${security.password-reset.expiration-minutes}")
+    private Integer resetPasswordTokenExpirationMinutes;
 
     @Override
     public AuthResponse register(RegisterRequest request, String ipAddress, String userAgent) {
@@ -228,8 +235,19 @@ public class AuthServiceImpl implements AuthService {
             UserModel user = userOpt.get();
             PasswordResetTokenModel token = passwordResetService.createToken(user);
 
+            String timestamp = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                    .withZone(ZoneId.systemDefault())
+                    .format(Instant.now());
+
             applicationEventPublisher.publishEvent(
-                    new UserPasswordResetRequestedEvent(token, frontendUrl)
+                    new UserPasswordResetRequestEvent(
+                            token,
+                            frontendUrl,
+                            ipAddress,
+                            userAgent,
+                            timestamp,
+                            resetPasswordTokenExpirationMinutes
+                    )
             );
 
             auditLogService.logAction(user, LogAction.USER_PASSWORD_RESET_REQUEST, ipAddress, userAgent);
@@ -250,19 +268,29 @@ public class AuthServiceImpl implements AuthService {
             throw new TokenAlreadyUsedException();
         }
 
-        // 3️⃣ Cambiar la contraseña
         UserModel user = modelMapper.map(resetToken.getUser(), UserModel.class);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userService.update(user.getId(), user);
 
-        // 4️⃣ Marcar el token como usado
         resetToken.setUsed(true);
         passwordResetService.update(resetToken);
 
-        // 5️⃣ Revocar refresh tokens (seguridad)
         refreshTokenService.revokeAllByUser(user);
 
-        // 6️⃣ Auditoría
+        String timestamp = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+                .format(Instant.now());
+
+        applicationEventPublisher.publishEvent(
+                new UserPasswordResetSuccessEvent(
+                        user,
+                        frontendUrl,
+                        ipAddress,
+                        userAgent,
+                        timestamp
+                )
+        );
+
         auditLogService.logAction(user, LogAction.USER_PASSWORD_RESET_COMPLETED, null, null);
 
         log.info("Password reset successfully for user {}", user.getEmail());
@@ -273,9 +301,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
 
-
         auditLogService.logAction(user, LogAction.USER_PROFILE_FETCHED, ipAddress, userAgent);
-
 
         return modelMapper.map(user, UserResponse.class);
     }
