@@ -1,3 +1,10 @@
+# [1.0.0-next.11](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.10...frontend-v1.0.0-next.11) (2025-10-16)
+
+
+### Features
+
+* **email:** add password reset templates and strategies ([6122c9f](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/6122c9f4d9dfa2e6d17a5e2476e0d7efb2ccc3f1))
+
 # [1.0.0-next.10](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.9...frontend-v1.0.0-next.10) (2025-10-13)
 
 
