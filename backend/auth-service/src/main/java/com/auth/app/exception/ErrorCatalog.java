@@ -35,6 +35,8 @@ public enum ErrorCatalog {
             "La contraseña no cumple con los requisitos de seguridad."),
     COMMON_PASSWORD(HttpStatus.BAD_REQUEST, ErrorCodes.COMMON_PASSWORD,
             "La contraseña elegida es demasiado común o insegura."),
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, ErrorCodes.SAME_PASSWORD,
+            "La nueva contraseña no puede ser igual a la anterior."),
     // 🧑‍💼 Usuario / Roles
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, ErrorCodes.USER_ALREADY_EXISTS,
             "El usuario ya existe."),

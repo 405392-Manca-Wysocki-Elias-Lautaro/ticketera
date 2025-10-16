@@ -31,6 +31,7 @@ import com.auth.app.dto.response.UserResponse;
 import com.auth.app.exception.exceptions.AccountNotVerifiedException;
 import com.auth.app.exception.exceptions.InvalidCredentialsException;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
+import com.auth.app.exception.exceptions.SamePasswordException;
 import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
 import com.auth.app.exception.exceptions.TokenExpiredException;
 import com.auth.app.exception.exceptions.TooManyAttemptsException;
@@ -220,6 +221,10 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException();
         }
 
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new SamePasswordException();
+        }
+
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userService.update(user.getId(), user);
         refreshTokenService.revokeAllByUser(user);
@@ -269,6 +274,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         UserModel user = modelMapper.map(resetToken.getUser(), UserModel.class);
+
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new SamePasswordException();
+        }
+
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userService.update(user.getId(), user);
 

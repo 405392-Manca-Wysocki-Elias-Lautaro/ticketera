@@ -21,6 +21,7 @@ public final class ErrorCodes {
     public static final String INVALID_FORMAT = "INVALID_FORMAT";
     public static final String WEAK_PASSWORD = "WEAK_PASSWORD";
     public static final String COMMON_PASSWORD = "COMMON_PASSWORD";
+    public static final String SAME_PASSWORD = "SAME_PASSWORD";
 
     // 🧑‍💼 Usuario / Roles
     public static final String USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";

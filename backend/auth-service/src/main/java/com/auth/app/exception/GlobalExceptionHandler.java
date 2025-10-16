@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.auth.app.exception.exceptions.AccountNotVerifiedException;
+import com.auth.app.exception.exceptions.CommonPasswordException;
 import com.auth.app.exception.exceptions.EmailAlreadyExistsException;
 import com.auth.app.exception.exceptions.EntityNotFoundException;
 import com.auth.app.exception.exceptions.InvalidCredentialsException;
 import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
+import com.auth.app.exception.exceptions.SamePasswordException;
 import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
 import com.auth.app.exception.exceptions.TokenExpiredException;
 import com.auth.app.exception.exceptions.TooManyAttemptsException;
@@ -123,11 +125,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WeakPasswordException.class)
     public ResponseEntity<ApiError> handleWeakPassword(WeakPasswordException ex, HttpServletRequest request) {
         log.warn("Weak password: {}", ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.WEAK_PASSWORD;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
 
-        ErrorCatalog error = ex.getMessage().equals(ErrorCodes.COMMON_PASSWORD)
-                ? ErrorCatalog.COMMON_PASSWORD
-                : ErrorCatalog.WEAK_PASSWORD;
-
+    @ExceptionHandler(CommonPasswordException.class)
+    public ResponseEntity<ApiError> handleCommonPassword(CommonPasswordException ex, HttpServletRequest request) {
+        log.warn("Common password rejected at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.COMMON_PASSWORD;
         return ResponseEntity.status(error.getStatus())
                 .body(buildError(error, request.getRequestURI(), null));
     }
@@ -176,6 +182,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleTooManyAttempts(TooManyAttemptsException ex, HttpServletRequest request) {
         log.warn("Too many login attempts at {}: {}", request.getRequestURI(), ex.getMessage());
         var error = ErrorCatalog.TOO_MANY_ATTEMPTS;
+        return ResponseEntity.status(error.getStatus())
+                .body(buildError(error, request.getRequestURI(), null));
+    }
+
+    @ExceptionHandler(SamePasswordException.class)
+    public ResponseEntity<ApiError> handleSamePassword(SamePasswordException ex, HttpServletRequest request) {
+        log.warn("Password change rejected at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorCatalog error = ErrorCatalog.SAME_PASSWORD;
         return ResponseEntity.status(error.getStatus())
                 .body(buildError(error, request.getRequestURI(), null));
     }
