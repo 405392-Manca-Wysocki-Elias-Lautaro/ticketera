@@ -3,6 +3,7 @@ package com.auth.app.services.domain.impl;
 import java.time.OffsetDateTime;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.auth.app.domain.entity.PasswordResetToken;
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PasswordResetServiceImpl implements PasswordResetService {
 
+    @Value("${security.password-reset.expiration-minutes}")
+    private int expirationMinutes;
     private final PasswordResetTokenRepository passwordResetRepository;
     private final ModelMapper modelMapper;
 
@@ -31,7 +34,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         PasswordResetToken reset = PasswordResetToken.builder()
                 .user(modelMapper.map(user, User.class))
                 .tokenHash(TokenUtils.hashToken(token))
-                .expiresAt(OffsetDateTime.now().plusMinutes(30))
+                .expiresAt(OffsetDateTime.now().plusMinutes(expirationMinutes))
                 .used(false)
                 .build();
 
