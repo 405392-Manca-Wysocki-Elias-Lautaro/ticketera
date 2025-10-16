@@ -1,27 +1,37 @@
 package com.auth.app.validation;
 
-import com.auth.app.dto.request.RegisterRequest;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, RegisterRequest> {
+import java.lang.reflect.Method;
+
+public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object> {
 
     @Override
-    public boolean isValid(RegisterRequest request, ConstraintValidatorContext context) {
-        if (request.getPassword() == null || request.getConfirmPassword() == null) {
+    public boolean isValid(Object obj, ConstraintValidatorContext context) {
+        try {
+            Method getPassword = obj.getClass().getMethod("getPassword");
+            Method getConfirmPassword = obj.getClass().getMethod("getConfirmPassword");
+
+            String password = (String) getPassword.invoke(obj);
+            String confirmPassword = (String) getConfirmPassword.invoke(obj);
+
+            if (password == null || confirmPassword == null) {
+                return false;
+            }
+
+            boolean matches = password.equals(confirmPassword);
+            if (!matches) {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("Passwords do not match")
+                        .addPropertyNode("confirmPassword")
+                        .addConstraintViolation();
+            }
+            return matches;
+
+        } catch (Exception e) {
+            // Si el DTO no tiene los métodos esperados, la validación falla
             return false;
         }
-
-        boolean matches = request.getPassword().equals(request.getConfirmPassword());
-        if (!matches) {
-            // personalizamos el mensaje para que se asocie al campo confirmPassword
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Las contraseñas no coinciden")
-                    .addPropertyNode("confirmPassword")
-                    .addConstraintViolation();
-        }
-
-        return matches;
     }
 }
