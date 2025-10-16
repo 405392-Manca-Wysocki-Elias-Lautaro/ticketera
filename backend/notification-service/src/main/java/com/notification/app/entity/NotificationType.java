@@ -6,7 +6,8 @@ import java.util.Set;
 public enum NotificationType {
     // 🔐 Autenticación
     EMAIL_VERIFICATION(EnumSet.of(NotificationChannel.EMAIL)),
-    PASSWORD_RESET(EnumSet.of(NotificationChannel.EMAIL)),
+    PASSWORD_RESET_REQUEST(EnumSet.of(NotificationChannel.EMAIL)),
+    PASSWORD_RESET_SUCCESS(EnumSet.of(NotificationChannel.EMAIL)),
     USER_WELCOME(EnumSet.of(NotificationChannel.EMAIL)),
     LOGIN_ALERT(EnumSet.of(NotificationChannel.EMAIL));
 
