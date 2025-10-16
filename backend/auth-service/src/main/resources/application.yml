@@ -67,6 +67,13 @@ jwt:
 frontend:
   url: ${FRONTEND_URL}
 
+security:
+  password-reset:
+    expiration-minutes: 30
+
+support:
+  email: support@ticketly.com
+
 logging.level:
   root: INFO
   org.hibernate.SQL: WARN

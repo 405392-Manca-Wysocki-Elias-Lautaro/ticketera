@@ -78,6 +78,13 @@ jwt:
   expiration:
     access: 900000    # 15 minutos
 
+security:
+  password-reset:
+    expiration-minutes: 30
+
+support:
+  email: support@ticketly.com
+
 logging.level:
   org.springframework.jdbc.core: DEBUG
   org.hibernate.SQL: DEBUG
