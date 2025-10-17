@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auth.app.domain.entity.LoginAttempt;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.repositories.LoginAttemptRepository;
 import com.auth.app.services.domain.LoginAttemptService;
 
@@ -29,7 +31,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
 
     @Override
     @Transactional
-    public void registerFailedAttempt(UserModel user, String ip, String userAgent) {
+    public void registerFailedAttempt(UserModel user, IpAddress ip, UserAgent userAgent) {
         LoginAttempt attempt = new LoginAttempt();
         attempt.setUser(modelMapper.map(user, User.class));
         attempt.setIpAddress(ip);
@@ -44,7 +46,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
 
     @Override
     @Transactional
-    public void registerSuccessfulAttempt(UserModel user, String ip, String userAgent) {
+    public void registerSuccessfulAttempt(UserModel user, IpAddress ip, UserAgent userAgent) {
         LoginAttempt attempt = new LoginAttempt();
         attempt.setUser(modelMapper.map(user, User.class));
         attempt.setIpAddress(ip);

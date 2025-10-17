@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.app.domain.entity.RefreshToken;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
 
@@ -27,7 +29,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
         AND r.ipAddress = :ipAddress
         AND r.userAgent = :userAgent
     """)
-    boolean existsValidToken(UUID userId, String tokenHash, String ipAddress, String userAgent);
+    boolean existsValidToken(UUID userId, String tokenHash, IpAddress ipAddress, UserAgent userAgent);
 
     @Modifying
     @Transactional

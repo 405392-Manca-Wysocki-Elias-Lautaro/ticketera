@@ -8,18 +8,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.auth.app.domain.entity.TrustedDevice;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 
 public interface TrustedDevicesRepository extends JpaRepository<TrustedDevice, UUID> {
 
-    Optional<TrustedDevice> findByUserIdAndUserAgentAndIpAddress(UUID userId, String userAgent, String ipAddress);
+    Optional<TrustedDevice> findByUserIdAndIpAddressAndUserAgent(UUID userId, IpAddress ipAddress, UserAgent userAgent);
 
-    boolean existsByUserIdAndUserAgentAndIpAddress(UUID userId, String userAgent, String ipAddress);
+    boolean existsByUserIdAndIpAddressAndUserAgent(UUID userId, IpAddress ipAddress, UserAgent userAgent);
 
     @Query("SELECT d FROM TrustedDevice d WHERE d.user.id = :userId AND d.ipAddress = :ip AND d.userAgent = :ua AND d.trusted = true")
     Optional<TrustedDevice> findByUserAndDeviceFingerprint(
             @Param("userId") UUID userId,
-            @Param("ip") String ipAddress,
-            @Param("ua") String userAgent
+            @Param("ip") IpAddress ipAddress,
+            @Param("ua") UserAgent userAgent
     );
 
 }

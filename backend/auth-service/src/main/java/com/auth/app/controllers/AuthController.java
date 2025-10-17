@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.dto.request.ChangePasswordRequest;
 import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
@@ -20,6 +22,7 @@ import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.dto.response.UserResponse;
 import com.auth.app.services.application.AuthService;
 import com.auth.app.utils.ApiResponseFactory;
+import com.auth.app.utils.RequestUtils;
 import com.auth.app.utils.TokenUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,8 +39,8 @@ public class AuthController {
             @Validated @RequestBody RegisterRequest request,
             HttpServletRequest httpRequest
     ) {
-        String userAgent = httpRequest.getHeader("User-Agent");
-        String ipAddress = httpRequest.getRemoteAddr();
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         AuthResponse authResponse = authService.register(request, ipAddress, userAgent);
 
@@ -48,8 +51,13 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestParam String email) {
-        authService.resendVerificationEmail(email);
+    public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestParam String email,
+            HttpServletRequest httpRequest
+    ) {
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
+
+        authService.resendVerificationEmail(email, ipAddress, userAgent);
         return ApiResponseFactory.success("Verification email resent successfully");
     }
 
@@ -58,8 +66,8 @@ public class AuthController {
             @RequestParam("token") String token,
             HttpServletRequest httpRequest
     ) {
-        String userAgent = httpRequest.getHeader("User-Agent");
-        String ipAddress = httpRequest.getRemoteAddr();
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         authService.verifyEmail(token, ipAddress, userAgent);
         return ApiResponseFactory.success("Email verified successfully");
@@ -70,8 +78,8 @@ public class AuthController {
             @Validated @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         AuthResponse authResponse = authService.login(request, ipAddress, userAgent);
 
@@ -84,8 +92,8 @@ public class AuthController {
             @CookieValue("refreshToken") String refreshCookie,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         String refreshToken = TokenUtils.extractRefreshToken(authHeader, refreshCookie);
 
@@ -99,8 +107,8 @@ public class AuthController {
             @RequestHeader("Authorization") String authHeader,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         authService.logout(authHeader, ipAddress, userAgent);
 
@@ -112,8 +120,8 @@ public class AuthController {
             @Validated @RequestBody ForgotPasswordRequest request,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         authService.forgotPassword(request, ipAddress, userAgent);
 
@@ -125,8 +133,8 @@ public class AuthController {
             @Validated @RequestBody ResetPasswordRequest request,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         authService.resetPassword(request, ipAddress, userAgent);
 
@@ -142,8 +150,8 @@ public class AuthController {
             @Validated @RequestBody ChangePasswordRequest request,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         authService.changePassword(authHeader, request, ipAddress, userAgent);
 
@@ -158,8 +166,8 @@ public class AuthController {
             @RequestHeader("Authorization") String authorizationHeader,
             HttpServletRequest httpRequest
     ) {
-        String ipAddress = httpRequest.getRemoteAddr();
-        String userAgent = httpRequest.getHeader("User-Agent");
+        IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
+        UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
         UserResponse user = authService.getCurrentUser(authorizationHeader, ipAddress, userAgent);
 

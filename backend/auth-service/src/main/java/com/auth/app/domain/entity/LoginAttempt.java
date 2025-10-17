@@ -3,7 +3,15 @@ package com.auth.app.domain.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
+import com.auth.app.utils.IpAddressConverter;
+import com.auth.app.utils.UserAgentConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -39,12 +47,14 @@ public class LoginAttempt {
     private boolean success;
 
     @Column(name = "ip_address")
-    private String ipAddress;
-
+    @Convert(converter = IpAddressConverter.class)
+    private IpAddress ipAddress;
+    
     @Column(name = "user_agent")
-    private String userAgent;
+    @Convert(converter = UserAgentConverter.class)
+    private UserAgent userAgent;
 
-    @Column(name = "attempted_at", nullable = false,
-            columnDefinition = "TIMESTAMPTZ DEFAULT now()")
+    @CreationTimestamp
+    @Column(name = "attempted_at", nullable = false, updatable = false)
     private OffsetDateTime attemptedAt;
 }

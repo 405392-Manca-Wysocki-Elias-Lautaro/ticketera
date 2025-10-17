@@ -11,6 +11,8 @@ import com.auth.app.domain.entity.RefreshToken;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
 import com.auth.app.repositories.RefreshTokenRepository;
 import com.auth.app.services.domain.AuditLogService;
@@ -31,7 +33,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    public String create(UserModel user, String ipAddress, String userAgent, boolean remembered) {
+    public String create(UserModel user, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
 
         String rawToken = TokenUtils.generateToken();
         String hashedToken = TokenUtils.hashToken(rawToken);
@@ -62,7 +64,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public String rotateToken(UserModel user, String ipAddress, String userAgent, boolean remembered) {
+    public String rotateToken(UserModel user, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
         revokeAllByUser(user);
 
         String rawToken = create(user, ipAddress, userAgent, remembered);
@@ -73,13 +75,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public boolean validate(UserModel user, String rawToken, String ipAddress, String userAgent) {
+    public boolean validate(UserModel user, String rawToken, IpAddress ipAddress, UserAgent userAgent) {
         return refreshTokenRepository.existsValidToken(user.getId(), TokenUtils.hashToken(rawToken), ipAddress, userAgent);
     }
 
     @Override
     @Transactional
-    public String rotateFromRefresh(UserModel user, String currentRawToken, String ipAddress, String userAgent, boolean remembered) {
+    public String rotateFromRefresh(UserModel user, String currentRawToken, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
         if (!validate(user, currentRawToken, ipAddress, userAgent)) {
             auditLogService.logAction(user, LogAction.REFRESH_TOKEN_INVALID, ipAddress, userAgent);
             throw new InvalidRefreshTokenException();

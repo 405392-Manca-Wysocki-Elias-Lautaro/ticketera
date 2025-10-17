@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auth.app.domain.entity.TrustedDevice;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.repositories.TrustedDevicesRepository;
 import com.auth.app.services.domain.TrustedDevicesService;
 
@@ -26,9 +28,9 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
     private final ModelMapper modelMapper;
 
     @Override
-    public boolean isNewDevice(UserModel user, String ipAddress, String userAgent) {
+    public boolean isNewDevice(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
 
-        Optional<TrustedDevice> existing = trustedDeviceRepository.findByUserIdAndUserAgentAndIpAddress(user.getId(), userAgent, ipAddress);
+        Optional<TrustedDevice> existing = trustedDeviceRepository.findByUserIdAndIpAddressAndUserAgent(user.getId(), ipAddress, userAgent);
 
         if (existing.isPresent()) {
             TrustedDevice device = existing.get();
@@ -50,7 +52,7 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
     }
 
     @Override
-    public void unregisterCurrentDevice(UserModel user, String ipAddress, String userAgent) {
+    public void unregisterCurrentDevice(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
 
         Optional<TrustedDevice> deviceOpt = trustedDeviceRepository
                 .findByUserAndDeviceFingerprint(user.getId(), ipAddress, userAgent);

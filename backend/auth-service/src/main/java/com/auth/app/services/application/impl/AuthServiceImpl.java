@@ -21,6 +21,8 @@ import com.auth.app.domain.events.UserRegisteredEvent;
 import com.auth.app.domain.events.UserVerifiedEvent;
 import com.auth.app.domain.model.PasswordResetTokenModel;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.dto.request.ChangePasswordRequest;
 import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
@@ -67,14 +69,11 @@ public class AuthServiceImpl implements AuthService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final PasswordResetService passwordResetService;
 
-    @Value("${frontend.url}")
-    private String frontendUrl;
-
     @Value("${security.password-reset.expiration-minutes}")
     private Integer resetPasswordTokenExpirationMinutes;
 
     @Override
-    public AuthResponse register(RegisterRequest request, String ipAddress, String userAgent) {
+    public AuthResponse register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel saved = userService.create(modelMapper.map(request, UserModel.class));
 
@@ -89,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         applicationEventPublisher.publishEvent(
-                new UserRegisteredEvent(saved, frontendUrl + "/verify?token=" + verifyEmailToken)
+                new UserRegisteredEvent(saved, verifyEmailToken, ipAddress, userAgent)
         );
 
         UserResponse userResponse = modelMapper.map(saved, UserResponse.class);
@@ -97,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resendVerificationEmail(String email) {
+    public void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = userService.findByEmail(email);
 
@@ -108,21 +107,21 @@ public class AuthServiceImpl implements AuthService {
         }
 
         applicationEventPublisher.publishEvent(
-                new UserRegisteredEvent(user, frontendUrl + "/verify?token=" + verifyEmailToken)
+                new UserRegisteredEvent(user, verifyEmailToken, ipAddress, userAgent)
         );
     }
 
     @Override
-    public void verifyEmail(String rawToken, String ipAddress, String userAgent) {
+    public void verifyEmail(String rawToken, IpAddress ipAddress, UserAgent userAgent) {
         UserModel verifiedUser = emailVerificationService.verifyToken(rawToken);
 
-        applicationEventPublisher.publishEvent(new UserVerifiedEvent(verifiedUser, frontendUrl));
+        applicationEventPublisher.publishEvent(new UserVerifiedEvent(verifiedUser, ipAddress, userAgent));
 
         auditLogService.logAction(verifiedUser, LogAction.EMAIL_VERIFIED, ipAddress, userAgent);
     }
 
     @Override
-    public AuthResponse login(LoginRequest request, String ipAddress, String userAgent) {
+    public AuthResponse login(LoginRequest request, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = userService.findByEmail(request.getEmail());
         if (user == null) {
@@ -163,9 +162,9 @@ public class AuthServiceImpl implements AuthService {
         boolean isNewDevice = trustedDevicesService.isNewDevice(user, ipAddress, userAgent);
 
         if (isNewDevice) {
-            //TODO: Enviar reset password token
+            PasswordResetTokenModel token = passwordResetService.createToken(user);
             applicationEventPublisher.publishEvent(
-                    new UserLoginFromNewDeviceEvent(user, ipAddress, userAgent, frontendUrl + "/verify?token=" + "12345")
+                    new UserLoginFromNewDeviceEvent(user, token, ipAddress, userAgent)
             );
         }
 
@@ -177,7 +176,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse refresh(String rawRefreshToken, String ipAddress, String userAgent) {
+    public AuthResponse refresh(String rawRefreshToken, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = tokenProvider.extractUserFromRefreshToken(rawRefreshToken);
 
@@ -201,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String authorizationHeader, String ipAddress, String userAgent) {
+    public void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
 
@@ -213,7 +212,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void changePassword(String authorizationHeader, ChangePasswordRequest request, String ipAddress, String userAgent) {
+    public void changePassword(String authorizationHeader, ChangePasswordRequest request, IpAddress ipAddress, UserAgent userAgent) {
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -233,7 +232,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void forgotPassword(ForgotPasswordRequest request, String ipAddress, String userAgent) {
+    public void forgotPassword(ForgotPasswordRequest request, IpAddress ipAddress, UserAgent userAgent) {
         Optional<UserModel> userOpt = userService.findOptionalByEmail(request.getEmail());
 
         if (userOpt.isPresent()) {
@@ -247,7 +246,6 @@ public class AuthServiceImpl implements AuthService {
             applicationEventPublisher.publishEvent(
                     new UserPasswordResetRequestEvent(
                             token,
-                            frontendUrl,
                             ipAddress,
                             userAgent,
                             timestamp,
@@ -260,7 +258,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordRequest request, String ipAddress, String userAgent) {
+    public void resetPassword(ResetPasswordRequest request, IpAddress ipAddress, UserAgent userAgent) {
         String rawToken = request.getToken();
         String hashed = TokenUtils.hashToken(rawToken);
 
@@ -294,7 +292,6 @@ public class AuthServiceImpl implements AuthService {
         applicationEventPublisher.publishEvent(
                 new UserPasswordResetSuccessEvent(
                         user,
-                        frontendUrl,
                         ipAddress,
                         userAgent,
                         timestamp
@@ -307,7 +304,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserResponse getCurrentUser(String authorizationHeader, String ipAddress, String userAgent) {
+    public UserResponse getCurrentUser(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
 

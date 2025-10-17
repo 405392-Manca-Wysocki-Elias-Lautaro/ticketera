@@ -1,5 +1,7 @@
 package com.auth.app.services.application;
 
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.dto.request.ChangePasswordRequest;
 import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
@@ -10,14 +12,14 @@ import com.auth.app.dto.response.UserResponse;
 
 
 public interface AuthService {
-    AuthResponse register(RegisterRequest request, String ipAddress, String userAgent);
-    void resendVerificationEmail(String email);
-    void verifyEmail(String rawToken, String ipAddress, String userAgent);
-    AuthResponse login(LoginRequest request, String ipAddress, String userAgent);
-    AuthResponse refresh(String rawRefreshToken, String ipAddress, String userAgent);
-    void logout(String authorizationHeader, String ipAddress, String userAgent);
-    void changePassword(String authorizationHeader, ChangePasswordRequest request, String ipAddress, String userAgent);
-    void forgotPassword(ForgotPasswordRequest request, String ipAddress, String userAgent);
-    void resetPassword(ResetPasswordRequest request, String ipAddress, String userAgent);
-    UserResponse getCurrentUser(String authorizationHeader, String ipAddress, String userAgent);
+    AuthResponse register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent);
+    void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent);
+    void verifyEmail(String rawToken, IpAddress ipAddress, UserAgent userAgent);
+    AuthResponse login(LoginRequest request, IpAddress ipAddress, UserAgent userAgent);
+    AuthResponse refresh(String rawRefreshToken, IpAddress ipAddress, UserAgent userAgent);
+    void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
+    void changePassword(String authorizationHeader, ChangePasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
+    void forgotPassword(ForgotPasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
+    void resetPassword(ResetPasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
+    UserResponse getCurrentUser(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
 }
