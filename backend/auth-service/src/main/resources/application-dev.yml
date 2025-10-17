@@ -66,9 +66,6 @@ rabbitmq:
   notifications:
     exchange: notifications.exchange
     key: notifications.key
-      
-frontend:
-  url: ${FRONTEND_URL}
 
 notification:
   url: ${NOTIFICATION_URL}
@@ -81,6 +78,9 @@ jwt:
 security:
   password-reset:
     expiration-minutes: 30
+
+frontend:
+  url: ${FRONTEND_URL}
 
 support:
   email: support@ticketly.com
