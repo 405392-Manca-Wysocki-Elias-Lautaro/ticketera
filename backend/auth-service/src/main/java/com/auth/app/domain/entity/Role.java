@@ -3,6 +3,9 @@ package com.auth.app.domain.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.auth.app.domain.enums.RoleCode;
 
 import jakarta.persistence.Column;
@@ -12,8 +15,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,21 +42,26 @@ public class Role {
 
     private String description;
 
-    @Column(name = "created_at", nullable = false,
-            columnDefinition = "TIMESTAMPTZ DEFAULT now()")
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
+    @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = OffsetDateTime.now();
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public void delete() {
+        this.deletedAt = OffsetDateTime.now();
     }
 
+    public void restore() {
+        this.deletedAt = null;
+    }
 }

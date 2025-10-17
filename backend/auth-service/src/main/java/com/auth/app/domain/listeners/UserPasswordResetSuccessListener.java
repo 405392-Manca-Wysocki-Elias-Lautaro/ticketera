@@ -7,12 +7,15 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.events.UserPasswordResetSuccessEvent;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.notification.NotificationSender;
 import com.auth.app.notification.dto.NotificationDTO;
 import com.auth.app.notification.entity.NotificationChannel;
 import com.auth.app.notification.entity.NotificationType;
+import com.auth.app.services.domain.AuditLogService;
+import com.auth.app.utils.FrontendUrlBuilder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 public class UserPasswordResetSuccessListener {
 
     private final NotificationSender notificationSender;
+    private final AuditLogService auditLogService;
+    private final FrontendUrlBuilder frontendUrlBuilder;
     @Value("${support.email}")
     String supportEmail;
 
@@ -31,17 +36,19 @@ public class UserPasswordResetSuccessListener {
     public void handleUserPasswordResetSuccess(UserPasswordResetSuccessEvent event) {
 
         UserModel user = event.getUser();
+        String link = frontendUrlBuilder.buildLoginUrl();
+
+        auditLogService.logAction(user, LogAction.PASSWORD_RESET_SUCCESS_EMAIL_SENT,
+                event.getIpAddress(), event.getUserAgent());
+
         try {
-
-            String loginLink = event.getFrontendUrl() + "/login";
-
             notificationSender.send(NotificationDTO.builder()
                     .to(user.getEmail())
                     .channel(NotificationChannel.EMAIL)
                     .type(NotificationType.PASSWORD_RESET_SUCCESS)
                     .variables(Map.of(
                             "firstName", user.getFirstName(),
-                            "link", loginLink,
+                            "link", link,
                             "supportEmail", supportEmail,
                             "ipAddress", event.getIpAddress(),
                             "userAgent", event.getUserAgent(),
@@ -50,10 +57,15 @@ public class UserPasswordResetSuccessListener {
                     .build()
             );
 
-            log.info("Password reset success email sent to {}", user.getEmail());
-
         } catch (Exception e) {
-            log.error("Error sending password reset success email to {}: {}", user.getEmail(), e.getMessage());
+            log.error(
+                    "[NOTIFICATION] Error sending password reset success email to {}: {}",
+                    user.getEmail(), e.getMessage()
+            );
+
+            auditLogService.logAction(user, LogAction.PASSWORD_RESET_SUCCESS_EMAIL_ERROR,
+                    event.getIpAddress(), event.getUserAgent());
+
         }
     }
 

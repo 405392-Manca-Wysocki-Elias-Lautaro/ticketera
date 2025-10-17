@@ -9,9 +9,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class UserPasswordResetSuccessEvent {
+public class UserVerificationEmailEvent {
+
     private final UserModel user;
+    private final String token;
     private final IpAddress ipAddress;
     private final UserAgent userAgent;
-    private final String timestamp;
 }

@@ -4,6 +4,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,23 +40,28 @@ public class ApiKey {
     @Column(nullable = false)
     private boolean revoked = false;
 
-    @Column(name = "created_at", nullable = false,
-            columnDefinition = "TIMESTAMPTZ DEFAULT now()")
+    @Column(name = "revoked_at")
+    private OffsetDateTime revokedAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "last_used_at")
     private OffsetDateTime lastUsedAt;
 
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = OffsetDateTime.now();
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public void delete() {
+        this.deletedAt = OffsetDateTime.now();
+    }
+
+    public void restore() {
+        this.deletedAt = null;
     }
 }

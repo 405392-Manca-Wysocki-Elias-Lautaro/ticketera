@@ -8,12 +8,17 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
+import com.auth.app.services.domain.AuditLogService;
 import com.auth.app.services.domain.UserService;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -26,15 +31,18 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenProvider {
 
     private final UserService userService;
+    private final AuditLogService auditLogService;
     private final SecretKey key;
     private final Long accessTokenExpirationMs;
 
     public TokenProvider(
             UserService userService,
+            AuditLogService auditLogService,
             @Value("${jwt.secret}") String jwtSecret,
             @Value("${jwt.expiration.access}") Long jwtAccessTokenExpirationMs
     ) {
         this.userService = userService;
+        this.auditLogService = auditLogService;
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.accessTokenExpirationMs = jwtAccessTokenExpirationMs;
     }
@@ -60,7 +68,14 @@ public class TokenProvider {
             String subject = claimsJws.getBody().getSubject();
             return UUID.fromString(subject);
 
+        } catch (ExpiredJwtException ex) {
+            auditLogService.logAction(null, LogAction.ACCESS_TOKEN_EXPIRED, null, null);
+            log.warn("[TOKEN] Access token expired: {}", ex.getMessage());
+            throw new InvalidOrUnknownTokenException();
+
         } catch (JwtException | IllegalArgumentException ex) {
+            auditLogService.logAction(null, LogAction.TOKEN_VALIDATION_FAILED, null, null);
+            log.warn("[TOKEN] Invalid or tampered token: {}", ex.getMessage());
             throw new InvalidRefreshTokenException();
         }
     }
@@ -72,15 +87,15 @@ public class TokenProvider {
 
     public UserModel extractUserFromAuthorizationHeader(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            log.warn("[TOKEN] Missing or malformed Authorization header");
+            auditLogService.logAction(null, LogAction.TOKEN_VALIDATION_FAILED, null, null);
             throw new InvalidOrUnknownTokenException();
         }
 
         String token = authorizationHeader.substring(7);
-
         validateAccessToken(token);
 
         UUID userId = getUserIdFromToken(token);
-
         return userService.findById(userId);
     }
 
@@ -91,7 +106,15 @@ public class TokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
+
+        } catch (ExpiredJwtException ex) {
+            auditLogService.logAction(null, LogAction.ACCESS_TOKEN_EXPIRED, null, null);
+            log.warn("[TOKEN] Access token expired: {}", ex.getMessage());
+            throw new InvalidOrUnknownTokenException();
+
         } catch (JwtException | IllegalArgumentException ex) {
+            auditLogService.logAction(null, LogAction.TOKEN_VALIDATION_FAILED, null, null);
+            log.warn("[TOKEN] Invalid access token: {}", ex.getMessage());
             throw new InvalidOrUnknownTokenException();
         }
     }

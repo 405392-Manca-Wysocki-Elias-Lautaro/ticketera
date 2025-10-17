@@ -17,8 +17,8 @@ import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.events.UserLoginFromNewDeviceEvent;
 import com.auth.app.domain.events.UserPasswordResetRequestEvent;
 import com.auth.app.domain.events.UserPasswordResetSuccessEvent;
-import com.auth.app.domain.events.UserRegisteredEvent;
-import com.auth.app.domain.events.UserVerifiedEvent;
+import com.auth.app.domain.events.UserVerificationEmailEvent;
+import com.auth.app.domain.events.UserWelcomeEvent;
 import com.auth.app.domain.model.PasswordResetTokenModel;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.domain.valueObjects.IpAddress;
@@ -88,8 +88,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         applicationEventPublisher.publishEvent(
-                new UserRegisteredEvent(saved, verifyEmailToken, ipAddress, userAgent)
+                new UserVerificationEmailEvent(saved, verifyEmailToken, ipAddress, userAgent)
         );
+
+        auditLogService.logAction(saved, LogAction.USER_REGISTERED,
+                ipAddress, userAgent);
 
         UserResponse userResponse = modelMapper.map(saved, UserResponse.class);
         return new AuthResponse(accessToken, refreshToken, userResponse);
@@ -99,7 +102,6 @@ public class AuthServiceImpl implements AuthService {
     public void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = userService.findByEmail(email);
-
         String verifyEmailToken = emailVerificationService.generateNewVerificationToken(email);
 
         if (EnvironmentUtils.isDev()) {
@@ -107,17 +109,25 @@ public class AuthServiceImpl implements AuthService {
         }
 
         applicationEventPublisher.publishEvent(
-                new UserRegisteredEvent(user, verifyEmailToken, ipAddress, userAgent)
+                new UserVerificationEmailEvent(user, verifyEmailToken, ipAddress, userAgent)
         );
+
+        auditLogService.logAction(user, LogAction.USER_VERIFICATION_EMAIL_RESENT, ipAddress, userAgent);
     }
 
     @Override
     public void verifyEmail(String rawToken, IpAddress ipAddress, UserAgent userAgent) {
-        UserModel verifiedUser = emailVerificationService.verifyToken(rawToken);
+        try {
+            UserModel verifiedUser = emailVerificationService.verifyToken(rawToken);
 
-        applicationEventPublisher.publishEvent(new UserVerifiedEvent(verifiedUser, ipAddress, userAgent));
+            applicationEventPublisher.publishEvent(new UserWelcomeEvent(verifiedUser, ipAddress, userAgent));
+            auditLogService.logAction(verifiedUser, LogAction.USER_EMAIL_VERIFIED, ipAddress, userAgent);
 
-        auditLogService.logAction(verifiedUser, LogAction.EMAIL_VERIFIED, ipAddress, userAgent);
+        } catch (TokenExpiredException | InvalidRefreshTokenException e) {
+            auditLogService.logAction(null, LogAction.USER_EMAIL_VERIFICATION_FAILED, ipAddress, userAgent);
+            throw e;
+        }
+
     }
 
     @Override
@@ -132,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
         if (!user.isEmailVerified() || !user.isActive()) {
             log.warn("[LOGIN_FAIL] Unverified account login attempt email={} IP={} UA={}",
                     request.getEmail(), ipAddress, userAgent);
-
+            auditLogService.logAction(user, LogAction.USER_LOGIN_BLOCKED, ipAddress, userAgent);
             throw new AccountNotVerifiedException();
         }
 
@@ -221,6 +231,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            auditLogService.logAction(user, LogAction.USER_PASSWORD_CHANGE_FAILED, ipAddress, userAgent);
             throw new SamePasswordException();
         }
 
@@ -265,9 +276,19 @@ public class AuthServiceImpl implements AuthService {
         PasswordResetToken resetToken = passwordResetService.findByTokenHash(hashed);
 
         if (resetToken.getExpiresAt().isBefore(OffsetDateTime.now())) {
+            auditLogService.logAction(
+                    modelMapper.map(resetToken.getUser(), UserModel.class),
+                    LogAction.USER_PASSWORD_RESET_FAILED,
+                    ipAddress, userAgent
+            );
             throw new TokenExpiredException();
         }
         if (resetToken.isUsed()) {
+            auditLogService.logAction(
+                    modelMapper.map(resetToken.getUser(), UserModel.class),
+                    LogAction.USER_PASSWORD_RESET_FAILED,
+                    ipAddress, userAgent
+            );
             throw new TokenAlreadyUsedException();
         }
 

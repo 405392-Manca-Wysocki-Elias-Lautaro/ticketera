@@ -7,7 +7,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
+import com.auth.app.utils.IpAddressConverter;
+import com.auth.app.utils.UserAgentConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +21,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,11 +45,13 @@ public class TrustedDevice {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "ip_address", length = 50)
-    private String ipAddress;
+    @Column(name = "ip_address")
+    @Convert(converter = IpAddressConverter.class)
+    private IpAddress ipAddress;
 
     @Column(name = "user_agent")
-    private String userAgent;
+    @Convert(converter = UserAgentConverter.class)
+    private UserAgent userAgent;
 
     private String location;
 
@@ -56,14 +63,29 @@ public class TrustedDevice {
     private OffsetDateTime revokedAt;
 
     @Column(name = "last_login")
-    @UpdateTimestamp
     private OffsetDateTime lastLogin;
 
-    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Version
-    private Long version;
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private OffsetDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void delete() {
+        this.deletedAt = OffsetDateTime.now();
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+    }
 
 }

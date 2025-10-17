@@ -3,6 +3,8 @@ package com.auth.app.domain.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +23,7 @@ public class EmailVerificationToken {
     // Relación con User
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false,
-                foreignKey = @ForeignKey(name = "fk_email_verification_user"))
+            foreignKey = @ForeignKey(name = "fk_email_verification_user"))
     private User user;
 
     @Column(name = "token_hash", nullable = false, unique = true)
@@ -34,14 +36,7 @@ public class EmailVerificationToken {
     @Builder.Default
     private Boolean used = false;
 
-    @Column(name = "created_at", nullable = false,
-            columnDefinition = "TIMESTAMPTZ DEFAULT now()")
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-    }
 }
