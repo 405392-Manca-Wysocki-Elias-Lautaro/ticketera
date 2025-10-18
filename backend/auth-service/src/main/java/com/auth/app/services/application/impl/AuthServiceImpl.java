@@ -214,11 +214,22 @@ public class AuthServiceImpl implements AuthService {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
 
-        refreshTokenService.revokeAllByUser(user);
-
-        auditLogService.logAction(user, LogAction.USER_LOGOUT, ipAddress, userAgent);
+        refreshTokenService.revokeCurrentToken(user, ipAddress, userAgent);
 
         trustedDevicesService.unregisterCurrentDevice(user, ipAddress, userAgent);
+
+        auditLogService.logAction(user, LogAction.USER_LOGOUT, ipAddress, userAgent);
+    }
+
+    @Override
+    public void logoutFromOtherDevices(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent) {
+        UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
+
+        refreshTokenService.revokeAllExceptCurrent(user, ipAddress, userAgent);
+
+        trustedDevicesService.unregisterAllExceptCurrent(user, ipAddress, userAgent);
+
+        auditLogService.logAction(user, LogAction.USER_LOGOUT_OTHER_DEVICES, ipAddress, userAgent);
     }
 
     @Override
@@ -237,7 +248,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userService.update(user.getId(), user);
-        refreshTokenService.revokeAllByUser(user);
+        refreshTokenService.revokeAllByUser(user, ipAddress, userAgent);
 
         auditLogService.logAction(user, LogAction.USER_PASSWORD_CHANGED, ipAddress, userAgent);
     }
@@ -304,7 +315,7 @@ public class AuthServiceImpl implements AuthService {
         resetToken.setUsed(true);
         passwordResetService.update(resetToken);
 
-        refreshTokenService.revokeAllByUser(user);
+        refreshTokenService.revokeAllByUser(user, ipAddress, userAgent);
 
         String timestamp = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
                 .withZone(ZoneId.systemDefault())

@@ -50,8 +50,8 @@ public class UserPasswordResetSuccessListener {
                             "firstName", user.getFirstName(),
                             "link", link,
                             "supportEmail", supportEmail,
-                            "ipAddress", event.getIpAddress(),
-                            "userAgent", event.getUserAgent(),
+                            "ipAddress", event.getIpAddress().toString(),
+                            "userAgent", event.getUserAgent().toString(),
                             "timestamp", event.getTimestamp()
                     ))
                     .build()

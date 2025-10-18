@@ -48,8 +48,8 @@ public class UserPasswordResetRequestListener {
                     .variables(Map.of(
                             "firstName", user.getFirstName(),
                             "link", link,
-                            "ipAddress", event.getIpAddress(),
-                            "userAgent", event.getUserAgent(),
+                            "ipAddress", event.getIpAddress().toString(),
+                            "userAgent", event.getUserAgent().toString(),
                             "timestamp", event.getTimestamp(),
                             "expirationMinutes", event.getExpirationMinutes()
                     ))

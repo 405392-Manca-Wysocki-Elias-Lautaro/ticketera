@@ -7,4 +7,5 @@ import com.auth.app.domain.valueObjects.UserAgent;
 public interface TrustedDevicesService {
     boolean isNewDevice(UserModel user, IpAddress ipAddress, UserAgent userAgent);
     void unregisterCurrentDevice(UserModel user, IpAddress ipAddress, UserAgent userAgent);
+    void unregisterAllExceptCurrent(UserModel user, IpAddress ipAddress, UserAgent userAgent);
 }

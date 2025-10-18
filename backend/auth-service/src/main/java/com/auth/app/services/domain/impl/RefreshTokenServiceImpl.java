@@ -57,15 +57,31 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    public void revokeAllByUser(UserModel user) {
+    public void revokeCurrentToken(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
+        refreshTokenRepository.revokeByUserAndDevice(user.getId(), ipAddress, userAgent);
+        log.info("Revoked current token refresh tokens for user {}, ip {}, user agent {}", user.getEmail(), ipAddress, userAgent);
+        auditLogService.logAction(user, LogAction.TOKEN_REVOKED, ipAddress, userAgent);
+    }
+
+    @Override
+    @Transactional
+    public void revokeAllExceptCurrent(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
+        refreshTokenRepository.revokeAllExceptCurrent(user.getId(), ipAddress, userAgent);
+        log.info("Revoked all refresh tokens except current one for user {}, ip {}, user agent {}", user.getEmail(), ipAddress, userAgent);
+        auditLogService.logAction(user, LogAction.ALL_TOKENS_REVOKED_EXCEPT_CURRENT, ipAddress, userAgent);
+    }
+
+    @Override
+    @Transactional
+    public void revokeAllByUser(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
         refreshTokenRepository.revokeAllByUserId(user.getId());
-        log.info("Revoked all refresh tokens for user {}", user.getEmail());
-        auditLogService.logAction(user, LogAction.TOKEN_REVOKED, null, null);
+        log.info("Revoked all refresh tokens for user {} from ip {}, user agent {}", user.getEmail(), ipAddress, userAgent);
+        auditLogService.logAction(user, LogAction.ALL_TOKENS_REVOKED, ipAddress, userAgent);
     }
 
     @Override
     public String rotateToken(UserModel user, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
-        revokeAllByUser(user);
+        revokeAllByUser(user, ipAddress, userAgent);
 
         String rawToken = create(user, ipAddress, userAgent, remembered);
 

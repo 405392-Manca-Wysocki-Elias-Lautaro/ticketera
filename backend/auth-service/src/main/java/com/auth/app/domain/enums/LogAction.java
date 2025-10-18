@@ -16,7 +16,7 @@ public enum LogAction {
     USER_EMAIL_VERIFICATION_FAILED("AUTH_006", "User email verification failed (invalid or expired token)"),
     USER_VERIFICATION_EMAIL_RESENT("AUTH_007", "Verification email resent to user"),
     USER_LOGIN_BLOCKED("AUTH_008", "Login blocked due to unverified or inactive account"),
-
+    USER_LOGOUT_OTHER_DEVICES("AUTH_009", "User logged out other devices"),
     // 🔐 TOKEN OPERATIONS
     ACCESS_TOKEN_GENERATED("TOKEN_001", "Access token generated"),
     REFRESH_TOKEN_ROTATED("TOKEN_002", "Refresh token rotated"),
@@ -26,6 +26,8 @@ public enum LogAction {
     REFRESH_TOKEN_USED("TOKEN_006", "The refresh token has already been used"),
     ACCESS_TOKEN_EXPIRED("TOKEN_007", "Access token expired or invalid"),
     TOKEN_VALIDATION_FAILED("TOKEN_008", "Token validation failed due to tampering or format error"),
+    ALL_TOKENS_REVOKED("TOKEN_009", "All user tokens revoked"),
+    ALL_TOKENS_REVOKED_EXCEPT_CURRENT("TOKEN_010", "All tokens revoked except the current one"),
     // ⚙️ PROFILE / SETTINGS
     USER_PROFILE_UPDATED("USER_001", "User profile updated"),
     USER_PASSWORD_CHANGED("USER_002", "User password changed"),

@@ -65,4 +65,8 @@ public class RefreshToken {
     @Column(name = "expires_at", nullable = false)
     private OffsetDateTime expiresAt;
 
+    public void revoke() {
+        this.revoked = true;
+    }
+
 }

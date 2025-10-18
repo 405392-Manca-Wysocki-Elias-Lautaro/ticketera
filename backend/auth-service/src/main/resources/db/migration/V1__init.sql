@@ -13,7 +13,7 @@ CREATE TABLE auth.roles (
     name            VARCHAR(50) NOT NULL UNIQUE,
     description     TEXT,
     created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMPTZ
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE auth.users (
     mfa_enabled     BOOLEAN DEFAULT FALSE,
     last_login_at   TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMPTZ,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
@@ -47,7 +47,7 @@ CREATE TABLE auth.email_verification_tokens (
     token_hash      TEXT NOT NULL UNIQUE,
     expires_at      TIMESTAMPTZ NOT NULL,
     used            BOOLEAN DEFAULT FALSE,
-    created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================================================
@@ -62,7 +62,7 @@ CREATE TABLE auth.api_keys (
     revoked_at      TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     last_used_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMPTZ
+    deleted_at      TIMESTAMPTZ,
     CONSTRAINT uq_api_keys_org_name UNIQUE (organizer_id, name)
 );
 
@@ -146,7 +146,7 @@ CREATE TABLE auth.trusted_devices (
     revoked_at      TIMESTAMPTZ,
     last_login      TIMESTAMPTZ DEFAULT now(),
     created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMPTZ
 );
 

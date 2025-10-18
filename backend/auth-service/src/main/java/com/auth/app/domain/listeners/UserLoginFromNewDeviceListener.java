@@ -48,8 +48,8 @@ public class UserLoginFromNewDeviceListener {
                     .to(user.getEmail())
                     .variables(Map.of(
                             "firstName", user.getFirstName(),
-                            "ipAddress", event.getIpAddress(),
-                            "userAgent", event.getUserAgent(),
+                            "ipAddress", event.getIpAddress().toString(),
+                            "userAgent", event.getUserAgent().toString(),
                             "timestamp", OffsetDateTime.now().toString(),
                             "link", link
                     ))

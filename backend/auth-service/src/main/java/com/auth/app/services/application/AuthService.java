@@ -18,6 +18,7 @@ public interface AuthService {
     AuthResponse login(LoginRequest request, IpAddress ipAddress, UserAgent userAgent);
     AuthResponse refresh(String rawRefreshToken, IpAddress ipAddress, UserAgent userAgent);
     void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
+    void logoutFromOtherDevices(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
     void changePassword(String authorizationHeader, ChangePasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
     void forgotPassword(ForgotPasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
     void resetPassword(ResetPasswordRequest request, IpAddress ipAddress, UserAgent userAgent);

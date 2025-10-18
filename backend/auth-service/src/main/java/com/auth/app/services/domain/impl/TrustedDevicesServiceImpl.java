@@ -52,6 +52,7 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
     }
 
     @Override
+    @Transactional
     public void unregisterCurrentDevice(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
 
         Optional<TrustedDevice> deviceOpt = trustedDeviceRepository
@@ -67,6 +68,22 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
         } else {
             log.warn("No trusted device found to revoke for user {} [{} - {}]", user.getEmail(), ipAddress, userAgent);
         }
+
     }
 
+    @Override
+    @Transactional
+    public void unregisterAllExceptCurrent(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
+        int updated = trustedDeviceRepository.revokeAllExceptCurrent(
+                user.getId(), ipAddress, userAgent, OffsetDateTime.now()
+        );
+
+        if (updated > 0) {
+            log.info("Revoked {} trusted devices for user {} except the current one [{} - {}]",
+                    updated, user.getEmail(), ipAddress, userAgent);
+        } else {
+            log.info("No other trusted devices found to revoke for user {} [{} - {}]",
+                    user.getEmail(), ipAddress, userAgent);
+        }
+    }
 }
