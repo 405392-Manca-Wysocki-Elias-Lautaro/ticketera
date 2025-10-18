@@ -1,3 +1,44 @@
+# [1.0.0-next.12](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.11...frontend-v1.0.0-next.12) (2025-10-18)
+
+
+### Bug Fixes
+
+* correct SQL script and repository queries in auth service ([0023898](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/00238980b7fa1ba7a01db59b7b8f140de6948e27))
+
+
+### Features
+
+* add custom exceptions and global error handling entries ([f961385](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/f961385f7b7f45c753033df888809df26ce2c034))
+* add resend verification route and improve RabbitMQ config ([fd8b576](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/fd8b576ff929d10ac80b2b0418a1466f22d45cef))
+* add trusted devices and login attempt modules ([7fe1f99](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/7fe1f99567eafab26d587c3e52042de417626cee))
+* add user-related events, listeners, and async configuration ([6e76e3d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/6e76e3d0b201c32f8415dfc4b6d1f9592f1d32b4))
+* **auth:** add /verify endpoint to AuthController ([ba70a28](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ba70a28102b7f7e4936af3507b9f1d22f4a9c625))
+* **auth:** add controller, service, and login/register flow ([ad532af](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ad532af91b550750194d5cbc6d5d4288b942812e))
+* **auth:** add JWT-based token provider and secure env configuration ([de7d9c0](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/de7d9c06650892cb9a1d1bb40ae47cf2e89608e4))
+* **auth:** add logout with token revocation and trusted device management ([9d9830b](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9d9830b5bf7178ff088481e7d7bf0c9abf9d43e7))
+* **auth:** add multi-device logout and revoke logic ([23075f4](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/23075f475a398db8df84a3101515c71436d6eccc))
+* **auth:** add password reset flow and related endpoints ([286c16c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/286c16cb57d2993b559e3e1b9796ec5708983cbb))
+* **auth:** add password security validations ([edf2d80](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/edf2d80b13e5b0b6c9a1f4a09d7b47c60e248b78))
+* **auth:** add refresh token entity, service, and token provider ([09ef9e9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/09ef9e998edce87c9d6233c1ca6ca2445f1bdd75))
+* **auth:** add resend verification email and improve consistency ([9e6f239](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9e6f239879df509d40c4377f4c4611ad0e8df476))
+* **auth:** add role domain/service layer and improve DTO handling ([76b650a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/76b650a03902171f70d0afcbe6295d7edf1479fa))
+* **auth:** improve notification and role handling in user registration ([24f0912](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/24f0912de80b6bb8d4a5f6bedc300c7ce9bee224))
+* **auth:** publish password reset events in service ([75b1429](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/75b14293fd70e510e9b15c405013c020d94fdd2a))
+* **auth:** update init.sql and add /me endpoint implementation ([f83a23e](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/f83a23e1e2669f4e141c36a72c8a4e27617135b3))
+* **auth:** use SHA-256 for token hashing and add validation check ([746fb1e](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/746fb1e7792d987cf56889a6f268c2d0b59734a8))
+* **config:** add password reset and support email vars ([0685914](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/06859144dfbe42695de940dc7efc0e5a5875e9af))
+* **core:** add entities, repos, mailhog svc, db updates & seeds ([87be83c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/87be83c3d71cf7be98dad10eac7828ee8031efe0))
+* **db:** add soft delete and audit timestamps ([9751fb3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9751fb3c5ae553a2dfbc87aadbf7b3c48d42914b))
+* enhance TokenProvider with user extraction and validation ([f3a5152](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/f3a51528d792d9a00a6649f14f0bcb0a86b544cd))
+* **events:** add password reset request and success handlers ([679b300](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/679b300b20d9fd16d13f87f2b63b5044f8310821))
+* extend refresh token service with rotation and validation ([3a8e7fa](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3a8e7faed0f108da6242f185eb51d88491c8997e))
+* **gateway:** add swagger aggregator configuration ([51b3124](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/51b31249ec0a687f4ac66dcea4c1f44a98402f82))
+* implement login and refresh flow with event delegation ([397f3fd](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/397f3fdb9ea2adde219e00516d2ad9a031e58d9c))
+* **password-reset:** add expiration and notification types ([6ab7a55](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/6ab7a55cba3fee7acbb719e6a53592daa64d99de))
+* **security:** add modelmapper, global handler, and validations ([c8e1dcc](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c8e1dcc38ada8e6787ca9e60db3708906044d71e))
+* **user:** simplify role model and add user service + DTOs ([8054cd6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/8054cd61eacbda01b1c9004ee684a49605e37b6f))
+* **utils:** add request helpers and value objects ([378c8cc](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/378c8cc3e5d52efc1e51eca186dee96f5293745d))
+
 # [1.0.0-next.11](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/frontend-v1.0.0-next.10...frontend-v1.0.0-next.11) (2025-10-16)
 
 
