@@ -38,6 +38,25 @@ services:
       timeout: 3s
       retries: 20
 
+  redis:
+    image: redis:7.2
+    container_name: redis
+    restart: always
+    expose:
+      - "6379"
+    volumes:
+      - redis_data_prod:/data
+    command: >
+      redis-server
+      --save 60 1
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory-policy allkeys-lru
+      --loglevel warning
+    environment:
+      TZ: ${TZ}
+    networks: [backend]
+
   # Frontend estático servido por Node 'serve'
   frontend:
     build:
@@ -54,6 +73,9 @@ services:
         RUNTIME_IMAGE: eclipse-temurin:17-jre
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       # CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:8081"
     depends_on: [ auth, events, tickets, payments, notifications, orders ]
     networks: [ backend, frontend_net ]
@@ -77,12 +99,14 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [ backend ]
 
   events:
@@ -212,7 +236,10 @@ services:
 
 networks:
   backend:
+    driver: bridge
   frontend_net:
 
 volumes:
   ticketera_prod_pgdata:
+  redis_data_prod:
+    
