@@ -7,6 +7,10 @@ spring:
   main.banner-mode: "off"
   sql.init.mode: never
 
+  notification:
+    url: http://localhost:8080
+    queue: notifications.queue
+
   devtools:
     restart:
       enabled: true
@@ -40,7 +44,46 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/r
+      - classpath:db/seed
     clean-disabled: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    template:
+      mandatory: true                  # importante para que Spring notifique si un mensaje no se pudo enrutar
+      retry:
+        enabled: true                  # activa reintentos en el publisher
+        initial-interval: 1000ms
+        max-attempts: 3
+        multiplier: 2.0
+        max-interval: 10000ms
+# Termina spring context
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    key: notifications.key
+
+notification:
+  url: ${NOTIFICATION_URL}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration:
+    access: 900000    # 15 minutos
+
+security:
+  password-reset:
+    expiration-minutes: 30
+
+frontend:
+  url: ${FRONTEND_URL}
+
+support:
+  email: support@ticketly.com
 
 logging.level:
   org.springframework.jdbc.core: DEBUG
