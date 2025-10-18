@@ -1,5 +1,6 @@
 package com.auth.app.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -172,6 +173,14 @@ public class AuthController {
         UserResponse user = authService.getCurrentUser(authorizationHeader, ipAddress, userAgent);
 
         return ApiResponseFactory.success("User retrieved successfully.", user);
+    }
+
+    @GetMapping("/api/auth/validate")
+    public ResponseEntity<Void> validateToken(@RequestParam String token) {
+        if (authService.validateAccessToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
 }

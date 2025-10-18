@@ -20,10 +20,10 @@ public enum ErrorCatalog {
             "El token de acceso es inválido."),
     TOO_MANY_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, ErrorCodes.TOO_MANY_ATTEMPTS,
             "Demasiados intentos fallidos. Intenta nuevamente más tarde."),
-    ACCOUNT_NOT_VERIFIED(HttpStatus.FORBIDDEN, ErrorCodes.ACCOUNT_NOT_VERIFIED,
-            "Please verify your email before logging in."),
+    ACCOUNT_NOT_VERIFIED(HttpStatus.UNAUTHORIZED, ErrorCodes.ACCOUNT_NOT_VERIFIED,
+            "Por favor verifique su email antes de ingresar."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, ErrorCodes.INVALID_REFRESH_TOKEN,
-            "Invalid or expired refresh token."),
+            "Refresh token invalido o expirado."),
     // 📥 Validaciones
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, ErrorCodes.VALIDATION_FAILED,
             "Uno o más campos no cumplen con los requisitos."),
@@ -45,7 +45,7 @@ public enum ErrorCatalog {
     // ✅ Verificación de Email
     USER_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, ErrorCodes.USER_ALREADY_VERIFIED,
             "El usuario ya ha verificado su cuenta."),
-    INVALID_OR_UNKNOWN_TOKEN(HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_OR_UNKNOWN_TOKEN,
+    INVALID_OR_UNKNOWN_TOKEN(HttpStatus.UNAUTHORIZED, ErrorCodes.INVALID_OR_UNKNOWN_TOKEN,
             "El token es inválido o no corresponde a ningún usuario."),
     TOKEN_ALREADY_USED(HttpStatus.BAD_REQUEST, ErrorCodes.TOKEN_ALREADY_USED,
             "El token de verificación ya fue utilizado."),

@@ -23,4 +23,5 @@ public interface AuthService {
     void forgotPassword(ForgotPasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
     void resetPassword(ResetPasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
     UserResponse getCurrentUser(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
+    boolean validateAccessToken(String token);
 }

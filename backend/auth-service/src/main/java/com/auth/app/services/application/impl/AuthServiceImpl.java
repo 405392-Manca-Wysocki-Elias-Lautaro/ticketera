@@ -345,4 +345,9 @@ public class AuthServiceImpl implements AuthService {
         return modelMapper.map(user, UserResponse.class);
     }
 
+    @Override
+    public boolean validateAccessToken(String token) {
+        return tokenProvider.validateAccessToken(token);
+    }
+
 }
