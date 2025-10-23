@@ -50,7 +50,7 @@ services:
     command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
     environment:
       TZ: ${TZ}
-    networks: [backend]
+    networks: [backend_net]
 
   mailhog:
     image: mailhog/mailhog
@@ -97,6 +97,7 @@ services:
       SERVICES_PAYMENT_BASE_URL: http://payment-dev:8080
       SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
+      JWT_SECRET: ${JWT_SECRET}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: 

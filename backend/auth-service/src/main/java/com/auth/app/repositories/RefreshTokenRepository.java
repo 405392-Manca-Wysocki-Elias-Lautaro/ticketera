@@ -41,7 +41,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     @Transactional
     @Query("""
             UPDATE RefreshToken r
-            SET r.revoked = TRUE,
+            SET r.revoked = TRUE
             WHERE r.tokenHash = :tokenHash
         """)
     void revokeByTokenHash(@Param("tokenHash") String tokenHash);
@@ -50,7 +50,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     @Transactional
     @Query("""
             UPDATE RefreshToken r
-            SET r.revoked = TRUE,
+            SET r.revoked = TRUE
             WHERE r.user.id = :userId
             AND (r.ipAddress <> :ipAddress OR r.userAgent <> :userAgent)
             AND r.revoked = FALSE
@@ -65,7 +65,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     @Transactional
     @Query("""
         UPDATE RefreshToken r
-            SET r.revoked = TRUE,
+            SET r.revoked = TRUE
             WHERE r.user.id = :userId
             AND r.ipAddress = :ipAddress
             AND r.userAgent = :userAgent
@@ -81,7 +81,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     @Transactional
     @Query("""
             UPDATE RefreshToken r
-            SET r.revoked = TRUE,
+            SET r.revoked = TRUE
             WHERE r.user.id = :userId
             AND r.revoked = FALSE
         """)
