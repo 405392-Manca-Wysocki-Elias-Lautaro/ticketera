@@ -14,9 +14,11 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/v3/api-docs/**")
-                        .allowedOrigins("http://localhost:8080")
-                        .allowedMethods("GET");
+                registry.addMapping("/**")
+                        .allowedOrigins("*") // TODO: Añadir dominios
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(false);
             }
         };
     }

@@ -99,8 +99,8 @@ services:
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
       JWT_SECRET: ${JWT_SECRET}
       AUTH_URL: ${AUTH_URL}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: 
     # depends_on:
     #   - auth-dev
@@ -148,8 +148,8 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: 
     depends_on:
       postgres:
@@ -369,7 +369,6 @@ services:
 
 networks:
   backend_net:
-    driver: bridge
   frontend_net:
 
 volumes:

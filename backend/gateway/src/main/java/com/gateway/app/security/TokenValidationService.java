@@ -20,12 +20,17 @@ public class TokenValidationService {
     private final JwtUtils jwtUtils;
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final WebClient.Builder webClientBuilder;
+
     @Value("${auth.service-url}")
     private String authServiceUrl;
 
     private static final Duration CACHE_TTL = Duration.ofMinutes(5);
 
     public Mono<Boolean> validateToken(String token) {
+        if (token == null || token.isBlank()) {
+            return Mono.error(new RuntimeException("Empty or null token"));
+        }
+
         try {
             var claims = jwtUtils.validateAndParseClaims(token);
 
@@ -46,46 +51,45 @@ public class TokenValidationService {
                             return Mono.just(true);
                         }
                         if ("revoked".equals(status)) {
-                            return Mono.error(new RuntimeException("Token revoked Gateway"));
+                            return Mono.error(new RuntimeException("Token revoked (Gateway cache)"));
                         }
                         return checkRemoteAndCache(token, cacheKey);
                     })
-                    .switchIfEmpty(checkRemoteAndCache(token, cacheKey));
+                    .switchIfEmpty(Mono.defer(() -> checkRemoteAndCache(token, cacheKey)))
+                    .doOnSuccess(result -> log.info("✅ Token successfully validated (cache or remote)"))
+                    .doOnError(err -> log.warn("❌ Token validation failed: {}", err.getMessage()));
 
         } catch (JwtException e) {
+            log.error("❌ Invalid JWT: {}", e.getMessage());
             return Mono.error(new RuntimeException("Invalid JWT: " + e.getMessage()));
+        } catch (Exception e) {
+            log.error("💥 Unexpected error during validation: {}", e.getMessage());
+            return Mono.error(e);
         }
     }
 
     private Mono<Boolean> checkRemoteAndCache(String token, String cacheKey) {
+        log.info("🌐 Validating token remotely with AuthService...");
 
         return webClientBuilder.build()
                 .get()
-                .uri(authServiceUrl + "/api/auth/validate?token=" + token)
+                .uri(authServiceUrl + "/validate?token=" + token)
                 .exchangeToMono(response -> {
-                    log.info("[AUTH VALIDATE] Status: {}", response.statusCode());
-
-                    // Log headers
-                    response.headers().asHttpHeaders()
-                            .forEach((k, v) -> log.debug("[AUTH VALIDATE] Header {} = {}", k, v));
-
                     if (response.statusCode().is2xxSuccessful()) {
-                        log.info("[AUTH VALIDATE] Token OK (200)");
                         return redisTemplate.opsForValue()
                                 .set(cacheKey, "valid", CACHE_TTL)
                                 .thenReturn(true);
                     }
 
-                    // Loguear body de error
                     return response.bodyToMono(String.class)
                             .defaultIfEmpty("<empty>")
                             .flatMap(body -> {
-                                log.error("[AUTH VALIDATE] Error {} - Body: {}", response.statusCode(), body);
+                                log.warn("❌ Token invalid ({}): {}", response.statusCode(), body);
                                 return redisTemplate.opsForValue()
                                         .set(cacheKey, "revoked", CACHE_TTL)
                                         .then(Mono.error(new RuntimeException("Auth validation failed: " + response.statusCode())));
                             });
-                });
+                })
+                .doOnError(err -> log.error("💥 Communication error with AuthService: {}", err.getMessage()));
     }
-
 }

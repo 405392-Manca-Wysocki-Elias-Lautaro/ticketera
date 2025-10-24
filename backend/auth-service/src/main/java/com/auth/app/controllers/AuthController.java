@@ -1,6 +1,5 @@
 package com.auth.app.controllers;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -21,6 +20,7 @@ import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.ApiResponse;
 import com.auth.app.dto.response.AuthResponse;
 import com.auth.app.dto.response.UserResponse;
+import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.services.application.AuthService;
 import com.auth.app.utils.ApiResponseFactory;
 import com.auth.app.utils.RequestUtils;
@@ -28,9 +28,11 @@ import com.auth.app.utils.TokenUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -176,11 +178,12 @@ public class AuthController {
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<Void> validateToken(@RequestParam String token) {
-        if (authService.validateAccessToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<ApiResponse<Void>> validateToken(@RequestParam("token") String token) {
+        log.info("request param: {}", token);
+        if (!authService.validateAccessToken(token)) {
+            throw new InvalidOrUnknownTokenException();
         }
-        return ResponseEntity.ok().build();
+        return ApiResponseFactory.success("Token validated.");
     }
 
 }

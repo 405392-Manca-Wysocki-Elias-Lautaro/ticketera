@@ -8,6 +8,6 @@ class GenerateHash {
     @Test
     void generateHash() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        System.out.println(encoder.encode("ChangeMe123!"));
+        System.out.println(encoder.encode("SecurePassword123$"));
     }
 }

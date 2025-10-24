@@ -24,23 +24,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .logout(logout -> logout.disable())
+                .formLogin(login -> login.disable())
+                .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            "/health",
-                            "/register",
-                            "/resend-verification",
-                            "/verify",
-                            "/login",
-                            "/forgot-password",
-                            "/reset-password",
-                            "/refresh-token",
-                            "/validate",
-                            "/v3/api-docs/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html"
-                    ).permitAll()
-                    .anyRequest()
-                    .authenticated()
+                    .requestMatchers("/**").permitAll()
                 );
 
         return http.build();
