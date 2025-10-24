@@ -43,3 +43,18 @@ logging:
   level:
     org.springframework.cloud.gateway: INFO
     reactor.netty.http.client: INFO
+
+gateway:
+  public-routes:
+    - /v3/api-docs/**
+    - /swagger-ui/**
+    - /swagger-ui.html
+    - /actuator/health
+    - /register
+    - /resend-verification
+    - /verify
+    - /login
+    - /validate
+    - /forgot-password
+    - /reset-password
+    - /refresh-token

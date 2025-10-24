@@ -79,9 +79,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         auditLogService.logAction(user, LogAction.ALL_TOKENS_REVOKED, ipAddress, userAgent);
     }
 
+    @Transactional
+    public void revokeByUserAndDevice(UserModel user, IpAddress ipAddress, UserAgent userAgent) {
+        refreshTokenRepository.revokeByUserAndDevice(user.getId(), ipAddress, userAgent);
+    }
+
     @Override
     public String rotateToken(UserModel user, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
-        revokeAllByUser(user, ipAddress, userAgent);
+        revokeByUserAndDevice(user, ipAddress, userAgent);
 
         String rawToken = create(user, ipAddress, userAgent, remembered);
 

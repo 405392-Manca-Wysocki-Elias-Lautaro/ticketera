@@ -98,6 +98,7 @@ services:
       SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
       JWT_SECRET: ${JWT_SECRET}
+      AUTH_URL: ${AUTH_URL}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: 

@@ -74,10 +74,8 @@ public class EmailVerificationServiceImpl implements EmailVerificatonService {
     @Override
     @Transactional
     public UserModel verifyToken(String rawToken) {
-        log.info("rawToken: {}", rawToken);
 
         String hash = TokenUtils.hashToken(rawToken);
-        log.info("hashToken: {}", hash);
 
         EmailVerificationToken token = emailVerificationTokenRepository.findByTokenHash(hash)
                 .orElseThrow(() -> new InvalidOrUnknownTokenException());

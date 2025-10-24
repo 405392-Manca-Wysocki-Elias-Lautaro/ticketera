@@ -48,6 +48,7 @@ public class TokenProvider {
     public String generateAccessToken(UserModel user) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
+                .setId(UUID.randomUUID().toString())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole().getCode())
                 .setIssuedAt(new Date())
@@ -115,6 +116,10 @@ public class TokenProvider {
             log.warn("[TOKEN] Invalid access token: {}", ex.getMessage());
             throw new InvalidOrUnknownTokenException();
         }
+    }
+
+    public Long getAccessTokenExpirationMs() {
+        return accessTokenExpirationMs;
     }
 
 }

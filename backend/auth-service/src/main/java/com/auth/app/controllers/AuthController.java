@@ -175,7 +175,7 @@ public class AuthController {
         return ApiResponseFactory.success("User retrieved successfully.", user);
     }
 
-    @GetMapping("/api/auth/validate")
+    @GetMapping("/validate")
     public ResponseEntity<Void> validateToken(@RequestParam String token) {
         if (authService.validateAccessToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

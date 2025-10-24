@@ -94,8 +94,12 @@ public class AuthServiceImpl implements AuthService {
         auditLogService.logAction(saved, LogAction.USER_REGISTERED,
                 ipAddress, userAgent);
 
-        UserResponse userResponse = modelMapper.map(saved, UserResponse.class);
-        return new AuthResponse(accessToken, refreshToken, userResponse);
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(tokenProvider.getAccessTokenExpirationMs())
+                .user(modelMapper.map(saved, UserResponse.class))
+                .build();
     }
 
     @Override
@@ -119,6 +123,8 @@ public class AuthServiceImpl implements AuthService {
     public void verifyEmail(String rawToken, IpAddress ipAddress, UserAgent userAgent) {
         try {
             UserModel verifiedUser = emailVerificationService.verifyToken(rawToken);
+
+            log.info("verified user: {}", verifiedUser);
 
             applicationEventPublisher.publishEvent(new UserWelcomeEvent(verifiedUser, ipAddress, userAgent));
             auditLogService.logAction(verifiedUser, LogAction.USER_EMAIL_VERIFIED, ipAddress, userAgent);
@@ -181,6 +187,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .expiresIn(tokenProvider.getAccessTokenExpirationMs())
                 .user(modelMapper.map(user, UserResponse.class))
                 .build();
     }
@@ -205,6 +212,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .accessToken(newAccess)
                 .refreshToken(newRefresh)
+                .expiresIn(tokenProvider.getAccessTokenExpirationMs())
                 .user(modelMapper.map(user, UserResponse.class))
                 .build();
     }
