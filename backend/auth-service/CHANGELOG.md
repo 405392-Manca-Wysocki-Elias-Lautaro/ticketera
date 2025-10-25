@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0...auth-v1.1.0) (2025-10-25)
+
+
+### Bug Fixes
+
+* delete changes ([bd4cd97](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/bd4cd977b9f8f91100d3ad7a25672c03107f2a58))
+
+
+### Features
+
+* initial folder structure ([1f83f9d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/1f83f9df3dfbfc597b843fc1b1c8698b8a715827))
+
 # 1.0.0 (2025-09-27)
 
 
