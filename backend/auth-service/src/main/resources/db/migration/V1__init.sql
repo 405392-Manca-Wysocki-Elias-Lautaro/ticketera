@@ -84,6 +84,7 @@ CREATE TABLE auth.api_key_scopes (
 CREATE TABLE auth.refresh_tokens (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL,
+    device_id       UUID NOT NULL DEFAULT gen_random_uuid(),
     token_hash      TEXT NOT NULL UNIQUE,
     ip_address      VARCHAR(50),
     user_agent      TEXT,
@@ -139,6 +140,7 @@ CREATE TABLE auth.audit_logs (
 CREATE TABLE auth.trusted_devices (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    device_id       UUID NOT NULL DEFAULT gen_random_uuid(),
     ip_address      VARCHAR(50),
     user_agent      TEXT,
     location        TEXT,
