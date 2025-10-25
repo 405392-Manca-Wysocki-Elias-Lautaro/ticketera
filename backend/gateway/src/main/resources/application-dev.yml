@@ -1,0 +1,84 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  main:
+    web-application-type: reactive
+
+  application:
+    name: gateway
+
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 5s
+
+      default-filters:
+        - RemoveRequestHeader=Cookie
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+      discovery:
+        locator:
+          enabled: false
+
+      routes:
+        # ===== Rutas DEV (Docker) con ENV + default seguros =====
+        - id: auth
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/?(?<segment>.*), /${segment}
+
+        - id: events
+          uri: "${SERVICES_EVENT_BASE_URL:http://event-dev:8080}"
+          predicates:
+            - Path=/api/events/**
+          filters:
+            - RewritePath=/api/events/?(?<segment>.*), /${segment}
+
+        - id: tickets
+          uri: "${SERVICES_TICKET_BASE_URL:http://ticket-dev:8080}"
+          predicates:
+            - Path=/api/tickets/**
+          filters:
+            - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
+
+        - id: payments
+          uri: "${SERVICES_PAYMENT_BASE_URL:http://payment-dev:8080}"
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api/payments/?(?<segment>.*), /${segment}
+
+        - id: notifications
+          uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification-dev:8080}"
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
+
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:8081"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  endpoint:
+    health:
+      probes:
+        enabled: true
