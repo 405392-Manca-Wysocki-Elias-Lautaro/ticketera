@@ -86,11 +86,15 @@ CREATE TABLE events.venue_areas (
 CREATE TABLE events.venue_seats (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   venue_area_id  uuid NOT NULL REFERENCES events.venue_areas(id),
-  seat_label     text NOT NULL,
-  row_label      text,
-  number_label   text
+  seat_number    int NOT NULL,
+  row_number     int NOT NULL,
+  label          text NOT NULL
 );
 
--- Recrear los índices para mejorar el rendimiento
+-- Índices para mejorar el rendimiento
 CREATE INDEX idx_venue_areas_venue_id ON events.venue_areas(venue_id);
 CREATE INDEX idx_venue_seats_venue_area_id ON events.venue_seats(venue_area_id);
+CREATE INDEX idx_venue_seats_row_number ON events.venue_seats(row_number);
+CREATE INDEX idx_venue_seats_seat_number ON events.venue_seats(seat_number);
+CREATE INDEX idx_venue_seats_label ON events.venue_seats(label);
+CREATE INDEX idx_venue_seats_row_seat ON events.venue_seats(venue_area_id, row_number, seat_number);

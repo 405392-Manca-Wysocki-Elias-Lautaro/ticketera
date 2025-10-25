@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VenueAreaDTO {
 
-    private UUID id;
+    private UUID areaId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID venueId;

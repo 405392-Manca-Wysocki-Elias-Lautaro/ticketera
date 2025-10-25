@@ -1,6 +1,7 @@
 package com.event.app.services.impl;
 
 import com.event.app.dtos.GenerateSeatsRequestDTO;
+import com.event.app.dtos.RowConfigurationDTO;
 import com.event.app.dtos.VenueAreaDTO;
 import com.event.app.models.VenueArea;
 import com.event.app.models.VenueSeat;
@@ -115,32 +116,39 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
             throw new IllegalArgumentException("No se pueden generar asientos para un área de admisión general");
         }
 
+        // Validar que se proporcionen configuraciones de filas
+        if (request.getRows() == null || request.getRows().isEmpty()) {
+            throw new IllegalArgumentException("Debe proporcionar al menos una configuración de fila");
+        }
+
         // Eliminar asientos existentes
         venueSeatRepository.deleteByVenueAreaId(venueAreaId);
 
-        // Valores por defecto
-        String rowPrefix = request.getRowPrefix() != null ? request.getRowPrefix() : "";
-        int startingRowNumber = request.getStartingRowNumber() != null ? request.getStartingRowNumber() : 1;
-        int startingSeatNumber = request.getStartingSeatNumber() != null ? request.getStartingSeatNumber() : 1;
-
         List<VenueSeatEntity> seats = new ArrayList<>();
 
-        // Generar asientos
-        for (int row = 0; row < request.getRows(); row++) {
-            int currentRow = startingRowNumber + row;
-            String rowLabel = rowPrefix + currentRow;
+        // Generar asientos para cada configuración de fila
+        int rowCounter = 1; // Contador para generar números de fila automáticamente
+        
+        for (RowConfigurationDTO rowConfig : request.getRows()) {
+            int seatsInThisRow = rowConfig.getSeatsPerRow();
+            // Todas las filas empiezan desde el asiento número 1
+            int startingSeatNumber = 1;
 
-            for (int seat = 0; seat < request.getSeatsPerRow(); seat++) {
-                int currentSeat = startingSeatNumber + seat;
+            // Generar asientos para esta fila específica
+            for (int seat = 0; seat < seatsInThisRow; seat++) {
+                int currentSeatNumber = startingSeatNumber + seat;
                 
                 VenueSeatEntity seatEntity = new VenueSeatEntity();
                 seatEntity.setVenueAreaId(venueAreaId);
-                seatEntity.setRowLabel(rowLabel);
-                seatEntity.setNumberLabel(String.valueOf(currentSeat));
-                seatEntity.setSeatLabel(rowLabel + "-" + currentSeat);
+                seatEntity.setRowNumber(rowCounter);
+                seatEntity.setSeatNumber(currentSeatNumber);
+                // Generar label en formato x-t donde x=rowNumber y t=seatNumber
+                seatEntity.setLabel(rowCounter + "-" + currentSeatNumber);
                 
                 seats.add(seatEntity);
             }
+            
+            rowCounter++; // Incrementar contador para la siguiente fila
         }
 
         // Guardar todos los asientos

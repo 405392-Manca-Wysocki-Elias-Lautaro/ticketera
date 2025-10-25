@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VenueSeatDTO {
 
-    private UUID id;
+    private UUID seatId;
 
     private UUID venueAreaId;
 
-    private String seatLabel;
+    private Integer rowNumber;
 
-    private String rowLabel;
+    private Integer seatNumber;
 
-    private String numberLabel;
+    private String label; // Concatenación de rowNumber + seatNumber para el frontend (ej: 1-1, 1-2, 1-3, ...)
 }
 

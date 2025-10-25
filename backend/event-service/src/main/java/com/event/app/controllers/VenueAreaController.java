@@ -117,6 +117,35 @@ public class VenueAreaController {
 
     /**
      * Generar asientos automáticamente para un área
+     * 
+     * Este endpoint permite crear asientos de forma flexible mediante un arreglo de configuraciones de filas.
+     * Cada fila puede tener diferente cantidad de asientos y número inicial personalizado.
+     * Los labels de las filas se generan automáticamente como "Fila 1", "Fila 2", etc.
+     * 
+     * Ejemplo de request body:
+     * {
+     *   "rows": [
+     *     {
+     *       "seatsPerRow": 10
+     *     },
+     *     {
+     *       "seatsPerRow": 15
+     *     },
+     *     {
+     *       "seatsPerRow": 12
+     *     }
+     *   ]
+     * }
+     * 
+     * Resultado:
+     * - Fila 1: 11, 12, 13, ..., 110 (rowNumber=1, seatNumber=1-10, label="11"-"110")
+     * - Fila 2: 21, 22, 23, ..., 215 (rowNumber=2, seatNumber=1-15, label="21"-"215")  
+     * - Fila 3: 31, 32, 33, ..., 312 (rowNumber=3, seatNumber=1-12, label="31"-"312")
+     * 
+     * @param venueId ID del venue
+     * @param areaId ID del área donde generar los asientos
+     * @param request Configuración de filas con sus respectivos asientos
+     * @return Lista de asientos generados
      */
     @PostMapping("/{areaId}/seats/generate")
     public ResponseEntity<List<VenueSeatDTO>> generateSeats(

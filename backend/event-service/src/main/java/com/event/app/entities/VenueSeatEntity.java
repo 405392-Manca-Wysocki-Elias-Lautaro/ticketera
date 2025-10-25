@@ -20,13 +20,13 @@ public class VenueSeatEntity {
     @Column(name = "venue_area_id", nullable = false)
     private UUID venueAreaId;
 
-    @Column(name = "seat_label", nullable = false, columnDefinition = "TEXT")
-    private String seatLabel;
+    @Column(name = "seat_number", nullable = false)
+    private Integer seatNumber;
 
-    @Column(name = "row_label", columnDefinition = "TEXT")
-    private String rowLabel;
+    @Column(name = "row_number", nullable = false)
+    private Integer rowNumber;
 
-    @Column(name = "number_label", columnDefinition = "TEXT")
-    private String numberLabel;
+    @Column(name = "label", nullable = false, columnDefinition = "TEXT")
+    private String label; // Concatenación de rowNumber + seatNumber
 }
 

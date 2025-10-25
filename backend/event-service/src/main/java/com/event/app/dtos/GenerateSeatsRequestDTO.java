@@ -1,28 +1,35 @@
 package com.event.app.dtos;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class GenerateSeatsRequestDTO {
 
-    @NotNull(message = "El número de filas es obligatorio")
-    @Min(value = 1, message = "Debe haber al menos 1 fila")
-    private Integer rows;
+    @NotEmpty(message = "Debe especificar al menos una configuración de fila")
+    @Valid
+    private List<RowConfigurationDTO> rows; // Arreglo de configuraciones de filas
 
-    @NotNull(message = "El número de asientos por fila es obligatorio")
-    @Min(value = 1, message = "Debe haber al menos 1 asiento por fila")
-    private Integer seatsPerRow;
-
-    private String rowPrefix; // Por ejemplo: "Fila ", "Row ", etc. / VER ESTO
-
-    private Integer startingRowNumber; // Número inicial para las filas (por defecto 1) / VER ESTO
-
-    private Integer startingSeatNumber; // Número inicial para los asientos (por defecto 1) / VER ESTO
+    // Constructor de conveniencia para mantener compatibilidad con el formato anterior
+    // (puede ser útil para migraciones o casos simples)
+    public static GenerateSeatsRequestDTO createSimpleLayout(
+            Integer numberOfRows, 
+            Integer seatsPerRow) {
+        
+        List<RowConfigurationDTO> rowConfigs = new java.util.ArrayList<>();
+        
+        for (int i = 0; i < numberOfRows; i++) {
+            rowConfigs.add(new RowConfigurationDTO(seatsPerRow));
+        }
+        
+        return new GenerateSeatsRequestDTO(rowConfigs);
+    }
 }
 

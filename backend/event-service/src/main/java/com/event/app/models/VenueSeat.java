@@ -14,10 +14,10 @@ public class VenueSeat {
 
     private UUID venueAreaId;
 
-    private String seatLabel;
+    private Integer seatNumber;
 
-    private String rowLabel;
+    private Integer rowNumber;
 
-    private String numberLabel;
+    private String label; // Concatenación de rowNumber + seatNumber
 }
 
