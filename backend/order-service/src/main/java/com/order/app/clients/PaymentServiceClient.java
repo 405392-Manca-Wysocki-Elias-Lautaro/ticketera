@@ -40,7 +40,7 @@ public class PaymentServiceClient {
             
             HttpEntity<PaymentRequest> entity = new HttpEntity<>(paymentRequest, headers);
             
-            String url = paymentServiceBaseUrl + "/api/payments/intents";
+            String url = paymentServiceBaseUrl + "/intents";
             
             ResponseEntity<PaymentResponse> response = restTemplate.exchange(
                 url,
