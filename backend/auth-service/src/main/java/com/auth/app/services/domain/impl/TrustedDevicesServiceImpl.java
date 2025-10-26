@@ -3,14 +3,19 @@ package com.auth.app.services.domain.impl;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.app.domain.entity.TrustedDevice;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.valueObjects.IpAddress;
+import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.repositories.TrustedDevicesRepository;
 import com.auth.app.services.domain.TrustedDevicesService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +29,7 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
     private final ModelMapper modelMapper;
 
     @Override
-    public boolean isNewDevice(UserModel user, UUID deviceId) {
+    public boolean isNewDevice(UserModel user, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
         Optional<TrustedDevice> existing = trustedDeviceRepository.findByUserIdAndDeviceId(user.getId(), deviceId);
         if (existing.isPresent()) {
             TrustedDevice device = existing.get();
@@ -35,6 +40,8 @@ public class TrustedDevicesServiceImpl implements TrustedDevicesService {
         TrustedDevice newDevice = TrustedDevice.builder()
                 .user(modelMapper.map(user, User.class))
                 .deviceId(deviceId)
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
                 .createdAt(OffsetDateTime.now())
                 .lastLogin(OffsetDateTime.now())
                 .build();

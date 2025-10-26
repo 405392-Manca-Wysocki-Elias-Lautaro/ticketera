@@ -18,9 +18,9 @@ public interface AuthService {
 
     AuthResponse refresh(String rawRefreshToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent);
 
-    void logout(String authorizationHeader, UUID deviceId, IpAddress ipAddress, UserAgent userAgent);
+    void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
 
-    void logoutFromOtherDevices(String authorizationHeader, UUID currentDeviceId, IpAddress ipAddress, UserAgent userAgent);
+    void logoutFromOtherDevices(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
 
     void changePassword(String authorizationHeader, ChangePasswordRequest request, IpAddress ipAddress, UserAgent userAgent);
 

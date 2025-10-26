@@ -32,7 +32,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     );
 
     // ✅ Revoke by token hash
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("""
         UPDATE RefreshToken r
@@ -72,7 +72,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     );
 
     // ✅ Revoke all tokens for a user
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("""
         UPDATE RefreshToken r

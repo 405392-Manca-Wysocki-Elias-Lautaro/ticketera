@@ -22,7 +22,20 @@
         <surefire.version>3.2.5</surefire.version>
         <failsafe.version>3.2.5</failsafe.version>
         <project.version>${project.version}</project.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Web MVC -->
@@ -96,6 +109,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -197,6 +222,10 @@
                 <configuration>
                     <trimStackTrace>true</trimStackTrace>
                     <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <excludes>
+                        <exclude>**/AuthAppApplicationTests.java</exclude>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 
@@ -215,6 +244,12 @@
                 </executions>
                 <configuration>
                     <reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/AuthAppApplicationTests.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 

@@ -2,16 +2,33 @@ package com.auth.app.controllers;
 
 import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.auth.app.domain.valueObjects.IpAddress;
 import com.auth.app.domain.valueObjects.UserAgent;
-import com.auth.app.dto.request.*;
-import com.auth.app.dto.response.*;
+import com.auth.app.dto.request.ChangePasswordRequest;
+import com.auth.app.dto.request.ForgotPasswordRequest;
+import com.auth.app.dto.request.LoginRequest;
+import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResetPasswordRequest;
+import com.auth.app.dto.response.ApiResponse;
+import com.auth.app.dto.response.AuthResponse;
+import com.auth.app.dto.response.UserResponse;
 import com.auth.app.exception.exceptions.InvalidOrUnknownTokenException;
 import com.auth.app.services.application.AuthService;
-import com.auth.app.utils.*;
+import com.auth.app.utils.ApiResponseFactory;
+import com.auth.app.utils.RequestUtils;
+import com.auth.app.utils.TokenUtils;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,11 +71,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Validated @RequestBody LoginRequest request, @RequestHeader(value = "X-Device-Id", required = false) String deviceIdHeader, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+        @Validated @RequestBody LoginRequest request,
+        @RequestHeader(value = "X-Device-Id", required = false) String deviceIdHeader,
+        HttpServletRequest httpRequest
+    ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
-
         UUID deviceId = Optional.ofNullable(deviceIdHeader).map(UUID::fromString).orElse(UUID.randomUUID());
+
         AuthResponse authResponse = authService.login(request, deviceId, ipAddress, userAgent);
 
         return ApiResponseFactory.success("Login successful", authResponse);
@@ -78,13 +99,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String authHeader, @RequestHeader(value = "X-Device-Id", required = false) String deviceIdHeader, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String authHeader, HttpServletRequest httpRequest) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
-        UUID deviceId = Optional.ofNullable(deviceIdHeader).map(UUID::fromString).orElse(UUID.randomUUID());
-
-        authService.logout(authHeader, deviceId, ipAddress, userAgent);
+        authService.logout(authHeader, ipAddress, userAgent);
 
         return ApiResponseFactory.success("Logout successful", null);
     }
@@ -120,7 +139,10 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(@RequestHeader("Authorization") String authorizationHeader, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+        @RequestHeader("Authorization") String authorizationHeader,
+        HttpServletRequest httpRequest
+    ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 

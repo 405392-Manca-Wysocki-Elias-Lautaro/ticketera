@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         UserModel saved = userService.create(modelMapper.map(request, UserModel.class));
         UUID deviceId = UUID.randomUUID();
 
-        String accessToken = tokenProvider.generateAccessToken(saved);
+        String accessToken = tokenProvider.generateAccessToken(saved, deviceId);
         String refreshToken = refreshTokenService.create(saved, deviceId, ipAddress, userAgent, false);
 
         String verifyEmailToken = emailVerificationService.generateToken(saved);
@@ -132,12 +132,12 @@ public class AuthServiceImpl implements AuthService {
 
         loginAttemptService.registerSuccessfulAttempt(user, ipAddress, userAgent);
 
-        String accessToken = tokenProvider.generateAccessToken(user);
+        String accessToken = tokenProvider.generateAccessToken(user, deviceId);
         String refreshToken = refreshTokenService.rotateToken(user, deviceId, ipAddress, userAgent, request.isRemembered());
 
         auditLogService.logAction(user, LogAction.USER_LOGIN, ipAddress, userAgent);
 
-        boolean isNewDevice = trustedDevicesService.isNewDevice(user, deviceId);
+        boolean isNewDevice = trustedDevicesService.isNewDevice(user, deviceId, ipAddress, userAgent);
 
         if (isNewDevice) {
             PasswordResetTokenModel token = passwordResetService.createToken(user);
@@ -167,7 +167,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String newRefresh = refreshTokenService.rotateFromRefresh(user, rawRefreshToken, deviceId, ipAddress, userAgent, false);
-        String newAccess = tokenProvider.generateAccessToken(user);
+        String newAccess = tokenProvider.generateAccessToken(user, deviceId);
 
         auditLogService.logAction(user, LogAction.TOKEN_REFRESHED, ipAddress, userAgent);
 
@@ -181,10 +181,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    @Override
-    public void logout(String authorizationHeader, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
+    public void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
+        UUID deviceId = tokenProvider.getDeviceIdFromToken(authorizationHeader.substring(7));
 
         refreshTokenService.revokeByDevice(user, deviceId, ipAddress, userAgent);
 
@@ -194,9 +194,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logoutFromOtherDevices(String authorizationHeader, UUID currentDeviceId, IpAddress ipAddress, UserAgent userAgent) {
+    public void logoutFromOtherDevices(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
+        UUID currentDeviceId = tokenProvider.getDeviceIdFromToken(authorizationHeader.substring(7));
 
         refreshTokenService.revokeAllExceptCurrent(user, currentDeviceId, ipAddress, userAgent);
 

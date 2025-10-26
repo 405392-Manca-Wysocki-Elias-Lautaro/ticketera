@@ -14,7 +14,7 @@ public interface TrustedDevicesRepository extends JpaRepository<TrustedDevice, U
 
     boolean existsByUserIdAndDeviceId(UUID userId, UUID deviceId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("""
         UPDATE TrustedDevice td
