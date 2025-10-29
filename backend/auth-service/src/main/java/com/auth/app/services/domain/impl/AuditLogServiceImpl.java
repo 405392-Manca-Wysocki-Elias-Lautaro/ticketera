@@ -25,8 +25,14 @@ public class AuditLogServiceImpl implements AuditLogService {
     @Override
     @Transactional
     public void logAction(UserModel user, LogAction action, IpAddress ipAddress, UserAgent userAgent) {
+        User mappedUser = null;
+
+        if (user != null) {
+            mappedUser = modelMapper.map(user, User.class);
+        }
+
         AuditLog log = AuditLog.builder()
-                .user(modelMapper.map(user, User.class))
+                .user(mappedUser)
                 .actionCode(action.getCode())
                 .action(action.name())
                 .description(action.getDescription())
@@ -37,4 +43,3 @@ public class AuditLogServiceImpl implements AuditLogService {
         auditLogRepository.save(log);
     }
 }
-

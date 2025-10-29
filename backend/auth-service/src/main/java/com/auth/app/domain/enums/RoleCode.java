@@ -7,5 +7,9 @@ public enum RoleCode {
     ADMIN,
     MANAGER,
     STAFF,
-    CUSTOMER
+    CUSTOMER,
+    TEST_USER,
+    TEST_ADMIN,
+    TEST_STAFF,
+    TEST_OWNER
 }

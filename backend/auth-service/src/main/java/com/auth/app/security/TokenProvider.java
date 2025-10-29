@@ -45,11 +45,13 @@ public class TokenProvider {
         this.accessTokenExpirationMs = jwtAccessTokenExpirationMs;
     }
 
-    public String generateAccessToken(UserModel user) {
+    public String generateAccessToken(UserModel user, UUID deviceId) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
+                .setId(UUID.randomUUID().toString())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole().getCode())
+                .claim("deviceId", deviceId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS512)
@@ -65,6 +67,28 @@ public class TokenProvider {
 
             String subject = claimsJws.getBody().getSubject();
             return UUID.fromString(subject);
+
+        } catch (ExpiredJwtException ex) {
+            auditLogService.logAction(null, LogAction.ACCESS_TOKEN_EXPIRED, null, null);
+            log.warn("[TOKEN] Access token expired: {}", ex.getMessage());
+            throw new InvalidOrUnknownTokenException();
+
+        } catch (JwtException | IllegalArgumentException ex) {
+            auditLogService.logAction(null, LogAction.TOKEN_VALIDATION_FAILED, null, null);
+            log.warn("[TOKEN] Invalid or tampered token: {}", ex.getMessage());
+            throw new InvalidRefreshTokenException();
+        }
+    }
+
+    public UUID getDeviceIdFromToken(String token) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+
+            String deviceId = claimsJws.getBody().get("deviceId", String.class);
+            return UUID.fromString(deviceId);
 
         } catch (ExpiredJwtException ex) {
             auditLogService.logAction(null, LogAction.ACCESS_TOKEN_EXPIRED, null, null);
@@ -115,6 +139,10 @@ public class TokenProvider {
             log.warn("[TOKEN] Invalid access token: {}", ex.getMessage());
             throw new InvalidOrUnknownTokenException();
         }
+    }
+
+    public Long getAccessTokenExpirationMs() {
+        return accessTokenExpirationMs;
     }
 
 }

@@ -1,16 +1,7 @@
-server:
-  port: 8080
-
 spring:
   config:
     activate:
       on-profile: dev
-
-  main:
-    web-application-type: reactive
-
-  application:
-    name: gateway
 
   devtools:
     restart:
@@ -20,27 +11,20 @@ spring:
 
   cloud:
     gateway:
-      httpclient:
-        connect-timeout: 3000
-        response-timeout: 5s
-
-      default-filters:
-        - RemoveRequestHeader=Cookie
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
-
       discovery:
         locator:
           enabled: false
-
+      default-filters:
+        - PreserveHostHeader
+      forwarded-headers-strategy: framework
       routes:
-        # ===== Rutas DEV (Docker) con ENV + default seguros =====
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
             - Path=/api/auth/**
           filters:
             - RewritePath=/api/auth/?(?<segment>.*), /${segment}
-
+        
         - id: events
           uri: "${SERVICES_EVENT_BASE_URL:http://event-dev:8080}"
           predicates:
@@ -68,7 +52,7 @@ spring:
             - Path=/api/notifications/**
           filters:
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
-        
+
         - id: orders
           uri: "${SERVICES_ORDER_BASE_URL:http://order-dev:8080}"
           predicates:
@@ -76,6 +60,7 @@ spring:
           filters:
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
 
+        # --- OpenAPI aggregation ---
         - id: openapi-auth
           uri: http://auth-dev:8080
           predicates:
@@ -119,8 +104,8 @@ spring:
           "[/**]":
             allowedOrigins:
               - "http://localhost:5173"
-              - "http://localhost:8081"
               - "http://localhost:8080"
+              - "http://localhost:8081"
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
@@ -151,12 +136,13 @@ springdoc:
   cors:
     enabled: true
 
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.security: DEBUG
+
 management:
-  endpoints:
-    web:
-      exposure:
-        include: "health,info"
   endpoint:
     health:
-      probes:
-        enabled: true
+      show-details: always

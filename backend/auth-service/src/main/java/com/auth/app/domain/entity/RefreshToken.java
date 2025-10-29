@@ -10,20 +10,8 @@ import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.utils.IpAddressConverter;
 import com.auth.app.utils.UserAgentConverter;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -37,9 +25,13 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // 🔹 Nuevo campo
+    @Column(name = "device_id", nullable = false)
+    private UUID deviceId;
 
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
@@ -47,14 +39,14 @@ public class RefreshToken {
     @Column(name = "ip_address")
     @Convert(converter = IpAddressConverter.class)
     private IpAddress ipAddress;
-    
+
     @Column(name = "user_agent")
     @Convert(converter = UserAgentConverter.class)
     private UserAgent userAgent;
-    
+
     @Builder.Default
     private boolean remembered = false;
-    
+
     @Builder.Default
     private boolean revoked = false;
 
@@ -68,5 +60,4 @@ public class RefreshToken {
     public void revoke() {
         this.revoked = true;
     }
-
 }

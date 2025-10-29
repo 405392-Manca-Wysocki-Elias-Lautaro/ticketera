@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthResponse {
     private String accessToken;
-    private String refreshToken;
+    private Long expiresIn;
     private UserResponse user;
+    private String tokenType;
+    private java.util.UUID deviceId;
 }
 

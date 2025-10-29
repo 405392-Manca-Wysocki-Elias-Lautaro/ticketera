@@ -1,5 +1,7 @@
 package com.auth.app.configs;
 
+import java.beans.Customizer;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,22 +26,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .logout(logout -> logout.disable())
+                .formLogin(login -> login.disable())
+                .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            "/health",
-                            "/register",
-                            "/resend-verification",
-                            "/verify",
-                            "/login",
-                            "/forgot-password",
-                            "/reset-password",
-                            "/refresh-token",
-                            "/v3/api-docs/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html"
-                    ).permitAll()
-                    .anyRequest()
-                    .authenticated()
+                    .requestMatchers("/**").permitAll()
                 );
 
         return http.build();
