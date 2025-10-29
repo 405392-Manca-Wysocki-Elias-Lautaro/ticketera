@@ -1,5 +1,6 @@
 package com.auth.app.utils;
 
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -30,11 +31,14 @@ public class TokenUtils {
     }
 
     public static String extractRefreshToken(String authHeader, String refreshCookie) {
+        // 🧩 Preferí siempre la cookie
         String refreshToken = null;
 
         if (refreshCookie != null && !refreshCookie.isBlank()) {
-            refreshToken = refreshCookie;
+            // 🔹 En cookies los caracteres como "+" o "/" pueden venir URL-encoded (%2B, %2F)
+            refreshToken = URLDecoder.decode(refreshCookie, StandardCharsets.UTF_8);
         } else if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            // 🔹 Como fallback, usa el Authorization header
             refreshToken = authHeader.substring(7).trim();
         }
 

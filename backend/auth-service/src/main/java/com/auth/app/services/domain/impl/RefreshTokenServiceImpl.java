@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auth.app.domain.entity.RefreshToken;
 import com.auth.app.domain.entity.User;
 import com.auth.app.domain.enums.LogAction;
+import com.auth.app.domain.model.RefreshTokenModel;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.domain.valueObjects.IpAddress;
 import com.auth.app.domain.valueObjects.UserAgent;
@@ -34,7 +35,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // ✅ Crea un nuevo refresh token (con deviceId)
     @Override
     @Transactional
-    public String create(UserModel user, UUID deviceId, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
+    public RefreshTokenModel create(UserModel user, UUID deviceId, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
         String rawToken = TokenUtils.generateToken();
         String hashedToken = TokenUtils.hashToken(rawToken);
 
@@ -57,7 +58,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         log.info("[TOKEN_CREATE] user={} deviceId={} ip={} ua={}",
                 user.getEmail(), deviceId, ipAddress.value(), userAgent.value());
 
-        return rawToken;
+        return RefreshTokenModel.builder()
+                .token(rawToken)
+                .expiresAt(expiration)
+                .build();
+
     }
 
     // ✅ Revoca tokens por deviceId
@@ -99,26 +104,20 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // ✅ Rota el token actual (revoca y genera uno nuevo)
     @Override
     @Transactional
-    public String rotateToken(UserModel user, UUID deviceId, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
+    public RefreshTokenModel rotateToken(UserModel user, UUID deviceId, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
         revokeByDevice(user, deviceId, ipAddress, userAgent);
 
-        String newToken = create(user, deviceId, ipAddress, userAgent, remembered);
+        RefreshTokenModel newToken = create(user, deviceId, ipAddress, userAgent, remembered);
 
         auditLogService.logAction(user, LogAction.REFRESH_TOKEN_ROTATED, ipAddress, userAgent);
 
         return newToken;
     }
 
-    // ✅ Valida un token de refresh
-    @Override
-    public boolean validate(UserModel user, String rawToken) {
-        return refreshTokenRepository.existsValidToken(user.getId(), TokenUtils.hashToken(rawToken));
-    }
-
     // ✅ Rota a partir de un refresh token existente
     @Override
     @Transactional
-    public String rotateFromRefresh(UserModel user, String currentRawToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
+    public RefreshTokenModel rotateFromRefresh(UserModel user, String currentRawToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent, boolean remembered) {
         if (!validate(user, currentRawToken)) {
             auditLogService.logAction(user, LogAction.REFRESH_TOKEN_INVALID, ipAddress, userAgent);
             throw new InvalidRefreshTokenException();
@@ -127,9 +126,38 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenRepository.revokeByTokenHash(TokenUtils.hashToken(currentRawToken));
         auditLogService.logAction(user, LogAction.REFRESH_TOKEN_USED, ipAddress, userAgent);
 
-        String newToken = create(user, deviceId, ipAddress, userAgent, remembered);
+        RefreshTokenModel newToken = create(user, deviceId, ipAddress, userAgent, remembered);
         auditLogService.logAction(user, LogAction.REFRESH_TOKEN_ROTATED, ipAddress, userAgent);
 
         return newToken;
     }
+
+    // ✅ Valida un token de refresh
+    @Override
+    public boolean validate(UserModel user, String rawToken) {
+        if (rawToken == null) {
+            log.warn("❌ rawToken is null, cannot validate");
+            return false;
+        }
+
+        String hashedToken = TokenUtils.hashToken(rawToken);
+
+        boolean exists = refreshTokenRepository.existsValidToken(user.getId(), hashedToken);
+        log.info("Validation result = {}", exists);
+
+        return exists;
+    }
+
+    @Override
+    public RefreshTokenModel findByTokenHash(String hashedToken) {
+        return refreshTokenRepository.findByTokenHash(hashedToken)
+                .map(e -> modelMapper.map(e, RefreshTokenModel.class))
+                .orElseThrow(InvalidRefreshTokenException::new);
+    }
+
+    @Override
+    public boolean hasValidTokenForDevice(UserModel user, UUID deviceId) {
+        return refreshTokenRepository.existsValidTokenForDevice(user.getId(), deviceId);
+    }
+
 }

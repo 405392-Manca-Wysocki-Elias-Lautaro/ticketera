@@ -81,4 +81,17 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
         AND r.revoked = FALSE
     """)
     void revokeAllByUserId(@Param("userId") UUID userId);
+
+    Optional<RefreshToken> findTopByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    @Query("""
+    SELECT COUNT(rt) > 0
+    FROM RefreshToken rt
+    WHERE rt.user.id = :userId
+        AND rt.deviceId = :deviceId
+        AND rt.revoked = false
+        AND rt.expiresAt > CURRENT_TIMESTAMP
+    """)
+    boolean existsValidTokenForDevice(UUID userId, UUID deviceId);
+
 }

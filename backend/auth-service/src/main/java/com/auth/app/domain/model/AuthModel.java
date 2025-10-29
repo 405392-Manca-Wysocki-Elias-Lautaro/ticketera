@@ -1,4 +1,4 @@
-package com.auth.app.dto.response;
+package com.auth.app.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthResponse {
+public class AuthModel {
     private String accessToken;
+    private RefreshTokenModel refreshToken;
     private Long expiresIn;
-    private UserResponse user;
+    private UserModel user;
     private String tokenType;
     private java.util.UUID deviceId;
+
 }
 

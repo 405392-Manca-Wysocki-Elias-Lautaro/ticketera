@@ -1,6 +1,8 @@
 package com.auth.app.services.application;
 
 import java.util.UUID;
+
+import com.auth.app.domain.model.AuthModel;
 import com.auth.app.domain.valueObjects.IpAddress;
 import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.dto.request.*;
@@ -8,15 +10,15 @@ import com.auth.app.dto.response.*;
 
 public interface AuthService {
 
-    AuthResponse register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent);
+    AuthModel register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent);
 
     void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent);
 
     void verifyEmail(String rawToken, IpAddress ipAddress, UserAgent userAgent);
 
-    AuthResponse login(LoginRequest request, UUID deviceId, IpAddress ipAddress, UserAgent userAgent);
+    AuthModel login(LoginRequest request, UUID deviceId, IpAddress ipAddress, UserAgent userAgent);
 
-    AuthResponse refresh(String rawRefreshToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent);
+    AuthModel refresh(String rawRefreshToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent);
 
     void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
 

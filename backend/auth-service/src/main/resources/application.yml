@@ -63,6 +63,10 @@ spring:
       password: ${REDIS_PASSWORD:}
       timeout: 1000
 
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
 rabbitmq:
   notifications:
     exchange: notifications.exchange
@@ -71,8 +75,7 @@ rabbitmq:
 jwt:
   secret: ${JWT_SECRET}
   expiration:
-    access: 900000      # 15 min
-    refresh: 604800000  # 7 días
+    access: 900000 # 15 min
 
 security:
   password-reset:

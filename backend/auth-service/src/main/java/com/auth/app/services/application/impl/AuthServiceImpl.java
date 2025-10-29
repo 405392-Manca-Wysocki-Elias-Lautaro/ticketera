@@ -4,15 +4,19 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.auth.app.domain.entity.PasswordResetToken;
 import com.auth.app.domain.enums.LogAction;
 import com.auth.app.domain.events.*;
+import com.auth.app.domain.model.AuthModel;
 import com.auth.app.domain.model.PasswordResetTokenModel;
+import com.auth.app.domain.model.RefreshTokenModel;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.domain.valueObjects.IpAddress;
 import com.auth.app.domain.valueObjects.UserAgent;
@@ -24,6 +28,7 @@ import com.auth.app.services.application.AuthService;
 import com.auth.app.services.domain.*;
 import com.auth.app.utils.EnvironmentUtils;
 import com.auth.app.utils.TokenUtils;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,13 +53,9 @@ public class AuthServiceImpl implements AuthService {
     private Integer resetPasswordTokenExpirationMinutes;
 
     @Override
-    public AuthResponse register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent) {
+    public AuthModel register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel saved = userService.create(modelMapper.map(request, UserModel.class));
-        UUID deviceId = UUID.randomUUID();
-
-        String accessToken = tokenProvider.generateAccessToken(saved, deviceId);
-        String refreshToken = refreshTokenService.create(saved, deviceId, ipAddress, userAgent, false);
 
         String verifyEmailToken = emailVerificationService.generateToken(saved);
 
@@ -66,11 +67,9 @@ public class AuthServiceImpl implements AuthService {
 
         auditLogService.logAction(saved, LogAction.USER_REGISTERED, ipAddress, userAgent);
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+        return AuthModel.builder()
                 .expiresIn(tokenProvider.getAccessTokenExpirationMs())
-                .user(modelMapper.map(saved, UserResponse.class))
+                .user(saved)
                 .build();
     }
 
@@ -104,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse login(LoginRequest request, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
+    public AuthModel login(LoginRequest request, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
         UserModel user = userService.findByEmail(request.getEmail());
 
         if (user == null) {
@@ -133,7 +132,7 @@ public class AuthServiceImpl implements AuthService {
         loginAttemptService.registerSuccessfulAttempt(user, ipAddress, userAgent);
 
         String accessToken = tokenProvider.generateAccessToken(user, deviceId);
-        String refreshToken = refreshTokenService.rotateToken(user, deviceId, ipAddress, userAgent, request.isRemembered());
+        RefreshTokenModel refreshToken = refreshTokenService.rotateToken(user, deviceId, ipAddress, userAgent, request.isRemembered());
 
         auditLogService.logAction(user, LogAction.USER_LOGIN, ipAddress, userAgent);
 
@@ -144,43 +143,47 @@ public class AuthServiceImpl implements AuthService {
             applicationEventPublisher.publishEvent(new UserLoginFromNewDeviceEvent(user, token, ipAddress, userAgent));
         }
 
-        return AuthResponse.builder()
+        return AuthModel.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .expiresIn(tokenProvider.getAccessTokenExpirationMs())
-                .user(modelMapper.map(user, UserResponse.class))
+                .user(user)
                 .tokenType("Bearer")
                 .deviceId(deviceId)
                 .build();
     }
 
     @Override
-    public AuthResponse refresh(String rawRefreshToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
+    public AuthModel refresh(String rawRefreshToken, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
 
-        UserModel user = tokenProvider.extractUserFromRefreshToken(rawRefreshToken);
+        String hashedToken = TokenUtils.hashToken(rawRefreshToken);
+        RefreshTokenModel stored = refreshTokenService.findByTokenHash(hashedToken);
 
-        boolean isValid = refreshTokenService.validate(user, rawRefreshToken);
+        UserModel user = stored.getUser();
 
-        if (!isValid) {
+        if (stored.isRevoked()
+                || stored.getExpiresAt().isBefore(OffsetDateTime.now())
+                || !refreshTokenService.validate(user, rawRefreshToken)) {
             auditLogService.logAction(user, LogAction.REFRESH_TOKEN_INVALID, ipAddress, userAgent);
             throw new InvalidRefreshTokenException();
         }
 
-        String newRefresh = refreshTokenService.rotateFromRefresh(user, rawRefreshToken, deviceId, ipAddress, userAgent, false);
+        RefreshTokenModel newRefresh = refreshTokenService.rotateFromRefresh(user, rawRefreshToken, deviceId, ipAddress, userAgent, false);
         String newAccess = tokenProvider.generateAccessToken(user, deviceId);
 
         auditLogService.logAction(user, LogAction.TOKEN_REFRESHED, ipAddress, userAgent);
 
-        return AuthResponse.builder()
+        return AuthModel.builder()
                 .accessToken(newAccess)
                 .refreshToken(newRefresh)
                 .expiresIn(tokenProvider.getAccessTokenExpirationMs())
-                .user(modelMapper.map(user, UserResponse.class))
+                .user(user)
                 .tokenType("Bearer")
                 .deviceId(deviceId)
                 .build();
     }
 
+    @Override
     public void logout(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent) {
 
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
@@ -290,7 +293,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenService.revokeAllByUser(user, ipAddress, userAgent);
 
         String timestamp = DateTimeFormatter.ofPattern(
-            "dd/MM/yyyy HH:mm:ss").withZone(ZoneId.systemDefault()).format(Instant.now());
+                "dd/MM/yyyy HH:mm:ss").withZone(ZoneId.systemDefault()).format(Instant.now());
 
         applicationEventPublisher.publishEvent(new UserPasswordResetSuccessEvent(user, ipAddress, userAgent, timestamp));
 
@@ -305,12 +308,39 @@ public class AuthServiceImpl implements AuthService {
         UserModel user = tokenProvider.extractUserFromAuthorizationHeader(authorizationHeader);
 
         auditLogService.logAction(user, LogAction.USER_PROFILE_FETCHED, ipAddress, userAgent);
-        
+
         return modelMapper.map(user, UserResponse.class);
     }
 
     @Override
     public boolean validateAccessToken(String token) {
-        return tokenProvider.validateAccessToken(token);
+        try {
+            boolean jwtValid = tokenProvider.validateAccessToken(token);
+            if (!jwtValid) {
+                log.warn("[ACCESS_VALIDATE] ❌ Invalid or expired JWT");
+                return false;
+            }
+
+            UUID userId = tokenProvider.getUserIdFromToken(token);
+            UUID deviceId = tokenProvider.getDeviceIdFromToken(token);
+
+            UserModel user = userService.findById(userId);
+            if (user == null || !user.isActive()) {
+                log.warn("[ACCESS_VALIDATE] ❌ User not found or inactive for token");
+                return false;
+            }
+
+            boolean hasActiveRefresh = refreshTokenService.hasValidTokenForDevice(user, deviceId);
+            if (!hasActiveRefresh) {
+                log.warn("[ACCESS_VALIDATE] ⚠️ No active refresh token for device {} — rejecting access", deviceId);
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            log.warn("[ACCESS_VALIDATE] ❌ Exception during validation: {}", e.getMessage());
+            return false;
+        }
     }
 }
