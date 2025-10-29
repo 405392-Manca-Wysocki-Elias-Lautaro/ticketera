@@ -14,7 +14,9 @@ spring:
       discovery:
         locator:
           enabled: false
-
+      default-filters:
+        - PreserveHostHeader
+      forwarded-headers-strategy: framework
       routes:
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
@@ -22,7 +24,7 @@ spring:
             - Path=/api/auth/**
           filters:
             - RewritePath=/api/auth/?(?<segment>.*), /${segment}
-
+        
         - id: events
           uri: "${SERVICES_EVENT_BASE_URL:http://event-dev:8080}"
           predicates:

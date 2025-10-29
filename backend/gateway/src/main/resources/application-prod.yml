@@ -9,6 +9,9 @@ spring:
 
   cloud:
     gateway:
+      default-filters:
+        - PreserveHostHeader
+      forwarded-headers-strategy: framework
       routes:
         - id: auth
           uri: http://auth:8080
