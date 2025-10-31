@@ -13,10 +13,12 @@ spring:
     gateway:
       httpclient:
         connect-timeout: 3000
-        response-timeout: 5s
+        response-timeout: 10s
       default-filters:
-        - RemoveRequestHeader=Cookie
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      forwarded-headers-strategy: framework
+      set-status:
+        enabled: false
 
   data:
     redis:

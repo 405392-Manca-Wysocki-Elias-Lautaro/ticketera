@@ -29,7 +29,8 @@ public class WebConfig {
                     // 🌐 Producción: dominios explícitos
                     mapping.allowedOrigins(
                         "https://app.ticketera.com", // TODO: Configurar dominios
-                        "https://frontend.ticketera.dev"
+                        "https://frontend.ticketera.dev",
+                        "http://localhost:3000"
                     );
                 } else {
                     // 🧪 Desarrollo: permite todos los orígenes

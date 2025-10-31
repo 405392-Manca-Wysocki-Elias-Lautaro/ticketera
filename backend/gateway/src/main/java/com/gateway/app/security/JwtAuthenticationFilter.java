@@ -33,6 +33,13 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+
+        if (routeProps.getPublicRoutes() == null) {
+            log.error("🚨 Public routes list is NULL! Check GatewayRoutesProperties binding.");
+        } else {
+            log.debug("📋 Loaded {} public routes: {}", routeProps.getPublicRoutes().size(), routeProps.getPublicRoutes());
+        }
+
         String path = exchange.getRequest().getPath().value();
         log.info("[JWT FILTER] Path={} | public={}", path, isPublicRoute(path));
 
@@ -54,7 +61,9 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     private boolean isPublicRoute(String path) {
         List<String> publicRoutes = routeProps.getPublicRoutes();
-        if (publicRoutes == null || publicRoutes.isEmpty()) return false;
+        if (publicRoutes == null || publicRoutes.isEmpty()) {
+            return false;
+        }
         return publicRoutes.stream().anyMatch(pattern -> PATH_MATCHER.match(pattern, path));
     }
 

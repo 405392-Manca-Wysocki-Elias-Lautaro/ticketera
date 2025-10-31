@@ -11,10 +11,9 @@ public class GatewaySecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable) // 👈🔥 Desactiva CSRF en Gateway
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .anyExchange().permitAll() // o .authenticated() si manejás tokens aquí
+                .anyExchange().permitAll()
             )
             .build();
     }
