@@ -19,7 +19,6 @@ export function generateViewport() {
   }
 }
 
-
 export default function RootLayout({
   children,
 }: {

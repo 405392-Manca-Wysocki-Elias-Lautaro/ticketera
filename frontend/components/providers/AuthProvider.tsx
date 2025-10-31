@@ -8,28 +8,40 @@ import { toast } from "sonner";
 
 interface AuthProviderProps {
     children: ReactNode;
-    publicRoutes?: string[];
 }
 
-export function AuthProvider({
-    children,
-    publicRoutes = ["/login", "/register"],
-}: AuthProviderProps) {
+/**
+ * 🔐 AuthProvider
+ *
+ * Controla la sesión y la navegación según el estado del usuario.
+ * - Permite libre acceso a todo lo que esté bajo /app/(public)
+ * - Protege automáticamente /app/(protected)
+ * - Muestra mensaje y limpia sesión si el token expira o el usuario no es válido.
+ */
+export function AuthProvider({ children }: AuthProviderProps) {
     const router = useRouter();
     const pathname = usePathname();
     const queryClient = useQueryClient();
 
     const { token, user, logout } = useAuthStore();
 
+    const isPublicRoute = pathname.startsWith("/app/(public)") ||
+        pathname === "/login" ||
+        pathname === "/register";
+
+    // 🚦 Control de acceso
     useEffect(() => {
-        const isPublic = publicRoutes.includes(pathname);
-        if (!token && !isPublic) {
+
+        if (!token && !isPublicRoute) {
             router.push("/login");
+            return;
         }
-        if (token && pathname === "/login") {
+
+        if (token && (pathname === "/login" || pathname === "/register")) {
             router.push("/dashboard");
+            return;
         }
-    }, [token, pathname, router, publicRoutes]);
+    }, [token, pathname, router, isPublicRoute]);
 
     useEffect(() => {
         if (!token) queryClient.clear();
@@ -37,7 +49,7 @@ export function AuthProvider({
 
     useEffect(() => {
         if (token && user === null) {
-            toast.error("Tu sesión ha expirado. Inicia sesión nuevamente.");
+            toast.error("Your session has expired. Please log in again.");
             logout();
             router.push("/login");
         }

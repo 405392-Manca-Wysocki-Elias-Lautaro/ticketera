@@ -42,12 +42,6 @@ export default function DashboardPage() {
         return filtered
     }, [selectedCategory, searchQuery])
 
-    useEffect(() => {
-        if (!isLoading && !user) {
-            router.push("/login")
-        }
-    }, [user, isLoading, router])
-
     if (isLoading || !user) {
         return (
             <div className="flex min-h-screen items-center justify-center">

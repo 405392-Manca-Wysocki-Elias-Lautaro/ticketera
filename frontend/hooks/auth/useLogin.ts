@@ -23,16 +23,6 @@ export function useLogin() {
 
             toast.success(`Bienvenido ${data.user.firstName || ""}`);
             router.push("/dashboard");
-        },
-        onError: (error: AxiosError) => {
-            console.error("❌ Error al iniciar sesión:", error);
-
-            // 👇 Cast seguro con optional chaining
-            const message =
-                (error.response?.data as { message?: string })?.message ||
-                "Error al iniciar sesión. Verifica tus credenciales.";
-
-            toast.error(message);
-        },
+        }
     });
 }
