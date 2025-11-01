@@ -21,6 +21,7 @@ import { Calendar, MapPin, Ticket, Plus, Edit, Trash2 } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { AdminSidebar } from '@/components/AdminSidebar'
 import { mockEvents } from '@/mocks/mockEvents'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 export default function AdminEventsPage() {
   const router = useRouter()
@@ -42,7 +43,7 @@ export default function AdminEventsPage() {
   }, [events, searchQuery])
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
+    if (!isLoading && (!user || user.role.code !== RoleCode.ADMIN)) {
       router.push("/dashboard")
     }
   }, [user, isLoading, router])
@@ -52,7 +53,7 @@ export default function AdminEventsPage() {
     setDeleteEventId(null)
   }
 
-  if (isLoading || !user || user.role !== "admin") {
+  if (isLoading || !user || user.role.code !== RoleCode.ADMIN) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

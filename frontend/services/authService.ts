@@ -10,7 +10,7 @@ export const authService = {
     ),
 
     logout: () => api.post<ApiResponse>(
-        `${BASE_URL}/logout`, {withCredentials: true}
+        `${BASE_URL}/logout`, {}, {withCredentials: true}
     ),
 
     //TODO: Cambiar any por type ForgotPassword

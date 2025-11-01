@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DollarSign, Clock, CheckCircle2 } from "lucide-react"
 import { Navbar } from '@/components/Navbar'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 interface Payment {
   id: string
@@ -50,12 +51,12 @@ export default function AdminPaymentsPage() {
   const { user, isLoading } = useAuth()
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
+    if (!isLoading && (!user || user.role.code !== RoleCode.ADMIN)) {
       router.push("/dashboard")
     }
   }, [user, isLoading, router])
 
-  if (isLoading || !user || user.role !== "admin") {
+  if (isLoading || !user || user.role.code !== RoleCode.ADMIN) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

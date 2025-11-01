@@ -1,4 +1,4 @@
-import { RoleCode } from './enums/roleCode'
+import { RoleCode } from './enums/RoleCode'
 
 export interface Role {
     id: string

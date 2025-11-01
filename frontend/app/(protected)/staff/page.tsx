@@ -13,6 +13,7 @@ import { QrCode, CheckCircle2, XCircle, Search, Calendar, MapPin, Users } from "
 import { useAuth } from '@/hooks/auth/useAuth'
 import { StaffSidebar } from '@/components/StaffSidebar'
 import { mockEvents } from '@/mocks/mockEvents'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 export default function StaffDashboardPage() {
     const router = useRouter()
@@ -35,7 +36,7 @@ export default function StaffDashboardPage() {
     const currentEvent = assignedEvents.find((e) => e.id === selectedEvent) || assignedEvents[0]
 
     useEffect(() => {
-        if (!isLoading && (!user || user.role !== "staff")) {
+        if (!isLoading && (!user || user.role.code !== RoleCode.STAFF)) {
             router.push("/dashboard")
         }
     }, [user, isLoading, router])
@@ -92,7 +93,7 @@ export default function StaffDashboardPage() {
         }
     }
 
-    if (isLoading || !user || user.role !== "staff") {
+    if (isLoading || !user || user.role.code !== RoleCode.STAFF) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

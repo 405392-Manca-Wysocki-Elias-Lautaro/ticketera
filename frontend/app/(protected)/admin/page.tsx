@@ -10,6 +10,7 @@ import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Cart
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { AdminSidebar } from '@/components/AdminSidebar'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 const salesData = [
     { month: "Ene", ventas: 12000, tickets: 240 },
@@ -32,12 +33,12 @@ export default function AdminDashboardPage() {
     const { user, isLoading } = useAuth()
 
     useEffect(() => {
-        if (!isLoading && (!user || user.role !== "admin")) {
+        if (!isLoading && (!user || user.role.code !== RoleCode.ADMIN)) {
             router.push("/dashboard")
         }
     }, [user, isLoading, router])
 
-    if (isLoading || !user || user.role !== "admin") {
+    if (isLoading || !user || user.role.code !== RoleCode.ADMIN) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

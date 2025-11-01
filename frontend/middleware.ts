@@ -16,7 +16,6 @@ export function middleware(req: NextRequest) {
     const token = req.cookies.get("refreshToken")?.value
 
     const { pathname } = req.nextUrl
-    console.log(`🧭 Ruta: ${pathname} | Cookie: ${token ? "✅ presente" : "❌ ausente"}`);
 
     const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 

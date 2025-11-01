@@ -32,7 +32,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { RoleCode } from '@/types/enums/roleCode'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 export function Navbar() {
     const { user, logout } = useAuth()

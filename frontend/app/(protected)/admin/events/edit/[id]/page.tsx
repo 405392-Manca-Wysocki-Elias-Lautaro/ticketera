@@ -23,6 +23,7 @@ import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { AdminSidebar } from '@/components/AdminSidebar'
 import { mockEvents } from '@/mocks/mockEvents'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 interface AreaForm {
   id: string
@@ -62,7 +63,7 @@ export default function EditEventPage() {
   const [eventAddress, setEventAddress] = useState("")
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
+    if (!isLoading && (!user || user.role.code !== RoleCode.ADMIN)) {
       router.push("/dashboard")
     }
   }, [user, isLoading, router])
@@ -155,7 +156,7 @@ export default function EditEventPage() {
     router.push("/admin/events")
   }
 
-  if (isLoading || !user || user.role !== "admin") {
+  if (isLoading || !user || user.role.code !== RoleCode.ADMIN) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

@@ -8,6 +8,7 @@ import { Calendar, MapPin, Users } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { StaffSidebar } from '@/components/StaffSidebar'
 import { mockEvents } from '@/mocks/mockEvents'
+import { RoleCode } from '@/types/enums/RoleCode'
 
 export default function StaffEventsPage() {
   const router = useRouter()
@@ -17,12 +18,12 @@ export default function StaffEventsPage() {
   const assignedEvents = mockEvents.slice(0, 3)
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "staff")) {
+    if (!isLoading && (!user || user.role.code !== RoleCode.STAFF)) {
       router.push("/dashboard")
     }
   }, [user, isLoading, router])
 
-  if (isLoading || !user || user.role !== "staff") {
+  if (isLoading || !user || user.role.code !== RoleCode.STAFF) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
