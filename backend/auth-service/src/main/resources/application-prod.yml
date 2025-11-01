@@ -20,6 +20,13 @@ spring:
       - classpath:db/migration
       - classpath:db/r
 
+app:
+  cookie:
+    domain: ticketera.dev
+    secure: true
+    same-site: None
+    path: /
+
 logging:
   level:
     root: INFO

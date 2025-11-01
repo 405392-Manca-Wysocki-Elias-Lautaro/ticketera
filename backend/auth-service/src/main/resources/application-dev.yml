@@ -21,6 +21,13 @@ spring:
     url: http://localhost:8080
     queue: notifications.queue
 
+app:
+  cookie:
+    domain: localhost
+    secure: true
+    same-site: None
+    path: /
+
 logging:
   level:
     root: INFO
