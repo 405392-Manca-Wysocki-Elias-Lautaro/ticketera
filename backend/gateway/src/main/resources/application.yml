@@ -16,6 +16,7 @@ spring:
         response-timeout: 10s
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+        - AddResponseHeader=Access-Control-Expose-Headers, Set-Cookie
       forwarded-headers-strategy: framework
       set-status:
         enabled: false

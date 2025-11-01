@@ -114,6 +114,8 @@ spring:
               - "http://localhost:3000"
             allowedMethods: "*"
             allowedHeaders: "*"
+            exposedHeaders:
+              - "Set-Cookie"
             allowCredentials: true
 
 springdoc:
