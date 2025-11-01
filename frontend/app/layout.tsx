@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css"; // estilos globales SSR-safe
 import ReactQueryProvider from '@/components/providers/QueryClientProvider';
 import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -29,7 +30,10 @@ export default function RootLayout({
       <body className={`${geist.className} antialiased bg-background text-foreground`}>
         <Toaster position="top-right" richColors />
         <ReactQueryProvider>
-          {children}
+          <TooltipProvider>
+
+            {children}
+          </TooltipProvider>
         </ReactQueryProvider>
       </body>
     </html>

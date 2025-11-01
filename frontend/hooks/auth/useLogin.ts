@@ -7,21 +7,24 @@ import type { LoginRequest } from "@/types/AuthRequest";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { ApiResponse } from '@/types/Apiresponse';
 
 export function useLogin() {
     const { setToken, setUser } = useAuthStore();
     const router = useRouter();
 
-    return useMutation<AuthResponse, AxiosError, LoginRequest>({
+    return useMutation<ApiResponse, AxiosError, LoginRequest>({
         mutationFn: async (credentials) => {
             const response = await authService.login(credentials);
             return response.data;
         },
         onSuccess: (data) => {
-            setToken(data.accessToken);
-            setUser(data.user);
+            const authResponse :AuthResponse = data?.data;
 
-            toast.success(`Bienvenido ${data.user.firstName || ""}`);
+            setToken(authResponse.accessToken);
+            setUser(authResponse.user);
+
+            toast.success(`Bienvenido ${authResponse.user.firstName || ""}`);
             router.push("/dashboard");
         }
     });

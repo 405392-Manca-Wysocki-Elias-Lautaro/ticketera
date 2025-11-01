@@ -56,7 +56,7 @@ export default function ProfilePage() {
                   <Label htmlFor="name">Nombre Completo</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="name" defaultValue={user.name} className="pl-9" />
+                    <Input id="name" defaultValue={user.firstName} className="pl-9" />
                   </div>
                 </div>
 
@@ -109,7 +109,7 @@ export default function ProfilePage() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-medium">Rol de Usuario</p>
-                  <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
+                  <p className="text-sm text-muted-foreground capitalize">{user.role.code}</p>
                 </div>
               </div>
 

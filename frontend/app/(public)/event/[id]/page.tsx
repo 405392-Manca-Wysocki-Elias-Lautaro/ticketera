@@ -17,13 +17,7 @@ export default function EventDetailPage() {
   const { user, isLoading } = useAuth()
   const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login")
-    }
-  }, [user, isLoading, router])
-
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

@@ -8,5 +8,5 @@ export interface User {
     emailVerified: boolean
     active: boolean
     id_role: number
-    rol: Role
+    role: Role
 }

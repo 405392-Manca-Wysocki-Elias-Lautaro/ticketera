@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -13,43 +13,27 @@ interface AuthProviderProps {
 /**
  * 🔐 AuthProvider
  *
- * Controla la sesión y la navegación según el estado del usuario.
- * - Permite libre acceso a todo lo que esté bajo /app/(public)
- * - Protege automáticamente /app/(protected)
- * - Muestra mensaje y limpia sesión si el token expira o el usuario no es válido.
+ * Componente para gestionar el estado de la sesión del usuario a través de la app.
+ * - Limpia la sesión si el token expira o el usuario no es válido.
+ * - Limpia la cache de React Query al cerrar sesión.
  */
 export function AuthProvider({ children }: AuthProviderProps) {
     const router = useRouter();
-    const pathname = usePathname();
     const queryClient = useQueryClient();
 
     const { token, user, logout } = useAuthStore();
 
-    const isPublicRoute = pathname.startsWith("/app/(public)") ||
-        pathname === "/login" ||
-        pathname === "/register";
-
-    // 🚦 Control de acceso
+    // Limpiar cache de React Query si el token desaparece
     useEffect(() => {
-
-        if (!token && !isPublicRoute) {
-            router.push("/login");
-            return;
+        if (!token) {
+            queryClient.clear();
         }
-
-        if (token && (pathname === "/login" || pathname === "/register")) {
-            router.push("/dashboard");
-            return;
-        }
-    }, [token, pathname, router, isPublicRoute]);
-
-    useEffect(() => {
-        if (!token) queryClient.clear();
     }, [token, queryClient]);
 
+    // Cerrar sesión si el token existe pero no hay datos de usuario (sesión corrupta/expirada)
     useEffect(() => {
         if (token && user === null) {
-            toast.error("Your session has expired. Please log in again.");
+            toast.error("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
             logout();
             router.push("/login");
         }
