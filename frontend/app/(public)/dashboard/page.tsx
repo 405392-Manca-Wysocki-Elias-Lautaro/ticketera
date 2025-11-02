@@ -64,9 +64,9 @@ export default function DashboardPage() {
                 {/* Category Filters */}
                 <div className="mb-8 overflow-x-auto pb-2">
                     <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-                        <TabsList className="inline-flex w-auto">
+                        <TabsList className="inline-flex w-full ">
                             {categories.map((category) => (
-                                <TabsTrigger key={category} value={category} className="whitespace-nowrap">
+                                <TabsTrigger key={category} value={category} className="whitespace-nowrap w-full">
                                     {category}
                                 </TabsTrigger>
                             ))}
