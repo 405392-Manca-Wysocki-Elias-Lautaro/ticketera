@@ -28,6 +28,7 @@ import com.auth.app.dto.request.ChangePasswordRequest;
 import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
 import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResendVerificationEmail;
 import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.ApiResponse;
 import com.auth.app.dto.response.AuthResponse;
@@ -63,11 +64,14 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestParam String email, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> resendVerification(
+        @Validated @RequestBody ResendVerificationEmail request,
+        HttpServletRequest httpRequest
+    ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
-        authService.resendVerificationEmail(email, ipAddress, userAgent);
+        authService.resendVerificationEmail(request, ipAddress, userAgent);
 
         return ApiResponseFactory.success("Verification email resent successfully");
     }
@@ -180,7 +184,10 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Validated @RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Validated @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 

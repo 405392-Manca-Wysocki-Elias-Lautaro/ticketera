@@ -12,7 +12,7 @@ public interface AuthService {
 
     AuthModel register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent);
 
-    void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent);
+    void resendVerificationEmail(ResendVerificationEmail request, IpAddress ipAddress, UserAgent userAgent);
 
     void verifyEmail(String rawToken, IpAddress ipAddress, UserAgent userAgent);
 

@@ -30,6 +30,7 @@ import com.auth.app.dto.request.ChangePasswordRequest;
 import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
 import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResendVerificationEmail;
 import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.UserResponse;
 import com.auth.app.exception.exceptions.AccountNotVerifiedException;
@@ -96,10 +97,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent) {
-        UserModel user = userService.findByEmail(email);
+    public void resendVerificationEmail(ResendVerificationEmail request, IpAddress ipAddress, UserAgent userAgent) {
+        UserModel user = userService.findByEmail(request.getEmail());
 
-        String verifyEmailToken = emailVerificationService.generateNewVerificationToken(email);
+        String verifyEmailToken = emailVerificationService.generateNewVerificationToken(request.getEmail());
 
         if (EnvironmentUtils.isDev()) {
             log.info("🗝️ Resend Verify Email Token: {}", verifyEmailToken);

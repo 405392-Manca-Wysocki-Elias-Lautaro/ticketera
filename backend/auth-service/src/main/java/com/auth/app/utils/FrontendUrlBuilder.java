@@ -21,7 +21,7 @@ public class FrontendUrlBuilder {
     }
 
     public String buildVerifyEmailUrl(String token) {
-        return baseUrl + "/verify-email?token=" + token;
+        return baseUrl + "/email-verified?token=" + token;
     }
 }
 
