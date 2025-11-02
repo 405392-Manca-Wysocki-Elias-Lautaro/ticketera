@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import Image from "next/image"
 import { useAuth } from "@/hooks/auth/useAuth"
 import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
@@ -10,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Clock, Navigation } from "lucide-react"
 import { mockEvents } from '@/mocks/mockEvents'
+import TiltedCard from '@/components/TiltedCard'
 
 export default function EventDetailPage() {
   const router = useRouter()
@@ -53,8 +53,24 @@ export default function EventDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Event Image */}
             <div className="relative h-64 md:h-96 w-full rounded-xl overflow-hidden">
-              <Image src={event.image || "/placeholder.svg"} alt={event.title} fill className="object-cover" priority />
-              <Badge className="absolute top-4 right-4 gradient-brand text-white border-0">{event.category}</Badge>
+              <TiltedCard
+                imageSrc={event.image || "/placeholder.svg"}
+                altText={event.title}
+                captionText={event.title}
+                containerHeight="100%"
+                imageHeight="100%"
+                imageWidth="100%"
+scaleOnHover={1.02}
+rotateAmplitude={6}
+                showMobileWarning={false}
+                showTooltip={false}
+                displayOverlayContent
+                overlayContent={
+                  <Badge className="absolute top-10 right-16 gradient-brand  text-white border-0">
+                    {event.category}
+                  </Badge>
+                }
+              />
             </div>
 
             {/* Event Info */}
