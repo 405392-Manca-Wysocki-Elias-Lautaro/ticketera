@@ -1,31 +1,53 @@
-// src/hooks/auth/useLogin.ts
 import { authService } from "@/services/authService";
 import { useAuthStore } from "@/lib/store";
-import { useMutation } from "@tanstack/react-query";
-import type { AuthResponse } from "@/types/AuthResponse";
-import type { LoginRequest } from "@/types/AuthRequest";
+import type { LoginRequest } from "@/types/Request/LoginRequest";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { ApiResponse } from '@/types/Apiresponse';
+import { AuthResponse } from "@/types/Response/AuthResponse";
+import { ApiResponse } from "@/types/Response/Apiresponse";
+import { useMutation } from "@tanstack/react-query";
+import { useResendVerificationEmail } from "@/hooks/auth/useResendVerificationEmail";
+import { handleApiError } from "@/utils/handleApiError";
 
 export function useLogin() {
     const { setToken, setUser } = useAuthStore();
     const router = useRouter();
+    const { resend } = useResendVerificationEmail();
 
     return useMutation<ApiResponse, AxiosError, LoginRequest>({
-        mutationFn: async (credentials) => {
+        mutationFn: async (credentials: LoginRequest) => {
             const response = await authService.login(credentials);
             return response.data;
         },
-        onSuccess: (data) => {
-            const authResponse :AuthResponse = data?.data;
+        onSuccess: (data: ApiResponse) => {
+            const authResponse: AuthResponse = data?.data;
 
             setToken(authResponse.accessToken);
             setUser(authResponse.user);
 
             toast.success(`Bienvenido ${authResponse.user.firstName || ""}`);
             router.push("/dashboard");
-        }
+        },
+        onError: (error: AxiosError<any>) => {
+            const code = error.response?.data?.data?.code;
+
+            if (code === "ACCOUNT_NOT_VERIFIED") {
+                const email =
+                    error.response?.data?.data?.details?.email ||
+                    error.response?.data?.data?.details?.user_email ||
+                    error.response?.data?.data?.email;
+
+                toast.warning(
+                    "Tu cuenta aún no está verificada. Te reenviamos un correo de verificación."
+                );
+
+                if (email) resend(email);
+                router.push("/verify-email");
+                return;
+            }
+
+            handleApiError(error);
+        },
     });
 }

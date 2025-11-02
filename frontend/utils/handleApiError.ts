@@ -1,4 +1,4 @@
-import { ApiErrorResponse } from '@/types/ApiErrorResponse'
+import { ApiErrorResponse } from '@/types/Response/ApiErrorResponse'
 import { toast } from "sonner"
 
 /**

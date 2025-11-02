@@ -19,8 +19,6 @@ export interface Event {
   image?: string
 }
 
-
-
 interface EventCardProps {
   event: Event
 }

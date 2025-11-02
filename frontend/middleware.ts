@@ -10,7 +10,7 @@ const protectedRoutes = [
 ]
 
 // 👨‍👩‍👧‍👦 Rutas públicas que un usuario autenticado no debería visitar (ej: login)
-const publicOnlyRoutes = ["/login", "/register"]
+const publicOnlyRoutes = ["/login", "/signup", "/verify-email", "/forgot-password"]
 
 export function middleware(req: NextRequest) {
     const token = req.cookies.get("refreshToken")?.value

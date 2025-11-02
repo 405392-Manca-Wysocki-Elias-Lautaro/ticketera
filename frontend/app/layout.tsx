@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css"; // estilos globales SSR-safe
+import "./globals.css";
 import ReactQueryProvider from '@/components/providers/QueryClientProvider';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';

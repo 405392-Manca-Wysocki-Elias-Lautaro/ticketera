@@ -119,9 +119,9 @@ export function Navbar() {
 
                         {/* Tooltip fuera del Dropdown para evitar conflicto */}
                         <DropdownMenu>
-                            <DropdownMenuTrigger>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <DropdownMenuTrigger asChild>
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -130,14 +130,14 @@ export function Navbar() {
                                             <User className="h-5 w-5" />
                                             <span className="sr-only">Menú de usuario</span>
                                         </Button>
-                                    </TooltipTrigger>
+                                    </DropdownMenuTrigger>
+                                </TooltipTrigger>
 
-                                    <TooltipContent>
-                                        <p>Menú de usuario</p>
-                                    </TooltipContent>
-                                </Tooltip>
+                                <TooltipContent>
+                                    <p>Menú de usuario</p>
+                                </TooltipContent>
+                            </Tooltip>
 
-                            </DropdownMenuTrigger>
 
                             <DropdownMenuContent align="end" className="w-56 z-9999">
                                 {user ?
