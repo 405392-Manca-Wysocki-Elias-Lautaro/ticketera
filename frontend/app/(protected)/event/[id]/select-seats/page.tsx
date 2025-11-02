@@ -1,27 +1,66 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { useAuth } from "@/hooks/auth/useAuth"
-import { Navbar } from "@/components/Navbar"
+import { useEffect, useState, useMemo } from "react"
+import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { ArrowLeft, ChevronDown } from "lucide-react"
 import Link from "next/link"
+import { useAuth } from '@/hooks/auth/useAuth'
 import { mockEvents } from '@/mocks/mockEvents'
+import { Navbar } from '@/components/Navbar'
 
 export default function SelectSeatsPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const { user, isLoading } = useAuth()
   const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
-  // TODO: Añadir tipo Area
-  const [selectedArea, setSelectedArea] = useState<any | null>(null)
-  // TODO: Añadir tipo Row
-  const [selectedRow, setSelectedRow] = useState<any | null>(null)
-  const [selectedSeats, setSelectedSeats] = useState<number[]>([])
-  const [quantity, setQuantity] = useState(1)
+
+  const urlAreaId = searchParams.get("area")
+  const urlSeats = searchParams.get("seats")
+  const urlQuantity = searchParams.get("quantity")
+
+  //TODO: Usar type Area
+  const [selectedArea, setSelectedArea] = useState<any | null>(() => {
+    if (urlAreaId && event) {
+      return event.areas.find((a) => a.id === urlAreaId) || null
+    }
+    return null
+  })
+
+  const [selectedSeats, setSelectedSeats] = useState<{ row: string; seat: number }[]>(() => {
+    if (urlSeats) {
+      return urlSeats.split(",").map((seat) => {
+        const [row, seatNum] = seat.split("-")
+        return { row, seat: Number.parseInt(seatNum) }
+      })
+    }
+    return []
+  })
+
+  const [quantity, setQuantity] = useState(() => {
+    return urlQuantity ? Number.parseInt(urlQuantity) : 1
+  })
+
+  const occupiedSeats = useMemo(() => {
+    if (!selectedArea || selectedArea.type === "general") return new Set<string>()
+
+    const occupied = new Set<string>()
+    selectedArea.rows?.forEach((row: any) => {
+      const totalSeats = row.endSeat - row.startSeat + 1
+      const occupiedCount = Math.floor(totalSeats * 0.3)
+
+      for (let i = 0; i < occupiedCount; i++) {
+        const randomSeat = row.startSeat + Math.floor(Math.random() * totalSeats)
+        occupied.add(`${row.name}-${randomSeat}`)
+      }
+    })
+
+    return occupied
+  }, [selectedArea]) // Only regenerate when area changes
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -37,19 +76,20 @@ export default function SelectSeatsPage() {
     )
   }
 
-  //TODO: Añadir tipo Area
+  //TODO: Usar type Area
   const handleAreaSelect = (area: any) => {
     setSelectedArea(area)
-    setSelectedRow(null)
     setSelectedSeats([])
   }
 
-  const handleSeatToggle = (seatNumber: number) => {
+  const handleSeatToggle = (row: string, seatNumber: number) => {
     setSelectedSeats((prev) => {
-      if (prev.includes(seatNumber)) {
-        return prev.filter((s) => s !== seatNumber)
+      const exists = prev.find((s) => s.row === row && s.seat === seatNumber)
+
+      if (exists) {
+        return prev.filter((s) => !(s.row === row && s.seat === seatNumber))
       } else {
-        return [...prev, seatNumber]
+        return [...prev, { row, seat: seatNumber }]
       }
     })
   }
@@ -61,8 +101,10 @@ export default function SelectSeatsPage() {
         : selectedArea.price * selectedSeats.length
       : 0
 
+    const seatsParam = selectedSeats.map((s) => `${s.row}-${s.seat}`).join(",")
+
     router.push(
-      `/event/${event.id}/checkout?area=${selectedArea?.id}&seats=${selectedSeats.join(",")}&quantity=${quantity}&total=${total}`,
+      `/event/${event.id}/checkout?area=${selectedArea?.id}&seats=${seatsParam}&quantity=${quantity}&total=${total}`,
     )
   }
 
@@ -157,13 +199,16 @@ export default function SelectSeatsPage() {
                           <div className="grid grid-cols-10 gap-2">
                             {Array.from({ length: row.endSeat - row.startSeat + 1 }, (_, i) => row.startSeat + i).map(
                               (seatNumber) => {
-                                const isSelected = selectedSeats.includes(seatNumber)
-                                const isOccupied = Math.random() > 0.7 // Mock occupied seats
+                                const seatKey = `${row.name}-${seatNumber}`
+                                const isSelected = selectedSeats.some(
+                                  (s) => s.row === row.name && s.seat === seatNumber,
+                                )
+                                const isOccupied = occupiedSeats.has(seatKey)
 
                                 return (
                                   <button
                                     key={seatNumber}
-                                    onClick={() => !isOccupied && handleSeatToggle(seatNumber)}
+                                    onClick={() => !isOccupied && handleSeatToggle(row.name, seatNumber)}
                                     disabled={isOccupied}
                                     className={`aspect-square rounded text-xs font-medium transition-all ${
                                       isOccupied
@@ -231,7 +276,46 @@ export default function SelectSeatsPage() {
                       selectedSeats.length > 0 && (
                         <div>
                           <p className="text-sm text-muted-foreground mb-1">Asientos seleccionados</p>
-                          <p className="font-semibold">{selectedSeats.sort((a, b) => a - b).join(", ")}</p>
+                          {selectedSeats.length <= 5 ? (
+                            <div className="space-y-1">
+                              {selectedSeats
+                                .sort((a, b) => a.row.localeCompare(b.row) || a.seat - b.seat)
+                                .map((seat, idx) => (
+                                  <p key={idx} className="font-semibold text-sm">
+                                    Fila {seat.row} - Asiento {seat.seat}
+                                  </p>
+                                ))}
+                            </div>
+                          ) : (
+                            <Collapsible>
+                              <div className="space-y-1">
+                                {selectedSeats
+                                  .sort((a, b) => a.row.localeCompare(b.row) || a.seat - b.seat)
+                                  .slice(0, 3)
+                                  .map((seat, idx) => (
+                                    <p key={idx} className="font-semibold text-sm">
+                                      Fila {seat.row} - Asiento {seat.seat}
+                                    </p>
+                                  ))}
+                              </div>
+                              <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="w-full mt-2">
+                                  Ver todos ({selectedSeats.length})
+                                  <ChevronDown className="ml-2 h-4 w-4" />
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="space-y-1 mt-2">
+                                {selectedSeats
+                                  .sort((a, b) => a.row.localeCompare(b.row) || a.seat - b.seat)
+                                  .slice(3)
+                                  .map((seat, idx) => (
+                                    <p key={idx} className="font-semibold text-sm">
+                                      Fila {seat.row} - Asiento {seat.seat}
+                                    </p>
+                                  ))}
+                              </CollapsibleContent>
+                            </Collapsible>
+                          )}
                         </div>
                       )
                     )}

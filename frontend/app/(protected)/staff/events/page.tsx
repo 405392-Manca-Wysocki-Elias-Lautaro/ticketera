@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Users } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { StaffSidebar } from '@/components/StaffSidebar'
 import { mockEvents } from '@/mocks/mockEvents'
 import { RoleCode } from '@/types/enums/RoleCode'
+import { StaffSidebar } from '@/components/StaffSidebar'
 
 export default function StaffEventsPage() {
   const router = useRouter()

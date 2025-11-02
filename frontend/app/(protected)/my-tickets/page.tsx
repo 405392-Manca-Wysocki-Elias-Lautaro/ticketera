@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Navbar } from "@/components/Navbar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,19 +10,21 @@ import { Calendar, MapPin, QrCode } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockTickets } from '@/mocks/mockTickets'
+import { Navbar } from '@/components/Navbar'
 
 export default function MyTicketsPage() {
     const router = useRouter()
     const { user, isLoading } = useAuth()
-    //TODO: Usar type TICKETS
+    //TODO: Usar type Ticket
     const [tickets, setTickets] = useState<any[]>(mockTickets)
+    //TODO: Usar type Ticket
     const [selectedTicket, setSelectedTicket] = useState<any | null>(null)
 
     useEffect(() => {
         if (!isLoading && !user) {
             router.push("/login")
         }
-    }, [isLoading, router])
+    }, [user, isLoading, router])
 
     if (isLoading || !user) {
         return (
@@ -122,7 +123,7 @@ export default function MyTicketsPage() {
     )
 }
 
-//TODO: Añadir type Ticket y separar en otra clase (Ver tema componentes anidados)
+//TODO: Usar type Ticket
 function TicketCard({ ticket, onViewQR }: { ticket: any; onViewQR?: () => void }) {
     const formattedDate = new Date(ticket.eventDate).toLocaleDateString("es-ES", {
         day: "numeric",
@@ -132,48 +133,50 @@ function TicketCard({ ticket, onViewQR }: { ticket: any; onViewQR?: () => void }
 
     return (
         <Card className={ticket.status === "used" ? "opacity-60" : ""}>
-            <CardContent className="p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        <h3 className="font-bold text-lg line-clamp-2 mb-1">{ticket.eventTitle}</h3>
-                        <Badge variant={ticket.status === "valid" ? "default" : "secondary"}>
-                            {ticket.status === "valid" ? "Válido" : "Usado"}
-                        </Badge>
-                    </div>
-                </div>
-
-                <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4 shrink-0" />
-                        <span>
-                            {formattedDate} - {ticket.eventTime}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4 shrink-0" />
-                        <span>{ticket.eventLocation}</span>
-                    </div>
-                </div>
-
-                <div className="pt-4 border-t space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Área</span>
-                        <span className="font-medium">{ticket.areaName}</span>
-                    </div>
-                    {ticket.seatNumber && (
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Asiento</span>
-                            <span className="font-medium">{ticket.seatNumber}</span>
+            <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex-1 space-y-4">
+                    <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg line-clamp-2 mb-1">{ticket.eventTitle}</h3>
+                            <Badge variant={ticket.status === "valid" ? "default" : "secondary"}>
+                                {ticket.status === "valid" ? "Válido" : "Usado"}
+                            </Badge>
                         </div>
-                    )}
-                    <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Precio</span>
-                        <span className="font-medium">${ticket.price.toLocaleString()}</span>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar className="h-4 w-4 shrink-0" />
+                            <span>
+                                {formattedDate} - {ticket.eventTime}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="h-4 w-4 shrink-0" />
+                            <span>{ticket.eventLocation}</span>
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t space-y-2">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Área</span>
+                            <span className="font-medium">{ticket.areaName}</span>
+                        </div>
+                        {ticket.seatNumber && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Asiento</span>
+                                <span className="font-medium">{ticket.seatNumber}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Precio</span>
+                            <span className="font-medium">${ticket.price.toLocaleString()}</span>
+                        </div>
                     </div>
                 </div>
 
                 {ticket.status === "valid" && onViewQR && (
-                    <Button onClick={onViewQR} className="w-full gradient-brand text-white">
+                    <Button onClick={onViewQR} className="w-full gradient-brand text-white mt-4">
                         <QrCode className="mr-2 h-4 w-4" />
                         Ver Código QR
                     </Button>

@@ -2,14 +2,14 @@
 
 import { useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { useAuth } from "@/hooks/auth/useAuth"
-import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import Confetti from "react-confetti"
-import { useWindowSize } from "@/hooks/useWindowSize"
+import { useAuth } from '@/hooks/auth/useAuth'
+import { useWindowSize } from '@/hooks/useWindowSize'
+import { Navbar } from '@/components/Navbar'
 
 export default function SuccessPage() {
   const router = useRouter()

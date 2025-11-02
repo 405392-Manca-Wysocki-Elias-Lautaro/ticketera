@@ -4,15 +4,16 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams, useSearchParams } from "next/navigation"
-import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, CreditCard, Lock } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { ArrowLeft, CreditCard, Lock, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockEvents } from '@/mocks/mockEvents'
+import { Navbar } from '@/components/Navbar'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -22,12 +23,28 @@ export default function CheckoutPage() {
   const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
   const [isProcessing, setIsProcessing] = useState(false)
 
+  const [cardNumber, setCardNumber] = useState("")
+  const [expiry, setExpiry] = useState("")
+  const [cvv, setCvv] = useState("")
+  const [phone, setPhone] = useState("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   const areaId = searchParams.get("area")
   const seats = searchParams.get("seats")
   const quantity = searchParams.get("quantity")
-  const total = searchParams.get("total")
+  const total = Number(searchParams.get("total"))
 
   const selectedArea = event?.areas.find((a) => a.id === areaId)
+
+  const parsedSeats = seats
+    ? seats.split(",").map((s) => {
+        const [row, seat] = s.split("-")
+        return { row, seat: Number(seat) }
+      })
+    : []
+
+  const serviceFee = Math.round(total * 0.1)
+  const finalTotal = total + serviceFee
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -35,8 +52,89 @@ export default function CheckoutPage() {
     }
   }, [user, isLoading, router])
 
+  const validateCardNumber = (value: string) => {
+    const cleaned = value.replace(/\s/g, "")
+    if (cleaned.length !== 16 || !/^\d+$/.test(cleaned)) {
+      return "Número de tarjeta inválido (16 dígitos)"
+    }
+    return ""
+  }
+
+  const validateExpiry = (value: string) => {
+    if (!/^\d{2}\/\d{2}$/.test(value)) {
+      return "Formato inválido (MM/AA)"
+    }
+    const [month, year] = value.split("/").map(Number)
+    if (month < 1 || month > 12) {
+      return "Mes inválido"
+    }
+    const currentYear = new Date().getFullYear() % 100
+    const currentMonth = new Date().getMonth() + 1
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      return "Tarjeta vencida"
+    }
+    return ""
+  }
+
+  const validateCVV = (value: string) => {
+    if (!/^\d{3,4}$/.test(value)) {
+      return "CVV inválido (3-4 dígitos)"
+    }
+    return ""
+  }
+
+  const validatePhone = (value: string) => {
+    const cleaned = value.replace(/[\s\-$$$$]/g, "")
+    if (cleaned.length < 10 || !/^\+?\d+$/.test(cleaned)) {
+      return "Teléfono inválido"
+    }
+    return ""
+  }
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\s/g, "")
+    if (value.length <= 16 && /^\d*$/.test(value)) {
+      const formatted = value.match(/.{1,4}/g)?.join(" ") || value
+      setCardNumber(formatted)
+      if (errors.cardNumber) {
+        setErrors((prev) => ({ ...prev, cardNumber: "" }))
+      }
+    }
+  }
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "")
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + "/" + value.slice(2, 4)
+    }
+    setExpiry(value)
+    if (errors.expiry) {
+      setErrors((prev) => ({ ...prev, expiry: "" }))
+    }
+  }
+
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const newErrors: Record<string, string> = {}
+
+    const cardError = validateCardNumber(cardNumber)
+    if (cardError) newErrors.cardNumber = cardError
+
+    const expiryError = validateExpiry(expiry)
+    if (expiryError) newErrors.expiry = expiryError
+
+    const cvvError = validateCVV(cvv)
+    if (cvvError) newErrors.cvv = cvvError
+
+    const phoneError = validatePhone(phone)
+    if (phoneError) newErrors.phone = phoneError
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
     setIsProcessing(true)
 
     // Simulate payment processing
@@ -82,17 +180,47 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-                    <Input id="cardNumber" placeholder="1234 5678 9012 3456" required />
+                    <Input
+                      id="cardNumber"
+                      placeholder="1234 5678 9012 3456"
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      maxLength={19}
+                      required
+                    />
+                    {errors.cardNumber && <p className="text-sm text-destructive">{errors.cardNumber}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="expiry">Vencimiento</Label>
-                      <Input id="expiry" placeholder="MM/AA" required />
+                      <Input
+                        id="expiry"
+                        placeholder="MM/AA"
+                        value={expiry}
+                        onChange={handleExpiryChange}
+                        maxLength={5}
+                        required
+                      />
+                      {errors.expiry && <p className="text-sm text-destructive">{errors.expiry}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="cvv">CVV</Label>
-                      <Input id="cvv" placeholder="123" maxLength={3} required />
+                      <Input
+                        id="cvv"
+                        placeholder="123"
+                        value={cvv}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (/^\d*$/.test(value) && value.length <= 4) {
+                            setCvv(value)
+                            if (errors.cvv) setErrors((prev) => ({ ...prev, cvv: "" }))
+                          }
+                        }}
+                        maxLength={4}
+                        required
+                      />
+                      {errors.cvv && <p className="text-sm text-destructive">{errors.cvv}</p>}
                     </div>
                   </div>
 
@@ -115,7 +243,18 @@ export default function CheckoutPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone">Teléfono</Label>
-                    <Input id="phone" type="tel" placeholder="+54 11 1234-5678" required />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+54 11 1234-5678"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value)
+                        if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }))
+                      }}
+                      required
+                    />
+                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -129,7 +268,7 @@ export default function CheckoutPage() {
                 ) : (
                   <>
                     <Lock className="mr-2 h-4 w-4" />
-                    Pagar ${total}
+                    Pagar ${finalTotal.toLocaleString()}
                   </>
                 )}
               </Button>
@@ -168,9 +307,43 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                   ) : (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Asientos</span>
-                      <span className="font-medium">{seats}</span>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-muted-foreground">Asientos</span>
+                        <span className="font-medium">{parsedSeats.length}</span>
+                      </div>
+                      {parsedSeats.length <= 3 ? (
+                        <div className="space-y-1 pl-4">
+                          {parsedSeats.map((seat, idx) => (
+                            <p key={idx} className="text-xs text-muted-foreground">
+                              Fila {seat.row} - Asiento {seat.seat}
+                            </p>
+                          ))}
+                        </div>
+                      ) : (
+                        <Collapsible>
+                          <div className="space-y-1 pl-4">
+                            {parsedSeats.slice(0, 2).map((seat, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground">
+                                Fila {seat.row} - Asiento {seat.seat}
+                              </p>
+                            ))}
+                          </div>
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-6 text-xs pl-4 mt-1">
+                              Ver todos
+                              <ChevronDown className="ml-1 h-3 w-3" />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="space-y-1 pl-4 mt-1">
+                            {parsedSeats.slice(2).map((seat, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground">
+                                Fila {seat.row} - Asiento {seat.seat}
+                              </p>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )}
                     </div>
                   )}
 
@@ -180,10 +353,21 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                <div className="pt-4 border-t space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium">${total.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Cargo por servicio</span>
+                    <span className="font-medium">${serviceFee.toLocaleString()}</span>
+                  </div>
+                </div>
+
                 <div className="pt-4 border-t">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="gradient-text">${total}</span>
+                    <span className="gradient-text">${finalTotal.toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>
