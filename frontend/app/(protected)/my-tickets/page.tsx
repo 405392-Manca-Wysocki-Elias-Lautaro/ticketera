@@ -11,6 +11,7 @@ import { QRCodeSVG } from "qrcode.react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockTickets } from '@/mocks/mockTickets'
 import { Navbar } from '@/components/Navbar'
+import LanyardTicket from '@/components/LanyardTicket'
 
 export default function MyTicketsPage() {
     const router = useRouter()
@@ -88,36 +89,15 @@ export default function MyTicketsPage() {
 
                 {/* QR Modal */}
                 {selectedTicket && (
-                    <div
-                        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-                        onClick={() => setSelectedTicket(null)}
-                    >
-                        <Card className="max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-                            <CardContent className="p-6 space-y-4">
-                                <div className="text-center">
-                                    <h3 className="font-bold text-lg mb-2">{selectedTicket.eventTitle}</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        {selectedTicket.areaName}
-                                        {selectedTicket.seatNumber && ` - Asiento ${selectedTicket.seatNumber}`}
-                                    </p>
-                                </div>
-
-                                <div className="flex justify-center bg-white p-6 rounded-lg">
-                                    <QRCodeSVG value={selectedTicket.qrCode} size={200} />
-                                </div>
-
-                                <div className="text-center">
-                                    <p className="text-xs text-muted-foreground mb-1">Código</p>
-                                    <p className="font-mono font-semibold">{selectedTicket.qrCode}</p>
-                                </div>
-
-                                <Button variant="outline" className="w-full bg-transparent" onClick={() => setSelectedTicket(null)}>
-                                    Cerrar
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    <LanyardTicket
+                        qrCode={selectedTicket.qrCode}
+                        eventTitle={selectedTicket.eventTitle}
+                        areaName={selectedTicket.areaName}
+                        seatNumber={selectedTicket.seatNumber}
+                        onClose={() => setSelectedTicket(null)}
+                    />
                 )}
+
             </main>
         </div>
     )
@@ -138,7 +118,7 @@ function TicketCard({ ticket, onViewQR }: { ticket: any; onViewQR?: () => void }
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <h3 className="font-bold text-lg line-clamp-2 mb-1">{ticket.eventTitle}</h3>
-                            <Badge variant={ticket.status === "valid" ? "default" : "secondary"}>
+                            <Badge variant={ticket.status === "valid" ? "secondary" : "default"}>
                                 {ticket.status === "valid" ? "Válido" : "Usado"}
                             </Badge>
                         </div>
