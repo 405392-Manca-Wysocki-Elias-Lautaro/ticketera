@@ -113,8 +113,8 @@ function Band({
         type: 'dynamic' as RigidBodyProps['type'],
         canSleep: true,
         colliders: false,
-        angularDamping: 5,
-        linearDamping: 5,
+        angularDamping: 12,
+        linearDamping: 8,
     };
 
     const texture = useTexture('/textures/lanyard.png');
@@ -158,10 +158,11 @@ function Band({
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.9]);
-    useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.9]);
-    useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.9]);
-    useSphericalJoint(j3, card, [[0, 0, 0], [0, 0.9, 0]]);
+    useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
+    useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
+    useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
+    useSphericalJoint(j3, card, [[0, 0, 0], [0, 0.85, 0]]);
+
     // Cursor de agarre
     useEffect(() => {
         if (hovered) {
@@ -210,11 +211,13 @@ function Band({
             rot.copy(card.current.rotation());
             card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
         }
+
+        
     });
 
     return (
         <>
-            <group position={[0, 3.5, 0]} scale={scale}>
+            <group position={[0, 3.9, 0]} scale={scale}>
                 <RigidBody ref={fixed} {...segmentProps} type="fixed" />
 
                 <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
@@ -230,6 +233,8 @@ function Band({
                 <RigidBody
                     ref={card}
                     {...segmentProps}
+                    mass={2}
+                    gravityScale={1.8}
                     type={
                         dragged
                             ? ('kinematicPosition' as RigidBodyProps['type'])
@@ -278,7 +283,7 @@ function Band({
                     resolution={[4096, 4096]}
                     useMap
                     map={texture}
-                    repeat={[-8, 1]} // 🔹 menos repeticiones = logo más grande
+                    repeat={[-10, 1]} // 🔹 menos repeticiones = logo más grande
                     lineWidth={0.5}    // 🔹 grosor del cordón
                 />
             </mesh>
