@@ -199,3 +199,9 @@
 @utility animate-star-movement-top {
   animation: star-movement-top 6s linear infinite alternate;
 }
+
+canvas {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

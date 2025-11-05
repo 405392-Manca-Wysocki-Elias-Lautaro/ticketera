@@ -6,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, MapPin, QrCode } from "lucide-react"
+import { Calendar, Loader2, MapPin, QrCode } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockTickets } from '@/mocks/mockTickets'
 import { Navbar } from '@/components/Navbar'
 import LanyardTicket from '@/components/LanyardTicket'
+import { usePreloadLanyardAssets } from '@/hooks/usePreloaderLanyardAssets'
 
 export default function MyTicketsPage() {
     const router = useRouter()
@@ -20,6 +21,8 @@ export default function MyTicketsPage() {
     const [tickets, setTickets] = useState<any[]>(mockTickets)
     //TODO: Usar type Ticket
     const [selectedTicket, setSelectedTicket] = useState<any | null>(null)
+
+    usePreloadLanyardAssets();
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -38,6 +41,10 @@ export default function MyTicketsPage() {
     const validTickets = tickets.filter((t) => t.status === "valid")
     const usedTickets = tickets.filter((t) => t.status === "used")
 
+    const handleViewQR = (ticket: any) => {
+        setSelectedTicket(ticket)
+    }
+
     return (
         <div className="min-h-screen bg-background">
             <Navbar />
@@ -55,7 +62,7 @@ export default function MyTicketsPage() {
                         {validTickets.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {validTickets.map((ticket) => (
-                                    <TicketCard key={ticket.id} ticket={ticket} onViewQR={() => setSelectedTicket(ticket)} />
+                                    <TicketCard key={ticket.id} ticket={ticket} onViewQR={() => handleViewQR(ticket)} />
                                 ))}
                             </div>
                         ) : (
@@ -111,6 +118,16 @@ function TicketCard({ ticket, onViewQR }: { ticket: any; onViewQR?: () => void }
         year: "numeric",
     })
 
+    const [loading, setLoading] = useState(false);
+
+    const handleClick = async ({ onClick }) => {
+        setLoading(true);
+        await new Promise((r) => setTimeout(r, 200));
+        onClick();
+        setTimeout(() => setLoading(false), 500);
+    };
+
+
     return (
         <Card className={ticket.status === "used" ? "opacity-60" : ""}>
             <CardContent className="p-6 flex flex-col h-full">
@@ -156,9 +173,21 @@ function TicketCard({ ticket, onViewQR }: { ticket: any; onViewQR?: () => void }
                 </div>
 
                 {ticket.status === "valid" && onViewQR && (
-                    <Button onClick={onViewQR} className="w-full gradient-brand text-white mt-4">
-                        <QrCode className="mr-2 h-4 w-4" />
-                        Ver Código QR
+                    <Button
+                        onClick={() => handleClick({ onClick: onViewQR })}
+                        className="w-full gradient-brand text-white mt-4"
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="animate-spin w-4 h-4" />
+                            </>
+                        ) : (
+                            <>
+                                <QrCode className="mr-2 h-4 w-4" />
+                                Ver Código QR
+                            </>
+                        )}
                     </Button>
                 )}
             </CardContent>

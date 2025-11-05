@@ -6,7 +6,7 @@ import { Physics } from "@react-three/rapier";
 import * as THREE from "three";
 import Lanyard from "@/components/Lanyard";
 import { motion } from "framer-motion";
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 
 interface LanyardTicketProps {
     qrCode: string;
@@ -25,20 +25,21 @@ export default function LanyardTicket({
 }: LanyardTicketProps) {
 
     useEffect(() => {
+        const timeout = setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+            invalidate();
+        }, 100);
+
+        return () => clearTimeout(timeout);
+    }, []);
+
+
+    useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
             document.body.style.overflow = 'auto';
         };
     }, []);
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            window.dispatchEvent(new Event('resize'));
-            invalidate();
-        }, 200);
-        return () => clearTimeout(timeout);
-    }, []);
-
 
     return (
         <div
@@ -59,33 +60,41 @@ export default function LanyardTicket({
                 >
 
                     <div className="absolute inset-0 z-50">
-                        <Canvas
-                            className="fixed! inset-0!"
-                            camera={{ position: [0, 0, 9], fov: window.innerWidth < 768 ? 50 : 35 }}
-                            gl={{ alpha: true }}
-                            onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), 0)}
+                        <Suspense
+                            fallback={
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-white">Cargando QR...</div>
+                                </div>
+                            }
                         >
-                            <ambientLight intensity={Math.PI} />
-                            <Physics gravity={[0, -25, 0]} timeStep="vary">
-                                <Lanyard
-                                    scale={1.2}
-                                    eventTitle={eventTitle}
-                                    areaName={areaName}
-                                    seatNumber={seatNumber}
-                                    qrCode={qrCode}
-                                />
-                            </Physics>
+                            <Canvas
+                                className="fixed! inset-0! w-screen h-screen"
+                                camera={{ position: [0, 0, 9], fov: window.innerWidth < 768 ? 50 : 35 }}
+                                gl={{ alpha: true }}
+                                onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), 0)}
+                            >
+                                <ambientLight intensity={Math.PI} />
+                                <Physics gravity={[0, -25, 0]} timeStep="vary">
+                                    <Lanyard
+                                        scale={1.2}
+                                        eventTitle={eventTitle}
+                                        areaName={areaName}
+                                        seatNumber={seatNumber}
+                                        qrCode={qrCode}
+                                    />
+                                </Physics>
 
-                            <Environment blur={0.75}>
-                                <Lightformer
-                                    intensity={2}
-                                    color="white"
-                                    position={[0, -1, 5]}
-                                    rotation={[0, 0, Math.PI / 3]}
-                                    scale={[100, 0.1, 1]}
-                                />
-                            </Environment>
-                        </Canvas>
+                                <Environment blur={0.75}>
+                                    <Lightformer
+                                        intensity={2}
+                                        color="white"
+                                        position={[0, -1, 5]}
+                                        rotation={[0, 0, Math.PI / 3]}
+                                        scale={[100, 0.1, 1]}
+                                    />
+                                </Environment>
+                            </Canvas>
+                        </Suspense>
                     </div>
                 </motion.div>
 
