@@ -150,17 +150,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
           cache-dependency-path: "./frontend/pnpm-lock.yaml"
 
-      - name: Install pnpm
-        run: corepack enable
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+      # 👇 ESTE paso es el que resuelve el error
+      - name: Enable pnpm via Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+      
+      - run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -168,7 +171,6 @@ jobs:
       - name: Lint
         run: pnpm run lint --if-present
 
-      # Tests (opcional)
       # - name: Run tests
       #   run: pnpm run test --if-present -- --ci
 
