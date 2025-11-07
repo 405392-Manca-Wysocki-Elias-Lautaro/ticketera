@@ -132,16 +132,21 @@ export default function CreateEventPage() {
     return (
         <div className="flex h-screen overflow-auto">
             <div className="container mx-auto px-4 py-8 max-w-4xl">
-                <Button variant="ghost" asChild className="mb-6 cursor-pointer">
-                    <Link href="/admin/events">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Volver a eventos
-                    </Link>
-                </Button>
 
-                <GradientText>
-                    <h1 className="text-3xl font-bold mb-8">Crear Nuevo Evento</h1>
-                </GradientText>
+                <div className="relative flex items-center justify-center mb-8">
+                    <div className="absolute left-0">
+                        <Button variant="ghost" asChild className="mb-6 cursor-pointer">
+                            <Link href="/admin/events">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Volver a eventos
+                            </Link>
+                        </Button>
+                    </div>
+                    
+                    <GradientText>
+                        <h1 className="text-3xl font-bold mb-8">Crear Nuevo Evento</h1>
+                    </GradientText>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Info */}

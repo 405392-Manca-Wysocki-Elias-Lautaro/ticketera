@@ -10,7 +10,7 @@ services:
     ports:
       - "${PG_PORT:-5432}:5432"
     volumes:
-      - ${PGDATA_VOL:-ticketera_dev_pgdata}:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
       - ./infra/postgres/dev/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -27,8 +27,8 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - rabbitmq_data:/var/log/rabbitmq
+      - rabbitmq_data_dev:/var/lib/rabbitmq
+      - rabbitmq_data_dev:/var/log/rabbitmq
     ports:
       - "5672:5672"     # puerto AMQP (comunicación entre microservicios)
       - "15672:15672"   # panel web http://localhost:15672
@@ -71,7 +71,7 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules_dev:/app/node_modules
     environment:
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: 1
@@ -97,7 +97,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/gateway:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SERVICES_AUTH_BASE_URL: http://auth-dev:8080
@@ -141,7 +141,7 @@ services:
           
     volumes:
       - ./backend/auth-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${AUTH_DB_SCHEMA},public
@@ -188,7 +188,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/event-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${EVENT_DB_SCHEMA},public
@@ -229,7 +229,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/ticket-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${TICKET_DB_SCHEMA},public
@@ -270,7 +270,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/payment-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${PAYMENT_DB_SCHEMA},public
@@ -311,7 +311,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/notification-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${NOTIFICATION_DB_SCHEMA},public
@@ -352,7 +352,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/order-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${ORDER_DB_SCHEMA},public
@@ -380,7 +380,8 @@ networks:
   backend_net:
 
 volumes:
-  ticketera_dev_pgdata:
-  m2cache:
-  rabbitmq_data:
+  postgres_data_dev:
+  maven_cache_dev:
+  rabbitmq_data_dev:
   redis_data_dev:
+  frontend_node_modules_dev:

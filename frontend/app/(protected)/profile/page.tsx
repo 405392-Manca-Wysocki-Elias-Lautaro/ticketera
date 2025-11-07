@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { User, Mail, Phone, MapPin, Save, Loader2 } from "lucide-react"
+import { User, Mail, Phone, MapPin, Save, Loader2, ArrowLeft } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { Navbar } from '@/components/Navbar'
-import { RoleCode } from '@/types/enums/RoleCode'
 import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 import StarBorder from '@/components/StarBorder'
+import { StaffSidebar } from '@/components/StaffSidebar'
+import Link from 'next/link'
 
 export default function ProfilePage() {
     const router = useRouter()
@@ -43,14 +44,36 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
+        <div className="flex min-h-screen bg-background">
 
-            <main className="container mx-auto px-4 py-8 max-w-2xl">
+            {!RoleUtils.isStaff(user) && (
+                <Navbar />
+            )}
 
-                <GradientText>
-                    <h1 className="text-3xl font-bold mb-8">Mi Perfil</h1>
-                </GradientText>
+            {RoleUtils.isStaff(user) && (
+                <div className="fixed left-0 h-full">
+                    <StaffSidebar />
+                </div>
+            )}
+
+            <div className="container mx-auto px-4 py-8 max-w-2xl">
+
+                <div className="relative flex items-center justify-center mb-8">
+                    {RoleUtils.isCustomer(user) && (
+                        <div className="absolute left-0">
+                            <Button variant="ghost" asChild className="cursor-pointer">
+                                <Link href="/dashboard">
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Volver al inicio
+                                </Link>
+                            </Button>
+                        </div>
+                    )}
+
+                    <GradientText>
+                        <h1 className="text-3xl font-bold text-center">Mi Perfil</h1>
+                    </GradientText>
+                </div>
 
                 <div className="space-y-6">
                     <Card>
@@ -135,7 +158,7 @@ export default function ProfilePage() {
                         </CardContent>
                     </Card>
                 </div>
-            </main>
+            </div>
         </div>
     )
 }

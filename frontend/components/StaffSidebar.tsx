@@ -40,13 +40,6 @@ export function StaffSidebar() {
             </div>
             <Separator />
             <nav className="flex-1 space-y-1 p-4">
-                <Button variant="ghost" asChild className="w-full justify-start mb-2 cursor-pointer">
-                    <Link href="/dashboard">
-                        <Home className="mr-2 h-4 w-4" />
-                        Ver Eventos Públicos
-                    </Link>
-                </Button>
-                <Separator className="my-2" />
                 {links.map((link) => (
                     <Button
                         key={link.href}
