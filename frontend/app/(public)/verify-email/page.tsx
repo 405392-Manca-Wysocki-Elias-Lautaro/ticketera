@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Mail, ArrowRight, RotateCw } from "lucide-react"
 import { useEffect } from "react"
 import { useResendVerificationEmail } from "@/hooks/auth/useResendVerificationEmail"
+import GradientText from '@/components/GradientText'
 
 export default function VerifyEmailPage() {
     const searchParams = useSearchParams()
@@ -42,7 +43,9 @@ export default function VerifyEmailPage() {
                     </div>
 
                     <div>
-                        <CardTitle className="text-2xl gradient-text">Verifica tu Email</CardTitle>
+                        <GradientText>
+                            <CardTitle className="text-2xl">Verifica tu Email</CardTitle>
+                        </GradientText>
                         <CardDescription className="text-base mt-2">
                             Te hemos enviado un correo de verificación
                         </CardDescription>

@@ -14,6 +14,8 @@ import { QrCode, CheckCircle2, XCircle, Camera, Hash, ChevronDown, Calendar, Map
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockEvents } from '@/mocks/mockEvents'
 import { RoleCode } from '@/types/enums/RoleCode'
+import GradientText from '@/components/GradientText'
+import { RoleUtils } from '@/utils/roleUtils'
 
 export default function StaffDashboardPage() {
     const router = useRouter()
@@ -32,7 +34,7 @@ export default function StaffDashboardPage() {
     const currentEvent = assignedEvents.find((e) => e.id === selectedEvent) || assignedEvents[0]
 
     useEffect(() => {
-        if (!isLoading && (!user || user.role.code !== RoleCode.STAFF)) {
+        if (!isLoading && (!user || !RoleUtils.isStaff(user))) {
             router.push("/login")
         }
     }, [user, isLoading, router])
@@ -84,7 +86,7 @@ export default function StaffDashboardPage() {
         }
     }
 
-    if (isLoading || !user || user.role.code !== RoleCode.STAFF) {
+    if (isLoading || !user || !RoleUtils.isStaff(user)) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -93,8 +95,11 @@ export default function StaffDashboardPage() {
     }
 
     return (
-        <main className="container mx-auto px-4 py-6 max-w-3xl">
-            <h1 className="text-2xl md:text-3xl font-bold mb-6 gradient-text">Validación de Tickets</h1>
+        <div className="flex flex-col justify-center content-start px-4 py-6 max-w-3xl">
+
+            <GradientText>
+                <h1 className="text-2xl md:text-3xl font-bold mb-6">Validación de Tickets</h1>
+            </GradientText>
 
             <Collapsible open={eventDetailsOpen} onOpenChange={setEventDetailsOpen} className="mb-6">
                 <Card>
@@ -158,8 +163,8 @@ export default function StaffDashboardPage() {
             {scanResult && (
                 <Card
                     className={`mb-6 border-2 ${scanResult.success
-                            ? "border-green-500 bg-green-50 dark:bg-green-950"
-                            : "border-red-500 bg-red-50 dark:bg-red-950"
+                        ? "border-green-500 bg-green-50 dark:bg-green-950"
+                        : "border-red-500 bg-red-50 dark:bg-red-950"
                         }`}
                 >
                     <CardContent className="pt-6">
@@ -265,6 +270,6 @@ export default function StaffDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-        </main>
+        </div>
     )
 }

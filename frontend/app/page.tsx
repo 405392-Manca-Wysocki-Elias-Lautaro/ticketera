@@ -1,9 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from '@/hooks/auth/useAuth'
-
 //? Esta página puede (debe) ser landing page
 export default function HomePage() {
     return (

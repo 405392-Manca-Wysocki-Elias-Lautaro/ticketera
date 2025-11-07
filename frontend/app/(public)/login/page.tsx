@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Button } from "@/components/ui/button"
@@ -10,17 +10,23 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLogin } from "@/hooks/auth/useLogin"
 import StarBorder from "@/components/StarBorder"
-import { Loader2 } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Checkbox } from '@/components/ui/checkbox'
 import { loginSchema, type LoginSchema } from '@/schemas/auth/LoginSchema'
 import { Label } from '@/components/ui/label'
+import { useState } from 'react'
+import GradientText from '@/components/GradientText'
 
 export default function LoginPage() {
+
+    const [showPassword, setShowPassword] = useState(false);
+
     const { mutate: login, isPending } = useLogin()
 
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema),
@@ -46,7 +52,9 @@ export default function LoginPage() {
                         </div>
                     </div>
                     <div>
-                        <CardTitle className="text-2xl gradient-text">Bienvenido a Ticketera</CardTitle>
+                        <GradientText>
+                            <CardTitle className="text-2xl">Bienvenido a Ticketera</CardTitle>
+                        </GradientText>
                         <CardDescription>Ingresa tus credenciales para continuar</CardDescription>
                     </div>
                 </CardHeader>
@@ -78,26 +86,45 @@ export default function LoginPage() {
                                     ¿Olvidaste tu contraseña?
                                 </Link>
                             </div>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="••••••••"
-                                {...register("password")}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    {...register("password")}
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                             {errors.password && (
                                 <p className="text-sm text-destructive">{errors.password.message}</p>
                             )}
                         </div>
 
-                        {/* Remember me (opcional futuro) */}
-                        <div className="flex items-center gap-2">
-                            <Checkbox id="remembered" {...register("remembered")} />
-                            <Label htmlFor="remembered" className="text-sm">
-                                Recordarme
-                            </Label>
-                        </div>
+                        {/* Remember me */}
+                        <Controller
+                            name="remembered"
+                            control={control}
+                            render={({ field }) => (
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="remembered"
+                                        checked={field.value}
+                                        onCheckedChange={(checked: any) => field.onChange(checked === true)}
+                                    />
+                                    <Label htmlFor="remembered" className="text-sm">
+                                        Recordarme
+                                    </Label>
+                                </div>
+                            )}
+                        />
 
-                        <StarBorder>
+                        <StarBorder className='w-full'>
                             <Button
                                 type="submit"
                                 className="w-full gradient-brand text-white"

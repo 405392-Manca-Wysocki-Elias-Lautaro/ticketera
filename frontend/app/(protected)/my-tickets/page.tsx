@@ -13,6 +13,8 @@ import { mockTickets } from '@/mocks/mockTickets'
 import { Navbar } from '@/components/Navbar'
 import LanyardTicket from '@/components/LanyardTicket'
 import { usePreloadLanyardAssets } from '@/hooks/usePreloaderLanyardAssets'
+import GradientText from '@/components/GradientText'
+import StarBorder from '@/components/StarBorder'
 
 export default function MyTicketsPage() {
     const router = useRouter()
@@ -50,7 +52,10 @@ export default function MyTicketsPage() {
             <Navbar />
 
             <main className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-8 gradient-text">Mis Tickets</h1>
+
+                <GradientText>
+                    <h1 className="text-3xl font-bold mb-8">Mis Tickets</h1>
+                </GradientText>
 
                 <Tabs defaultValue="valid" className="space-y-6">
                     <TabsList>
@@ -69,9 +74,11 @@ export default function MyTicketsPage() {
                             <Card>
                                 <CardContent className="py-12 text-center">
                                     <p className="text-muted-foreground">No tienes tickets activos</p>
-                                    <Button asChild className="mt-4 gradient-brand text-white">
-                                        <a href="/dashboard">Explorar Eventos</a>
-                                    </Button>
+                                    <StarBorder>
+                                        <Button asChild className="mt-4 gradient-brand text-white">
+                                            <a href="/dashboard">Explorar Eventos</a>
+                                        </Button>
+                                    </StarBorder>
                                 </CardContent>
                             </Card>
                         )}
@@ -173,22 +180,26 @@ function TicketCard({ ticket, onViewQR }: { ticket: any; onViewQR?: () => void }
                 </div>
 
                 {ticket.status === "valid" && onViewQR && (
-                    <Button
-                        onClick={() => handleClick({ onClick: onViewQR })}
-                        className="w-full gradient-brand text-white mt-4"
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="animate-spin w-4 h-4" />
-                            </>
-                        ) : (
-                            <>
-                                <QrCode className="mr-2 h-4 w-4" />
-                                Ver Código QR
-                            </>
-                        )}
-                    </Button>
+                    <div className="mt-4 w-full">
+                        <StarBorder>
+                            <Button
+                                onClick={() => handleClick({ onClick: onViewQR })}
+                                className="w-full gradient-brand text-white"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="animate-spin w-4 h-4" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <QrCode className="mr-2 h-4 w-4" />
+                                        Ver Código QR
+                                    </>
+                                )}
+                            </Button>
+                        </StarBorder>
+                    </div>
                 )}
             </CardContent>
         </Card>

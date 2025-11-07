@@ -32,7 +32,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { RoleCode } from '@/types/enums/RoleCode'
+import { RoleUtils } from '@/utils/roleUtils'
+import GradientText from './GradientText'
 
 export function Navbar() {
     const { user, logout } = useAuth()
@@ -41,9 +42,9 @@ export function Navbar() {
     const [searchQuery, setSearchQuery] = useState("")
 
     const logoHref =
-        user?.role?.code === RoleCode.ADMIN
+        RoleUtils.isAdmin(user)
             ? "/admin"
-            : user?.role?.code === RoleCode.STAFF
+            : RoleUtils.isStaff(user)
                 ? "/staff"
                 : "/dashboard"
 
@@ -75,9 +76,12 @@ export function Navbar() {
                             height={32}
                             className="h-8 w-8 rounded-full"
                         />
-                        <span className="font-bold text-lg gradient-text hidden sm:inline">
-                            Ticketera
-                        </span>
+
+                        <GradientText>
+                            <span className="font-bold text-lg hidden sm:inline">
+                                Ticketly
+                            </span>
+                        </GradientText>
                     </Link>
 
                     {/* Search Bar */}
@@ -147,9 +151,9 @@ export function Navbar() {
                                             <p className="text-xs text-muted-foreground">{user?.email}</p>
                                         </div>
 
-                                        <DropdownMenuSeparator />
+                                        {/* <DropdownMenuSeparator /> */}
 
-                                        {(user?.role?.code === RoleCode.ADMIN || user?.role?.code === RoleCode.STAFF) && (
+                                        {(RoleUtils.canManageEvents(user)) && (
                                             <>
                                                 <DropdownMenuItem asChild>
                                                     <Link href="/dashboard">
@@ -161,7 +165,7 @@ export function Navbar() {
                                             </>
                                         )}
 
-                                        {user?.role?.code === RoleCode.ADMIN && (
+                                        {RoleUtils.isAdmin(user) && (
                                             <>
                                                 <DropdownMenuItem asChild>
                                                     <Link href="/admin">
@@ -179,7 +183,7 @@ export function Navbar() {
                                             </>
                                         )}
 
-                                        {user?.role?.code === RoleCode.STAFF && (
+                                        {RoleUtils.isStaff(user) && (
                                             <>
                                                 <DropdownMenuItem asChild>
                                                     <Link href="/staff">
@@ -199,7 +203,7 @@ export function Navbar() {
                                         </DropdownMenuItem>
 
                                         <DropdownMenuItem
-                                            onClick={() => logout}
+                                            onClick={() => logout()}
                                             className="text-destructive"
                                         >
                                             <LogOut className="mr-2 h-4 w-4" />

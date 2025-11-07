@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { EventCard } from '@/components/EventCard'
 import { mockEvents } from '@/mocks/mockEvents'
+import GradientText from '@/components/GradientText'
 
 //TODO: Borrar
 const categories = ["Todos", "Música", "Comedia", "Tecnología", "Deportes", "Teatro"]
@@ -57,7 +58,9 @@ export default function DashboardPage() {
             <main className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2 gradient-text">Descubre Eventos</h1>
+                    <GradientText>
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2">Descubre Eventos</h1>
+                    </GradientText>
                     <p className="text-muted-foreground">Encuentra y compra entradas para los mejores eventos</p>
                 </div>
 

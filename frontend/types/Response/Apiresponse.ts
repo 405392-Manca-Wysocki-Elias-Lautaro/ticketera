@@ -1,7 +1,5 @@
-import { AuthResponse } from './AuthResponse'
-
-export interface ApiResponse {
-    data: AuthResponse
+export interface ApiResponse<T> {
+    data: T
     message: string
     success: boolean
     timestamp: string

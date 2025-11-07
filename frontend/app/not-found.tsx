@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle, Home } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { RoleCode } from '@/types/enums/RoleCode'
+import GradientText from '@/components/GradientText'
+import { RoleUtils } from '@/utils/roleUtils'
 
 export default function NotFound() {
     const router = useRouter()
@@ -16,9 +18,9 @@ export default function NotFound() {
     useEffect(() => {
         if (!isLoading && user) {
             // Determine redirect path based on role
-            if (user.role.code === RoleCode.ADMIN) {
+            if (RoleUtils.isAdmin(user)) {
                 setRedirectPath("/admin")
-            } else if (user.role.code === RoleCode.STAFF) {
+            } else if (RoleUtils.isStaff(user)) {
                 setRedirectPath("/staff")
             } else {
                 setRedirectPath("/dashboard")
@@ -38,7 +40,9 @@ export default function NotFound() {
                         <AlertCircle className="h-16 w-16 text-destructive" />
                     </div>
                     <div>
-                        <CardTitle className="text-3xl gradient-text">404</CardTitle>
+                        <GradientText>
+                            <CardTitle className="text-3xl">404</CardTitle>
+                        </GradientText>
                         <CardDescription className="text-lg">Página no encontrada</CardDescription>
                     </div>
                 </CardHeader>

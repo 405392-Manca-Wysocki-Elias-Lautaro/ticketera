@@ -9,8 +9,9 @@ import Link from "next/link"
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Legend } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { AdminSidebar } from '@/components/AdminSidebar'
-import { RoleCode } from '@/types/enums/RoleCode'
+import GradientText from '@/components/GradientText'
+import { RoleUtils } from '@/utils/roleUtils'
+import StarBorder from '@/components/StarBorder'
 
 const salesData = [
     { month: "Ene", ventas: 12000, tickets: 240 },
@@ -33,12 +34,12 @@ export default function AdminDashboardPage() {
     const { user, isLoading } = useAuth()
 
     useEffect(() => {
-        if (!isLoading && (!user || user.role.code !== RoleCode.ADMIN)) {
+        if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
             router.push("/dashboard")
         }
     }, [user, isLoading, router])
 
-    if (isLoading || !user || user.role.code !== RoleCode.ADMIN) {
+    if (isLoading || !user || !RoleUtils.isAdmin(user)) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -47,22 +48,24 @@ export default function AdminDashboardPage() {
     }
 
     return (
-        <div className="flex min-h-screen">
-            <AdminSidebar />
-
-            <div className="flex-1 overflow-auto">
+        <div className="flex h-screen overflow-auto">
+            <div className="flex-1">
                 <main className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h1 className="text-3xl font-bold gradient-text">Panel de Administración</h1>
+                            <GradientText>
+                                <h1 className="text-3xl font-bold">Panel de Administración</h1>
+                            </GradientText>
                             <p className="text-muted-foreground">Gestiona tus eventos y ventas</p>
                         </div>
-                        <Button asChild className="gradient-brand text-white cursor-pointer">
-                            <Link href="/admin/events/create">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Crear Evento
-                            </Link>
-                        </Button>
+                        <StarBorder>
+                            <Button asChild className="gradient-brand text-white cursor-pointer">
+                                <Link href="/admin/events/create">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Crear Evento
+                                </Link>
+                            </Button>
+                        </StarBorder>
                     </div>
 
                     {/* Stats */}

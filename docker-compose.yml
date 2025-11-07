@@ -56,7 +56,7 @@ services:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
-      - "1025:1025" # SMTP
+      - "2525:1025" # SMTP
       - "8025:8025" # Web UI
     networks: [ backend_net ]
 
@@ -378,7 +378,6 @@ services:
 
 networks:
   backend_net:
-  frontend_net:
 
 volumes:
   ticketera_dev_pgdata:

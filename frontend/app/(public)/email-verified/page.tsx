@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2, Loader2, AlertCircle, ArrowRight } from "lucide-react"
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail"
+import GradientText from '@/components/GradientText'
 
 export default function EmailVerifiedPage() {
     const searchParams = useSearchParams()
@@ -48,7 +49,9 @@ export default function EmailVerifiedPage() {
                                 </div>
                             </div>
                             <div>
-                                <CardTitle className="text-2xl gradient-text">Verificando tu email...</CardTitle>
+                                <GradientText>
+                                    <CardTitle className="text-2xl">Verificando tu email...</CardTitle>
+                                </GradientText>
                                 <CardDescription className="text-base mt-2">
                                     Por favor espera mientras verificamos tu cuenta
                                 </CardDescription>
@@ -64,7 +67,9 @@ export default function EmailVerifiedPage() {
                                 </div>
                             </div>
                             <div>
-                                <CardTitle className="text-2xl gradient-text">¡Email verificado!</CardTitle>
+                                <GradientText>
+                                    <CardTitle className="text-2xl">¡Email verificado!</CardTitle>
+                                </GradientText>
                                 <CardDescription className="text-base mt-2">
                                     Tu cuenta ha sido activada exitosamente
                                 </CardDescription>
@@ -80,7 +85,9 @@ export default function EmailVerifiedPage() {
                                 </div>
                             </div>
                             <div>
-                                <CardTitle className="text-2xl gradient-text">Error en la verificación</CardTitle>
+                                <GradientText>
+                                    <CardTitle className="text-2xl ">Error en la verificación</CardTitle>
+                                </GradientText>
                                 <CardDescription className="text-base mt-2">{error}</CardDescription>
                             </div>
                         </>

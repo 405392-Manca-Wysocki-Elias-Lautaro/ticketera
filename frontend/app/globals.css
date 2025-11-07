@@ -12,11 +12,14 @@
   --popover-foreground: oklch(0.145 0 0);
 
   /* Brand colors from logo gradient */
-  --primary: oklch(0.65 0.18 35); /* Orange #FF6B35 */
+  --primary: oklch(0.65 0.18 35);
+  /* Orange #FF6B35 */
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.55 0.25 330); /* Magenta #FF1493 */
+  --secondary: oklch(0.55 0.25 330);
+  /* Magenta #FF1493 */
   --secondary-foreground: oklch(1 0 0);
-  --accent: oklch(0.6 0.22 290); /* Purple #8B5CF6 */
+  --accent: oklch(0.6 0.22 290);
+  /* Purple #8B5CF6 */
   --accent-foreground: oklch(1 0 0);
 
   --muted: oklch(0.97 0 0);
@@ -37,11 +40,16 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* Added chart colors for recharts */
-  --chart-1: oklch(0.65 0.18 35); /* Orange */
-  --chart-2: oklch(0.6 0.24 350); /* Pink */
-  --chart-3: oklch(0.55 0.25 330); /* Magenta */
-  --chart-4: oklch(0.6 0.22 290); /* Purple */
-  --chart-5: oklch(0.7 0.15 60); /* Yellow-Orange */
+  --chart-1: oklch(0.65 0.18 35);
+  /* Orange */
+  --chart-2: oklch(0.6 0.24 350);
+  /* Pink */
+  --chart-3: oklch(0.55 0.25 330);
+  /* Magenta */
+  --chart-4: oklch(0.6 0.22 290);
+  /* Purple */
+  --chart-5: oklch(0.7 0.15 60);
+  /* Yellow-Orange */
 }
 
 .dark {
@@ -126,6 +134,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -148,26 +157,48 @@
 
 /* Custom gradient utilities for brand */
 .gradient-brand {
-  background: linear-gradient(
-    135deg,
-    oklch(0.65 0.18 35) 0%,
-    oklch(0.6 0.24 350) 33%,
-    oklch(0.55 0.25 330) 66%,
-    oklch(0.6 0.22 290) 100%
-  );
+  background: linear-gradient(135deg,
+      oklch(0.65 0.18 35) 0%,
+      oklch(0.6 0.24 350) 33%,
+      oklch(0.55 0.25 330) 66%,
+      oklch(0.6 0.22 290) 100%);
 }
 
 .gradient-text {
-  background: linear-gradient(
-    135deg,
-    oklch(0.65 0.18 35) 0%,
-    oklch(0.6 0.24 350) 33%,
-    oklch(0.55 0.25 330) 66%,
-    oklch(0.6 0.22 290) 100%
-  );
+  background: linear-gradient(135deg,
+      oklch(0.65 0.18 35) 0%,
+      oklch(0.6 0.24 350) 33%,
+      oklch(0.55 0.25 330) 66%,
+      oklch(0.6 0.22 290) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.gradient-text-animated {
+  background: linear-gradient(90deg,
+      oklch(0.65 0.18 35) 0%,
+      oklch(0.6 0.24 350) 25%,
+      oklch(0.55 0.25 330) 50%,
+      oklch(0.6 0.22 290) 75%,
+      oklch(0.65 0.18 35) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 100%;
+  background-position: 200% 50%;
+  animation: gradient-flow 20s ease-in-out infinite;
+}
+
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 200% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes star-movement-bottom {
@@ -175,6 +206,7 @@
     transform: translate(0%, 0%);
     opacity: 1;
   }
+
   100% {
     transform: translate(-100%, 0%);
     opacity: 0;
@@ -186,6 +218,7 @@
     transform: translate(0%, 0%);
     opacity: 1;
   }
+
   100% {
     transform: translate(100%, 0%);
     opacity: 0;
@@ -204,4 +237,23 @@ canvas {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/*  ================================
+    GRADIENT TEXT ANIMATION
+    ================================ */
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@utility animate-gradient {
+  background-size: 300% 100%;
+  animation: gradient 8s linear infinite;
 }

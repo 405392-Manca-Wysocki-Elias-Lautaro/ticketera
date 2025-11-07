@@ -1,10 +1,32 @@
 import { useAuthStore } from "@/lib/store";
 import { useEffect } from "react";
 import { useLogout } from "./useLogout";
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export function useAuth() {
-    const { token, user, isLoading, setLoading } = useAuthStore();
-    const { mutate: logout } = useLogout();
+
+    const router = useRouter();
+    const { token, user, isLoading, setLoading, logout: localLogout } = useAuthStore();
+    const { mutateAsync: serverLogout } = useLogout();
+
+    async function logout() {
+
+        toast.loading("Cerrando sesión...");
+        router.push("/login");
+        
+        try {
+            await serverLogout();
+            toast.dismiss();
+            toast.success("Sesión cerrada correctamente");
+        } catch {
+            toast.dismiss();
+            toast.warning("Sesión cerrada localmente");
+        } finally {
+            localLogout();
+        }
+    }
+
 
     useEffect(() => {
         if (isLoading) {
@@ -17,6 +39,6 @@ export function useAuth() {
         user,
         isLoading,
         isAuthenticated: !!token,
-        logout, // 🔥 logout por backend
+        logout,
     };
 }

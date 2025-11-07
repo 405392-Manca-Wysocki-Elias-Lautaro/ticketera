@@ -17,6 +17,7 @@ import { signUpSchema, SignUpSchema } from "@/schemas/auth/SignUpSchema"
 import { useRegister } from '@/hooks/auth/useRegister'
 import { useState } from 'react'
 import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator'
+import GradientText from '@/components/GradientText'
 
 export default function SignUpPage() {
 
@@ -60,7 +61,9 @@ export default function SignUpPage() {
                     </div>
 
                     <div className="text-center">
-                        <CardTitle className="text-2xl gradient-text">Crear Cuenta</CardTitle>
+                        <GradientText>
+                            <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+                        </GradientText>
                         <CardDescription>Completa tus datos para registrarte</CardDescription>
                     </div>
                 </CardHeader>

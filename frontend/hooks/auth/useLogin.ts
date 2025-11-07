@@ -5,22 +5,22 @@ import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AuthResponse } from "@/types/Response/AuthResponse";
-import { ApiResponse } from "@/types/Response/Apiresponse";
 import { useMutation } from "@tanstack/react-query";
 import { useResendVerificationEmail } from "@/hooks/auth/useResendVerificationEmail";
 import { handleApiError } from "@/utils/handleApiError";
+import { ApiResponse } from '@/types/Response/ApiResponse';
 
 export function useLogin() {
     const { setToken, setUser } = useAuthStore();
     const router = useRouter();
     const { resend } = useResendVerificationEmail();
 
-    return useMutation<ApiResponse, AxiosError, LoginRequest>({
+    return useMutation<ApiResponse<AuthResponse>, AxiosError, LoginRequest>({
         mutationFn: async (credentials: LoginRequest) => {
             const response = await authService.login(credentials);
             return response.data;
         },
-        onSuccess: (data: ApiResponse) => {
+        onSuccess: (data: ApiResponse<AuthResponse>) => {
             const authResponse: AuthResponse = data?.data;
 
             setToken(authResponse.accessToken);

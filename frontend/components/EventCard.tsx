@@ -4,6 +4,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import TiltedCard from "@/components/TiltedCard"
+import StarBorder from './StarBorder'
+import GradientText from './GradientText'
 
 //TODO: Borrar
 export interface Event {
@@ -84,13 +86,21 @@ export function EventCard({ event }: EventCardProps) {
             </CardContent>
 
             <CardFooter className="p-4 pt-0 flex items-center justify-between">
+
                 <div>
                     <p className="text-xs text-muted-foreground">Desde</p>
-                    <p className="text-xl font-bold gradient-text">${event.price.toLocaleString()}</p>
+                    <GradientText>
+                        <p className="text-xl font-bold">${event.price.toLocaleString()}</p>
+                    </GradientText>
+
                 </div>
-                <Button asChild className="gradient-brand text-white">
-                    <Link href={`/event/${event.id}`}>Ver Detalles</Link>
-                </Button>
+
+                <StarBorder>
+                    <Button asChild className="gradient-brand text-white">
+                        <Link href={`/event/${event.id}`}>Ver Detalles</Link>
+                    </Button>
+                </StarBorder>
+
             </CardFooter>
         </Card>
     )
