@@ -151,33 +151,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1️⃣ Setup Node con cache para pnpm
+      # 1️⃣ Instalar pnpm primero
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # 2️⃣ Configurar Node y habilitar cache
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
-          cache-dependency-path: "./frontend/pnpm-lock.yaml"
+          cache: pnpm
+          cache-dependency-path: ./frontend/pnpm-lock.yaml
 
-      # 2️⃣ Instala pnpm manualmente (modo seguro)
-      - name: Setup pnpm
-        run: |
-          npm install -g pnpm
-          echo "✅ pnpm version: $(pnpm --version)"
+      # 3️⃣ Verificar que exista
+      - run: pnpm --version
 
-      - run: |
-          which pnpm || echo "pnpm not found"
-          echo "PATH=$PATH"
-          npm ls -g --depth=0
-
-
-      # 3️⃣ Instala dependencias
+      # 4️⃣ Instalar dependencias
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 4️⃣ Linter
+      # 5️⃣ Linter
       - name: Lint
         run: pnpm run lint --if-present
 
-      # 5️⃣ Build
+      # 6️⃣ Build
       - name: Build
         run: pnpm run build
