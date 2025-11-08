@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.auth.app.configs.CookieProperties;
 import com.auth.app.domain.model.AuthModel;
 import com.auth.app.domain.model.RefreshTokenModel;
 import com.auth.app.domain.valueObjects.IpAddress;
@@ -27,6 +28,7 @@ import com.auth.app.dto.request.ChangePasswordRequest;
 import com.auth.app.dto.request.ForgotPasswordRequest;
 import com.auth.app.dto.request.LoginRequest;
 import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResendVerificationEmail;
 import com.auth.app.dto.request.ResetPasswordRequest;
 import com.auth.app.dto.response.ApiResponse;
 import com.auth.app.dto.response.AuthResponse;
@@ -48,6 +50,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final ModelMapper modelMapper;
+    private final CookieProperties cookieProps;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Validated @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
@@ -61,11 +64,14 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestParam String email, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> resendVerification(
+        @Validated @RequestBody ResendVerificationEmail request,
+        HttpServletRequest httpRequest
+    ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
-        authService.resendVerificationEmail(email, ipAddress, userAgent);
+        authService.resendVerificationEmail(request, ipAddress, userAgent);
 
         return ApiResponseFactory.success("Verification email resent successfully");
     }
@@ -95,9 +101,10 @@ public class AuthController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                 .httpOnly(true)
-                .secure(false) //TODO: PONER EN TRUE EN PRODUCCION // ⚠️ si estás en HTTP local, ponelo false para testear
-                .sameSite("None") // necesario si el frontend está en otro dominio
-                .path("/")
+                .secure(cookieProps.isSecure())
+                .sameSite(cookieProps.getSameSite())
+                .domain(cookieProps.getDomain())
+                .path(cookieProps.getPath())
                 .maxAge(Duration.between(OffsetDateTime.now(), refreshToken.getExpiresAt()))
                 .build();
 
@@ -142,9 +149,10 @@ public class AuthController {
 
         ResponseCookie newCookie = ResponseCookie.from("refreshToken", rotatedRefresh.getToken())
                 .httpOnly(true)
-                .secure(false) // ⚠️ poné true en producción (HTTPS obligatorio)
-                .sameSite("None") // o "None" si tu frontend está en otro dominio HTTPS
-                .path("/")
+                .secure(cookieProps.isSecure())
+                .sameSite(cookieProps.getSameSite())
+                .domain(cookieProps.getDomain())
+                .path(cookieProps.getPath())
                 .maxAge(Duration.between(OffsetDateTime.now(), rotatedRefresh.getExpiresAt()))
                 .build();
 
@@ -165,17 +173,21 @@ public class AuthController {
 
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false) //TODO: PONER EN TRUE EN PRODUCCION //
-                .sameSite("None")
-                .path("/")
-                .maxAge(0) // elimina inmediatamente
+                .secure(cookieProps.isSecure())
+                .sameSite(cookieProps.getSameSite())
+                .domain(cookieProps.getDomain())
+                .path(cookieProps.getPath())
+                .maxAge(0)
                 .build();
 
         return ApiResponseFactory.success("Logout successful", null, deleteCookie);
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Validated @RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Validated @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 

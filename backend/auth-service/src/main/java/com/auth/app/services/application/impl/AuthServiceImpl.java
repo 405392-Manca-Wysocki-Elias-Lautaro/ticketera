@@ -1,6 +1,8 @@
 package com.auth.app.services.application.impl;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,19 +15,40 @@ import org.springframework.stereotype.Service;
 
 import com.auth.app.domain.entity.PasswordResetToken;
 import com.auth.app.domain.enums.LogAction;
-import com.auth.app.domain.events.*;
+import com.auth.app.domain.events.UserLoginFromNewDeviceEvent;
+import com.auth.app.domain.events.UserPasswordResetRequestEvent;
+import com.auth.app.domain.events.UserPasswordResetSuccessEvent;
+import com.auth.app.domain.events.UserVerificationEmailEvent;
+import com.auth.app.domain.events.UserWelcomeEvent;
 import com.auth.app.domain.model.AuthModel;
 import com.auth.app.domain.model.PasswordResetTokenModel;
 import com.auth.app.domain.model.RefreshTokenModel;
 import com.auth.app.domain.model.UserModel;
 import com.auth.app.domain.valueObjects.IpAddress;
 import com.auth.app.domain.valueObjects.UserAgent;
-import com.auth.app.dto.request.*;
-import com.auth.app.dto.response.*;
-import com.auth.app.exception.exceptions.*;
+import com.auth.app.dto.request.ChangePasswordRequest;
+import com.auth.app.dto.request.ForgotPasswordRequest;
+import com.auth.app.dto.request.LoginRequest;
+import com.auth.app.dto.request.RegisterRequest;
+import com.auth.app.dto.request.ResendVerificationEmail;
+import com.auth.app.dto.request.ResetPasswordRequest;
+import com.auth.app.dto.response.UserResponse;
+import com.auth.app.exception.exceptions.AccountNotVerifiedException;
+import com.auth.app.exception.exceptions.InvalidCredentialsException;
+import com.auth.app.exception.exceptions.InvalidRefreshTokenException;
+import com.auth.app.exception.exceptions.SamePasswordException;
+import com.auth.app.exception.exceptions.TokenAlreadyUsedException;
+import com.auth.app.exception.exceptions.TokenExpiredException;
+import com.auth.app.exception.exceptions.TooManyAttemptsException;
 import com.auth.app.security.TokenProvider;
 import com.auth.app.services.application.AuthService;
-import com.auth.app.services.domain.*;
+import com.auth.app.services.domain.AuditLogService;
+import com.auth.app.services.domain.EmailVerificatonService;
+import com.auth.app.services.domain.LoginAttemptService;
+import com.auth.app.services.domain.PasswordResetService;
+import com.auth.app.services.domain.RefreshTokenService;
+import com.auth.app.services.domain.TrustedDevicesService;
+import com.auth.app.services.domain.UserService;
 import com.auth.app.utils.EnvironmentUtils;
 import com.auth.app.utils.TokenUtils;
 
@@ -74,10 +97,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resendVerificationEmail(String email, IpAddress ipAddress, UserAgent userAgent) {
-        UserModel user = userService.findByEmail(email);
+    public void resendVerificationEmail(ResendVerificationEmail request, IpAddress ipAddress, UserAgent userAgent) {
+        UserModel user = userService.findByEmail(request.getEmail());
 
-        String verifyEmailToken = emailVerificationService.generateNewVerificationToken(email);
+        String verifyEmailToken = emailVerificationService.generateNewVerificationToken(request.getEmail());
 
         if (EnvironmentUtils.isDev()) {
             log.info("🗝️ Resend Verify Email Token: {}", verifyEmailToken);
@@ -104,9 +127,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthModel login(LoginRequest request, UUID deviceId, IpAddress ipAddress, UserAgent userAgent) {
-        UserModel user = userService.findByEmail(request.getEmail());
 
-        if (user == null) {
+        UserModel user;
+        
+        try {
+            user = userService.findByEmail(request.getEmail());
+        } catch (Exception e) {
             auditLogService.logAction(null, LogAction.USER_LOGIN_FAILED, ipAddress, userAgent);
             throw new InvalidCredentialsException();
         }

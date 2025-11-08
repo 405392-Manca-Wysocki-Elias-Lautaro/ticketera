@@ -61,7 +61,14 @@ services:
   frontend:
     build:
       context: ./frontend
-    networks: [ frontend_net ]
+      target: runner
+    ports:
+      - "80:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://api.ticketera.com
+    networks:
+      - backend_net
 
   # API Gateway WebFlux (Spring Cloud Gateway)
   gateway:

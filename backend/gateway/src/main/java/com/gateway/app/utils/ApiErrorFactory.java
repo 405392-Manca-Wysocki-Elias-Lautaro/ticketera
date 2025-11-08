@@ -23,7 +23,7 @@ public class ApiErrorFactory {
 
         ApiResponse<ApiError> response = ApiResponse.<ApiError>builder()
                 .success(false)
-                .message("Error en la solicitud")
+                .message("Request error")
                 .data(apiError)
                 .timestamp(OffsetDateTime.now())
                 .build();
