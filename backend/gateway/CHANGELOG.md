@@ -1,3 +1,39 @@
+# [1.0.0-next.5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.4...gateway-v1.0.0-next.5) (2025-11-08)
+
+
+### Bug Fixes
+
+* **ci:** comment out lint step in CI workflow ([9127595](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/91275954f0eda826269a4dd1c68a74108b88adf7))
+* **ci:** enable and activate pnpm using corepack in frontend job ([fd58679](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/fd58679ac8b0ce5733452a62763247b789558918))
+* **ci:** ensure pnpm installation in frontend workflow ([b76667d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/b76667dd664c8e7e8f4970950c877c0494f0f900))
+* **ci:** install pnpm globally before usage in frontend workflow ([3a0083c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3a0083cd4b47dc6dccebdfdaa3ba921179639112))
+* **ci:** install pnpm globally to ensure availability in frontend job ([2f1de5c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/2f1de5c3384212ac637114800077217eff72d36b))
+* **ci:** remove invalid --if-present flag from pnpm lint command ([49a4781](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/49a4781ddb2b049f80c0024ff0f70319dbc7cfaa))
+* **ci:** reorder pnpm installation before setup-node step ([7affa68](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/7affa68326083438ae28beb0b302ea3148850520))
+* **cors:** allow auth cookies and limit others in gateway ([97f435a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/97f435ac3a59c55fbb03731ff5ceb20bc6dae8eb))
+* **cors:** enable cookie forwarding and add global config ([2e93e00](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/2e93e00ff48547482485bc40f1c391d5f5009192))
+* improve Lanyard grab on mobile and preload assets ([ef72827](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ef72827ae6ea78a7c0ad286fe8fc66071ab71d0d))
+
+
+### Features
+
+* **admin:** add admin panel pages ([37316ef](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/37316ef4f5ec17dc765abeb8df3390bbb5e8e6a1))
+* **auth+ui+layout:** unify authentication flow, UI components, and layouts ([b9eae3c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/b9eae3c4b6f8ffcd2bbb7b8b06b098a970f8759e))
+* **auth:** add authentication pages ([036adfa](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/036adfa6708dd7c92158d6709e3896f46ebeb19b))
+* **auth:** add dynamic cookie properties in app config ([396a2e6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/396a2e6a6ce0b7fa2a5b51fbc7e3f93721ab3c2b))
+* **auth:** add email verification flow ([3aeac12](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3aeac127810927995a2b3fdf918ca0338ca818d5))
+* **auth:** implement email verification flow ([16a3903](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/16a390313373069995f34ccaba4b1f3c9b265635))
+* enhance Lanyard physics, design, and logo update ([69404e3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/69404e3c870224a89c831b789c6cd5237863ec57))
+* **frontend:** Add complete authentication flow and UI components ([4e99739](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4e99739c2bc8729663c92fdd8ae83d226626bafd))
+* **frontend:** Complete authentication system with reusable UI components ([07d8585](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/07d8585d964fff6584ba14ed17618dfbe9a7f039))
+* **frontend:** implement auth flow and UI components ([ab29dfc](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ab29dfc4d0fadee84f4b716fd1670ffd068d6d49))
+* **pages:** add utility pages ([39f08f8](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/39f08f84878f1447e64bc171f453949b6095cf79))
+* scaffold frontend with routes, hooks, and protected middleware ([4027065](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/40270654a65f15cd674d9e52b19f1d8811e6066c))
+* **ui:** add reusable UI components ([d5f2a33](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/d5f2a338817e5077aa5b07e57c0922b5eaed95d4))
+* **ui:** add TiltedCard and Lanyard to event cards ([f04ee67](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/f04ee671cd297d4c8276ad3fb11c3dca1115a99d))
+* **ui:** apply TiltedCard to event detail image ([7f47612](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/7f476123b37d61b14f24a7a1634a6f376785d17f))
+* **ui:** replace QR dialog with new 3D LanyardTicket ([1013129](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/1013129774f2fa66ea7a140f7e3b7522107c3caf))
+
 # [1.0.0-next.4](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.3...gateway-v1.0.0-next.4) (2025-10-29)
 
 
