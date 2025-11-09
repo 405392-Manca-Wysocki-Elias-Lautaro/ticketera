@@ -28,10 +28,7 @@ public class TicketController {
     // 🎟️ Generar nuevo ticket
     @PostMapping("/generate")
     public ResponseEntity<?> generate(@RequestBody TicketGenerateRequest request) {
-        TicketModel ticketModel = ticketService.generateTicket(
-                request.getOrderItemId(),
-                request.getOccurrenceId()
-        );
+        TicketModel ticketModel = ticketService.generateTicket(request);
 
         TicketResponse ticketResponse = modelMapper.map(ticketModel, TicketResponse.class);
 

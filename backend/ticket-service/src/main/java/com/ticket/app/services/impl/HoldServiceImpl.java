@@ -28,11 +28,12 @@ public class HoldServiceImpl implements HoldService {
     }
 
     // ------------------------------------------------------------
-    // 🎟️ Crear Hold (admisión general o asiento numerado)
+    // 🎟️ Create Hold (general admission or assigned seat)
     // ------------------------------------------------------------
     @Override
     @Transactional
     public Hold createHold(UUID customerId, UUID occurrenceId, UUID areaId, UUID seatId, Integer quantity) {
+        // 🎯 Seat-based hold
         if (seatId != null) {
             Optional<Hold> existing = holdRepository.findActiveBySeatId(seatId);
             if (existing.isPresent()) {
@@ -52,6 +53,7 @@ public class HoldServiceImpl implements HoldService {
             return holdRepository.save(hold);
         }
 
+        // 🎯 General Admission hold
         if (quantity == null || quantity <= 0) {
             throw new InvalidHoldQuantityException();
         }
@@ -69,7 +71,7 @@ public class HoldServiceImpl implements HoldService {
     }
 
     // ------------------------------------------------------------
-    // 🔁 Convertir Hold a CONVERTED (cuando se genera el ticket)
+    // 🔁 Convert Hold to CONVERTED (when ticket is generated)
     // ------------------------------------------------------------
     @Override
     @Transactional
@@ -92,7 +94,7 @@ public class HoldServiceImpl implements HoldService {
     }
 
     // ------------------------------------------------------------
-    // ⏱️ Expirar Holds vencidos
+    // ⏱️ Expire all expired Holds
     // ------------------------------------------------------------
     @Override
     @Transactional
@@ -110,7 +112,7 @@ public class HoldServiceImpl implements HoldService {
     }
 
     // ------------------------------------------------------------
-    // 🔍 Obtener todos los Holds activos
+    // 🔍 Retrieve all active Holds
     // ------------------------------------------------------------
     @Override
     public List<Hold> getAllActive() {

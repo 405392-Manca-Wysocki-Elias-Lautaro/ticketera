@@ -19,6 +19,12 @@ CREATE TABLE IF NOT EXISTS tickets.tickets (
   -- Identificadores únicos
   code                text NOT NULL UNIQUE,      -- Código visible / manual
   qr_token            text UNIQUE,               -- Token QR o UUID (nuevo campo)
+
+  -- Precio
+  price               numeric(12,2),
+  currency            text,
+  discount            numeric(12,2),
+  final_price         numeric(12,2),
   
   -- Estado y fechas
   status              text NOT NULL DEFAULT 'ISSUED',
@@ -26,6 +32,7 @@ CREATE TABLE IF NOT EXISTS tickets.tickets (
   checked_in_at       timestamptz,
   canceled_at         timestamptz,               -- Nueva fecha opcional
   refunded_at         timestamptz,               -- Nueva fecha opcional
+  expires_at          timestamptz NOT NULL,
   
   -- Auditoría
   created_user        UUID,

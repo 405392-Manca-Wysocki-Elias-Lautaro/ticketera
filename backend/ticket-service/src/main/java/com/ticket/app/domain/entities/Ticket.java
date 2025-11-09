@@ -1,5 +1,6 @@
 package com.ticket.app.domain.entities;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -58,6 +59,18 @@ public class Ticket {
     @Builder.Default
     private TicketStatus status = TicketStatus.ISSUED;
 
+    @Column(name = "price")
+    private BigDecimal price;
+
+    @Column(name = "currency")
+    private String currency;
+
+    @Column(name = "discount")
+    private BigDecimal discount;
+
+    @Column(name = "final_price")
+    private BigDecimal finalPrice;
+
     @Column(name = "issued_at", nullable = false)
     @Builder.Default
     private OffsetDateTime issuedAt = OffsetDateTime.now();
@@ -70,6 +83,9 @@ public class Ticket {
 
     @Column(name = "refunded_at")
     private OffsetDateTime refundedAt;
+
+    @Column(name = "expires_at")
+    private OffsetDateTime expiresAt;
 
     @Column(name = "created_user")
     private UUID createdUser;
