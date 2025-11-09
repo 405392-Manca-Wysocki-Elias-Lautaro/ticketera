@@ -67,14 +67,19 @@ public class OrderService {
             // 7. Crear historial de estado
             createStatusHistory(order, null, OrderStatus.PENDING, null, "Order created");
             
-            // 8. Procesar pago
-            PaymentResponse paymentResponse = processPayment(order);
+            // 8. Procesar pago (pasar la descripción del request)
+            PaymentResponse paymentResponse = processPayment(order, request.getPaymentDescription());
             
             // 9. Actualizar orden según resultado del pago
             updateOrderAfterPayment(order, paymentResponse);
             
-            logger.info("Order created successfully: {}", order.getId());
-            return OrderResponse.fromEntity(order);
+            // 10. Extraer la URL de pago para incluirla en la respuesta
+            String paymentUrl = paymentResponse != null && paymentResponse.requiresRedirect() 
+                ? paymentResponse.getPaymentUrl() 
+                : null;
+            
+            logger.info("Order created successfully: {} with payment URL: {}", order.getId(), paymentUrl);
+            return OrderResponse.fromEntity(order, paymentUrl);
             
         } catch (Exception e) {
             logger.error("Error creating order for customer {}: {}", request.getCustomer().getEmail(), e.getMessage(), e);
@@ -277,7 +282,14 @@ public class OrderService {
             .collect(Collectors.toList());
     }
     
-    private PaymentResponse processPayment(Order order) {
+    /**
+     * Procesa el pago de una orden
+     * 
+     * @param order La orden a procesar
+     * @param paymentDescription Descripción personalizada para el pago (opcional)
+     * @return PaymentResponse con los detalles del pago
+     */
+    private PaymentResponse processPayment(Order order, String paymentDescription) {
         logger.info("Processing payment for order: {}", order.getId());
         
         // Crear request de pago
@@ -292,7 +304,16 @@ public class OrderService {
         PaymentRequest.PaymentMetadata metadata = new PaymentRequest.PaymentMetadata();
         metadata.setCustomerEmail(order.getCustomer().getEmail());
         metadata.setCustomerName(order.getCustomer().getFullName());
-        metadata.setDescription("Order #" + order.getId());
+        
+        // Usar la descripción personalizada del request, o un mensaje genérico si no viene
+        // NUNCA exponer el order_id por seguridad
+        if (paymentDescription != null && !paymentDescription.trim().isEmpty()) {
+            metadata.setDescription(paymentDescription);
+        } else {
+            // Mensaje genérico y seguro por defecto
+            metadata.setDescription("Compra de tickets");
+        }
+        
         paymentRequest.setMetadata(metadata);
         
         // Llamar al payment service

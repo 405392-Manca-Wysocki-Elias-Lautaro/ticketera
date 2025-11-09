@@ -32,6 +32,9 @@ public class CreateOrderRequest {
     @Future(message = "Expiration date must be in the future")
     private LocalDateTime expiresAt;
     
+    @Size(max = 200, message = "Payment description cannot exceed 200 characters")
+    private String paymentDescription;
+    
     // Constructors
     public CreateOrderRequest() {}
     
@@ -56,6 +59,9 @@ public class CreateOrderRequest {
     
     public LocalDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+    
+    public String getPaymentDescription() { return paymentDescription; }
+    public void setPaymentDescription(String paymentDescription) { this.paymentDescription = paymentDescription; }
     
     // Nested classes
     public static class CustomerInfo {

@@ -30,8 +30,16 @@ public class OrderResponse {
     private LocalDateTime paidAt;
     private List<OrderItemResponse> items;
     
-    // Factory method to create from entity
+    // URL de pago de Mercado Pago (solo presente cuando la orden requiere pago)
+    private String paymentUrl;
+    
+    // Factory method to create from entity (sin payment URL)
     public static OrderResponse fromEntity(Order order) {
+        return fromEntity(order, null);
+    }
+    
+    // Factory method to create from entity with payment URL
+    public static OrderResponse fromEntity(Order order, String paymentUrl) {
         return OrderResponse.builder()
             .id(order.getId())
             .customer(CustomerResponse.fromEntity(order.getCustomer()))
@@ -50,6 +58,7 @@ public class OrderResponse {
                 order.getItems().stream()
                     .map(OrderItemResponse::fromEntity)
                     .collect(Collectors.toList()) : null)
+            .paymentUrl(paymentUrl)
             .build();
     }
     
