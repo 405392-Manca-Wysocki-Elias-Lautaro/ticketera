@@ -77,7 +77,7 @@ export function Navbar() {
                             className="h-8 w-8 rounded-full"
                         />
 
-                        <GradientText>
+                        <GradientText className='backdrop-blur-none'>
                             <span className="font-bold text-lg hidden sm:inline">
                                 Ticketly
                             </span>

@@ -19,6 +19,9 @@ public class TicketGenerateRequest {
     @NotNull(message = "The field 'occurrenceId' is required.")
     private UUID occurrenceId;
 
+    @NotNull(message = "The field 'userId' is required.")
+    private UUID userId;
+
     // 💰 Pricing fields
     @NotNull(message = "The field 'price' is required.")
     @DecimalMin(value = "0.0", inclusive = false, message = "The price must be greater than 0.")

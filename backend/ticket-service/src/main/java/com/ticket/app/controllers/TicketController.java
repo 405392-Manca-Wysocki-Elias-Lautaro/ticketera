@@ -2,9 +2,7 @@ package com.ticket.app.controllers;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ticket.app.domain.models.TicketModel;
 import com.ticket.app.dto.request.TicketGenerateRequest;
@@ -14,7 +12,11 @@ import com.ticket.app.exception.exceptions.InvalidTicketValidationTypeException;
 import com.ticket.app.services.TicketService;
 import com.ticket.app.utils.ApiResponseFactory;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
+@RequestMapping("/")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -25,17 +27,15 @@ public class TicketController {
         this.modelMapper = modelMapper;
     }
 
-    // 🎟️ Generar nuevo ticket
+    // 🎟️ Generate new ticket
     @PostMapping("/generate")
     public ResponseEntity<?> generate(@RequestBody TicketGenerateRequest request) {
         TicketModel ticketModel = ticketService.generateTicket(request);
-
         TicketResponse ticketResponse = modelMapper.map(ticketModel, TicketResponse.class);
-
-        return ApiResponseFactory.created("Ticket generado correctamente.", ticketResponse);
+        return ApiResponseFactory.created("Ticket generated successfully.", ticketResponse);
     }
 
-    // ✅ Validar ticket por código o QR
+    // ✅ Validate ticket by QR or code
     @PostMapping("/validate")
     public ResponseEntity<?> validateTicket(@RequestBody TicketValidateRequest request) {
         TicketModel ticket;
@@ -49,5 +49,21 @@ public class TicketController {
         }
 
         return ApiResponseFactory.success("Ticket validated successfully.", ticket);
+    }
+
+    // 🔍 Get ticket by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable UUID id) {
+        TicketModel ticket = ticketService.getById(id);
+        TicketResponse ticketResponse = modelMapper.map(ticket, TicketResponse.class);
+        return ApiResponseFactory.success("Ticket retrieved successfully.", ticketResponse);
+    }
+
+    // 👤 Get tickets by user ID
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getByUserId(@PathVariable UUID userId) {
+        List<TicketModel> tickets = ticketService.getByUserId(userId);
+
+        return ApiResponseFactory.success("User tickets retrieved successfully.", tickets);
     }
 }

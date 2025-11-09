@@ -13,21 +13,24 @@ const protectedRoutes = [
 const publicOnlyRoutes = ["/login", "/signup", "/verify-email", "/forgot-password"]
 
 export function middleware(req: NextRequest) {
-    const token = req.cookies.get("refreshToken")?.value
-
+    const refreshToken = req.cookies.get("refreshToken")?.value
+    const sessionFlag = req.cookies.get("sessionFlag")?.value
     const { pathname } = req.nextUrl
 
-    const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+    const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
+    const isPublicOnly = publicOnlyRoutes.includes(pathname)
 
-    // 1. 🛡️ Si el usuario no está autenticado e intenta acceder a una ruta protegida
-    if (!token && isProtectedRoute) {
+    const isAuthenticated = refreshToken && sessionFlag
+
+    // No autenticado → ruta protegida
+    if (!isAuthenticated && isProtected) {
         const loginUrl = new URL("/login", req.url)
-        loginUrl.searchParams.set("from", pathname) // Guardar la página de origen
+        loginUrl.searchParams.set("from", pathname)
         return NextResponse.redirect(loginUrl)
     }
 
-    // 2. 🔄 Si el usuario está autenticado e intenta acceder a login/register
-    if (token && publicOnlyRoutes.includes(pathname)) {
+    // Autenticado → no dejar entrar a login/register
+    if (isAuthenticated && isPublicOnly) {
         return NextResponse.redirect(new URL("/dashboard", req.url))
     }
 

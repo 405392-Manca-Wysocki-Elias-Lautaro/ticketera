@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS tickets.tickets (
   occurrence_id       UUID NOT NULL,
   event_venue_area_id UUID,
   event_venue_seat_id UUID,
+  user_id             UUID NOT NULL,
 
   -- Identificadores únicos
   code                text NOT NULL UNIQUE,      -- Código visible / manual

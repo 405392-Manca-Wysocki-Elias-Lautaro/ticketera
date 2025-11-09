@@ -4,8 +4,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import TiltedCard from "@/components/TiltedCard"
-import StarBorder from './StarBorder'
-import GradientText from './GradientText'
+import GradientText from '../GradientText'
+import StarBorder from '../StarBorder'
 
 //TODO: Borrar
 export interface Event {

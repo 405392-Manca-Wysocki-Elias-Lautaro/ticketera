@@ -8,6 +8,7 @@ interface AuthState {
     isLoading: boolean;
     setToken: (token: string | null) => void;
     setUser: (user: User | null) => void;
+    setSessionFlag: (flag: boolean) => void;
     setLoading: (loading: boolean) => void;
     logout: () => void;
 }
@@ -22,10 +23,21 @@ export const useAuthStore = create(
             setToken: (token) => set({ token }),
             setUser: (user) => set({ user }),
             setLoading: (loading) => set({ isLoading: loading }),
+            setSessionFlag: (flag) => {
+                if (flag) {
+                    document.cookie = "sessionFlag=true; Path=/; SameSite=Strict;";
+                    localStorage.setItem("sessionFlag", "true");
+                } else {
+                    document.cookie = "sessionFlag=; Max-Age=0; Path=/;";
+                    localStorage.removeItem("sessionFlag");
+                }
+            },
 
             logout: () => {
                 set({ token: null, user: null });
-            },
+                localStorage.removeItem("sessionFlag");
+                document.cookie = "sessionFlag=; Max-Age=0; path=/;";
+            }
         }),
         {
             name: "auth-storage",

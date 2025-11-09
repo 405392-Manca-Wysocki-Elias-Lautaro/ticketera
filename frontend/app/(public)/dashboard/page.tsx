@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { EventCard } from '@/components/EventCard'
 import { mockEvents } from '@/mocks/mockEvents'
 import GradientText from '@/components/GradientText'
+import { EventCard } from '@/components/dashboard/EventCard'
 
 //TODO: Borrar
 const categories = ["Todos", "Música", "Comedia", "Tecnología", "Deportes", "Teatro"]
@@ -52,10 +52,10 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="h-screen bg-background overflow-auto">
             <Navbar />
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="h-auto w-full mx-auto px-6 py-8">
                 {/* Header */}
                 <div className="mb-8">
                     <GradientText>

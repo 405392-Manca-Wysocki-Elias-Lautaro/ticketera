@@ -4,7 +4,7 @@ import { Canvas, invalidate } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
 import * as THREE from "three";
-import Lanyard from "@/components/Lanyard";
+import Lanyard from "@/components/tickets/Lanyard";
 import { motion } from "framer-motion";
 import { Suspense, useEffect } from 'react';
 

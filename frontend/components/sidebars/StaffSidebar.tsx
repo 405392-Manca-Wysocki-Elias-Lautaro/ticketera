@@ -2,66 +2,44 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Calendar, DollarSign, LayoutDashboard, Plus, Settings, Home, Tickets } from "lucide-react"
+import { QrCode, Settings, Home, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import GradientText from './GradientText'
+import GradientText from '../GradientText'
 
-export function AdminSidebar() {
+export function StaffSidebar() {
     const pathname = usePathname()
 
     const links = [
         {
-            title: "Dashboard",
-            href: "/admin",
-            icon: LayoutDashboard,
+            title: "Validar Tickets",
+            href: "/staff",
+            icon: QrCode,
         },
         {
-            title: "Mis Eventos",
-            href: "/admin/events",
+            title: "Mis Eventos Asignados",
+            href: "/staff/events",
             icon: Calendar,
         },
         {
-            title: "Crear Evento",
-            href: "/admin/events/create",
-            icon: Plus,
-        },
-        {
-            title: "Pagos",
-            href: "/admin/payments",
-            icon: DollarSign,
-        },
-        {
-            title: "Validar Tickets",
-            href: "/admin/validate",
-            icon: Tickets,
-        },
-        {
             title: "Configuración",
-            href: "/admin/settings",
+            href: "/profile",
             icon: Settings,
         },
     ]
 
     return (
-        <div className="flex h-screen w-64 flex-col border-r bg-background">
+        <div className="flex h-full w-64 flex-col border-r bg-background">
             <div className="p-6">
 
                 <GradientText>
-                    <h2 className="text-lg font-semibold">Panel Admin</h2>
+                    <h2 className="text-lg font-semibold">Panel Staff</h2>
                 </GradientText>
 
             </div>
             <Separator />
             <nav className="flex-1 space-y-1 p-4">
-                <Button variant="ghost" asChild className="w-full justify-start mb-2 cursor-pointer">
-                    <Link href="/dashboard">
-                        <Home className="mr-2 h-4 w-4" />
-                        Ver Eventos Públicos
-                    </Link>
-                </Button>
-                <Separator className="my-2" />
                 {links.map((link) => (
                     <Button
                         key={link.href}

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { extend, invalidate, useFrame } from '@react-three/fiber';
-import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
+import { extend, useFrame } from '@react-three/fiber';
+import { useTexture, Environment, Lightformer } from '@react-three/drei';
 import {
     BallCollider,
     CuboidCollider,

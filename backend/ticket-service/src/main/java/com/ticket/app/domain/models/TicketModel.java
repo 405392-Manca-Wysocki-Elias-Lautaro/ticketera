@@ -24,6 +24,7 @@ public class TicketModel {
     private UUID occurrenceId;
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;
+    private UUID userId;
 
     private String code;
     private String qrToken;

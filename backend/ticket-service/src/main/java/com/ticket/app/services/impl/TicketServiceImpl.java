@@ -1,6 +1,7 @@
 package com.ticket.app.services.impl;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
@@ -17,10 +18,12 @@ import com.ticket.app.exception.exceptions.InvalidTicketStatusException;
 import com.ticket.app.exception.exceptions.TicketAlreadyCheckedInException;
 import com.ticket.app.exception.exceptions.TicketExpiredException;
 import com.ticket.app.exception.exceptions.TicketNotFoundException;
+import com.ticket.app.exception.exceptions.UnauthorizedTicketAccessException;
 import com.ticket.app.repositories.HoldRepository;
 import com.ticket.app.repositories.TicketRepository;
 import com.ticket.app.repositories.TicketStatusHistoryRepository;
 import com.ticket.app.services.TicketService;
+import com.ticket.app.utils.JwtUtils;
 import com.ticket.app.utils.QrGeneratorUtil;
 
 @Service
@@ -30,17 +33,20 @@ public class TicketServiceImpl implements TicketService {
     private final TicketStatusHistoryRepository historyRepository;
     private final HoldRepository holdRepository;
     private final ModelMapper modelMapper;
+    private final JwtUtils jwtUtils;
 
     public TicketServiceImpl(
             TicketRepository ticketRepository,
             TicketStatusHistoryRepository historyRepository,
             HoldRepository holdRepository,
-            ModelMapper modelMapper
+            ModelMapper modelMapper,
+            JwtUtils jwtUtils
     ) {
         this.ticketRepository = ticketRepository;
         this.historyRepository = historyRepository;
         this.holdRepository = holdRepository;
         this.modelMapper = modelMapper;
+        this.jwtUtils = jwtUtils;
     }
 
     // ------------------------------------------------------------
@@ -67,6 +73,7 @@ public class TicketServiceImpl implements TicketService {
             TicketModel model = new TicketModel();
             model.setOrderItemId(request.getOrderItemId());
             model.setOccurrenceId(request.getOccurrenceId());
+            model.setUserId(jwtUtils.getUserId());
             model.setCode("TCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             model.setQrToken(UUID.randomUUID().toString());
             model.setStatus(TicketStatus.ISSUED);
@@ -120,6 +127,16 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private TicketModel validateAndUpdate(Ticket entity) {
+
+        UUID currentUserId = jwtUtils.getUserId();
+        String role = jwtUtils.getRole();
+
+        List<String> allowedRoles = List.of("STAFF", "ADMIN", "SUPER_ADMIN");
+
+        if (!entity.getUserId().equals(currentUserId) && !allowedRoles.contains(role)) {
+            throw new UnauthorizedTicketAccessException();
+        }
+
         TicketStatus fromStatus = entity.getStatus();
 
         if (entity.getExpiresAt() != null && entity.getExpiresAt().isBefore(OffsetDateTime.now())) {
@@ -150,10 +167,37 @@ public class TicketServiceImpl implements TicketService {
         history.setTicket(ticket);
         history.setFromStatus(from != null ? from.name().toLowerCase() : null);
         history.setToStatus(to.name().toLowerCase());
-        history.setUpdatedUser(null); // Can be set with authenticated user if available
+        history.setUpdatedUser(jwtUtils.getUserId());
         history.setUpdatedAt(OffsetDateTime.now());
         history.setNote(note);
 
         historyRepository.save(history);
     }
+
+    // ------------------------------------------------------------
+    // 🔍 Get ticket by ID
+    // ------------------------------------------------------------
+    @Override
+    @Transactional(readOnly = true)
+    public TicketModel getById(UUID id) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(TicketNotFoundException::new);
+
+        TicketModel model = modelMapper.map(ticket, TicketModel.class);
+        return model;
+    }
+
+    // ------------------------------------------------------------
+    // 👤 Get all tickets by User ID
+    // ------------------------------------------------------------
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketModel> getByUserId(UUID userId) {
+        List<Ticket> tickets = ticketRepository.findByUserId(userId);
+
+        return tickets.stream()
+                .map(ticket -> modelMapper.map(ticket, TicketModel.class))
+                .toList();
+    }
+
 }

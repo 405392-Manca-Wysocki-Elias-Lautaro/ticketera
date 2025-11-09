@@ -98,6 +98,7 @@ services:
     volumes:
       - ./backend/gateway:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SERVICES_AUTH_BASE_URL: http://auth-dev:8080
@@ -106,11 +107,11 @@ services:
       SERVICES_PAYMENT_BASE_URL: http://payment-dev:8080
       SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       AUTH_URL: ${AUTH_URL}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-      REDIS_PASSWORD: 
+      REDIS_PASSWORD:
     # depends_on:
     #   - auth-dev
     #   - event-dev
@@ -138,10 +139,11 @@ services:
           -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
           -Dspring-boot.run.fork=false \
           spring-boot:run
-          
     volumes:
       - ./backend/auth-service:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key:/app/keys/jwtRS256.key:ro
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${AUTH_DB_SCHEMA},public
@@ -152,20 +154,20 @@ services:
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
       FRONTEND_URL: ${FRONTEND_URL}
       NOTIFICATION_URL: ${NOTIFICATION_URL}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_PRIVATE_KEY: /app/keys/jwtRS256.key
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-      REDIS_PASSWORD: 
+      REDIS_PASSWORD:
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [backend_net]
     ports:
       - "8082:8080"
@@ -189,6 +191,7 @@ services:
     volumes:
       - ./backend/event-service:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${EVENT_DB_SCHEMA},public
@@ -197,6 +200,7 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -206,7 +210,6 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [backend_net]
     ports:
       - "8083:8080"
@@ -230,6 +233,7 @@ services:
     volumes:
       - ./backend/ticket-service:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${TICKET_DB_SCHEMA},public
@@ -238,6 +242,7 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -247,7 +252,6 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [backend_net]
     ports:
       - "8084:8080"
@@ -271,6 +275,7 @@ services:
     volumes:
       - ./backend/payment-service:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${PAYMENT_DB_SCHEMA},public
@@ -279,6 +284,7 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payment-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payment-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -288,7 +294,6 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [backend_net]
     ports:
       - "8085:8080"
@@ -312,6 +317,7 @@ services:
     volumes:
       - ./backend/notification-service:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${NOTIFICATION_DB_SCHEMA},public
@@ -320,6 +326,7 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -329,12 +336,11 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [backend_net]
     ports:
       - "8086:8080"
       - "5008:5005"
-  
+
   order-dev:
     container_name: order-dev
     image: maven:3.9.8-eclipse-temurin-17
@@ -353,6 +359,7 @@ services:
     volumes:
       - ./backend/order-service:/workspace
       - maven_cache_dev:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${ORDER_DB_SCHEMA},public
@@ -361,6 +368,7 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -370,7 +378,6 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
     networks: [backend_net]
     ports:
       - "8087:8080"

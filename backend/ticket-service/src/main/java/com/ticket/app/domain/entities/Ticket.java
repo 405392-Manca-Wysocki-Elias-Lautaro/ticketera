@@ -47,6 +47,9 @@ public class Ticket {
     @Column(name = "event_venue_seat_id")
     private UUID eventVenueSeatId;
 
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
     @Column(nullable = false, unique = true)
     private String code;
 

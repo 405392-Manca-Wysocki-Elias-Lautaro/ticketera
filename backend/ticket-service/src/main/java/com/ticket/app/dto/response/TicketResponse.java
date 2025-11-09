@@ -21,7 +21,7 @@ public class TicketResponse {
     private UUID occurrenceId;
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;
-    private UUID ticketTypeId;
+    private UUID userId;
 
     private String code;
     private String qrBase64;

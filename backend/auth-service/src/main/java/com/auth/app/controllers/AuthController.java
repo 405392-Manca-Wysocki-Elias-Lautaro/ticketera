@@ -4,6 +4,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -65,8 +66,8 @@ public class AuthController {
 
     @PostMapping("/resend-verification")
     public ResponseEntity<ApiResponse<Void>> resendVerification(
-        @Validated @RequestBody ResendVerificationEmail request,
-        HttpServletRequest httpRequest
+            @Validated @RequestBody ResendVerificationEmail request,
+            HttpServletRequest httpRequest
     ) {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
@@ -99,18 +100,29 @@ public class AuthController {
         AuthModel authModel = authService.login(request, deviceId, ipAddress, userAgent);
         RefreshTokenModel refreshToken = authModel.getRefreshToken();
 
+        Duration refreshDuration = Duration.between(OffsetDateTime.now(), refreshToken.getExpiresAt());
+
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                 .httpOnly(true)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
                 .domain(cookieProps.getDomain())
                 .path(cookieProps.getPath())
-                .maxAge(Duration.between(OffsetDateTime.now(), refreshToken.getExpiresAt()))
+                .maxAge(refreshDuration)
+                .build();
+
+        ResponseCookie sessionFlagCookie = ResponseCookie.from("sessionFlag", "true")
+                .httpOnly(false)
+                .secure(cookieProps.isSecure())
+                .sameSite(cookieProps.getSameSite())
+                .domain(cookieProps.getDomain())
+                .path(cookieProps.getPath())
+                .maxAge(refreshDuration)
                 .build();
 
         AuthResponse authResponse = modelMapper.map(authModel, AuthResponse.class);
 
-        return ApiResponseFactory.success("Login successful", authResponse, refreshCookie);
+        return ApiResponseFactory.success("Login successful", authResponse, List.of(refreshCookie, sessionFlagCookie));
     }
 
     @PostMapping("/refresh")
@@ -169,9 +181,13 @@ public class AuthController {
         IpAddress ipAddress = RequestUtils.extractIp(httpRequest);
         UserAgent userAgent = RequestUtils.extractUserAgent(httpRequest);
 
-        authService.logout(authHeader, ipAddress, userAgent);
+        try {
+            if (authHeader != null && !authHeader.isBlank()) {
+                authService.logout(authHeader, ipAddress, userAgent);
+            }
+        } catch (Exception e) {}
 
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+        ResponseCookie deleteRefreshCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
@@ -180,7 +196,16 @@ public class AuthController {
                 .maxAge(0)
                 .build();
 
-        return ApiResponseFactory.success("Logout successful", null, deleteCookie);
+        ResponseCookie deleteFlagCookie = ResponseCookie.from("sessionFlag", "")
+                .httpOnly(false)
+                .secure(cookieProps.isSecure())
+                .sameSite(cookieProps.getSameSite())
+                .domain(cookieProps.getDomain())
+                .path(cookieProps.getPath())
+                .maxAge(0)
+                .build();
+
+        return ApiResponseFactory.success("Logout successful", null, List.of(deleteRefreshCookie, deleteFlagCookie));
     }
 
     @PostMapping("/forgot-password")

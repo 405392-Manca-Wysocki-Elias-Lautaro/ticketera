@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, Home } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { RoleCode } from '@/types/enums/RoleCode'
 import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 
