@@ -55,7 +55,7 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-background">
             <Navbar />
 
-            <main className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="mb-8">
                     <GradientText>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
                         <p className="text-muted-foreground text-lg">No se encontraron eventos para esta búsqueda</p>
                     </div>
                 )}
-            </main>
+            </div>
         </div>
     )
 }

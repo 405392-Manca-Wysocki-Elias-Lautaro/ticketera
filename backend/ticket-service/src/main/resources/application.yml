@@ -2,31 +2,31 @@ project:
   version: @project.version@
 
 spring:
-  application.name: notification-service
+  application.name: ticket-service
   main.banner-mode: "off"
   sql.init.mode: never
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:ticket},public
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:tickets},public
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     hikari:
-      schema: ${DB_SCHEMA:ticket}
+      schema: ${DB_SCHEMA:tickets}
       maximum-pool-size: 30
 
   jpa:
     hibernate:
       ddl-auto: validate
-      default_schema: ${DB_SCHEMA:ticket}
+      default_schema: ${DB_SCHEMA:tickets}
     properties:
-      hibernate.default_schema: ${DB_SCHEMA:ticket}
+      hibernate.default_schema: ${DB_SCHEMA:tickets}
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
 
   flyway:
     enabled: true
-    schemas: ${DB_SCHEMA:ticket}
-    default-schema: ${DB_SCHEMA:ticket}
+    schemas: ${DB_SCHEMA:tickets}
+    default-schema: ${DB_SCHEMA:tickets}
     table: ${FLYWAY_TABLE:flyway_history_ticket}
     validate-on-migrate: true
     baseline-on-migrate: false

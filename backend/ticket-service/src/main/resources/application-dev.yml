@@ -18,14 +18,19 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     hikari:
-      schema: ${DB_SCHEMA:ticket}
       maximum-pool-size: 10
+      minimum-idle: 3
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 600000
 
   jpa:
     hibernate:
       ddl-auto: validate
       default_schema: ${DB_SCHEMA:ticket}
+    show-sql: true
     properties:
+      hibernate.format_sql: true
       hibernate.default_schema: ${DB_SCHEMA:ticket}
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
@@ -35,8 +40,9 @@ spring:
     schemas: ${DB_SCHEMA:ticket}
     default-schema: ${DB_SCHEMA:ticket}
     table: ${FLYWAY_TABLE:flyway_history_ticket}
+    baseline-on-migrate: true
     validate-on-migrate: true
-    baseline-on-migrate: false
+    out-of-order: true
     locations:
       - classpath:db/migration
       - classpath:db/r
@@ -46,6 +52,7 @@ logging.level:
   org.springframework.jdbc.core: DEBUG
   org.hibernate.SQL: DEBUG
   org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  org.flywaydb.core.internal.command.DbMigrate: INFO
 
 management:
   endpoints.web.exposure.include: "health,info"
