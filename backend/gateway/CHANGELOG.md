@@ -1,3 +1,37 @@
+# [1.0.0-next.6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.5...gateway-v1.0.0-next.6) (2025-11-10)
+
+
+### Bug Fixes
+
+* delete NotNull annotation in venueId and fix error in controller ([f9ebcaf](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/f9ebcafb58bb65083b579e61022d6bf1879819e7))
+* do some changes ([238fc1f](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/238fc1fa2a6285853b64ccd6270240a28d81d5ac))
+* fix build ([150b9de](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/150b9de0cf89901fbeed5e6812be81b981dd37bf))
+* last changes to organizer crud ([0e50176](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/0e50176fea363a578ff433355877f4ac2dc94827))
+* **payment:** update payment intent URL to match new API structure ([46eaacc](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/46eaacce7a36cd1cfb40105995edc0646d76cbfe))
+* resolve some errors in organizer impl ([9c3a21a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9c3a21a5d72e1d989b2d811791b1c5decc046741))
+
+
+### Features
+
+* add seed of seat types table ([6967d7c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/6967d7ce2947000538039e2166a2807fd30c77f2))
+* add some changes and fix others ([5d7b6a0](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/5d7b6a061c07f85afa164a01473c8bc1260ee809))
+* add some configurations ([c4759a4](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c4759a49cda0ced8d7da08d7f97c8f1e874e69b2))
+* change Id Long to UUID in Venues Areas an Seats, and sign of enpoints ([71d7674](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/71d76744b87a0f36326febd358570676240e2e62))
+* enhance seat generation functionality with flexible row configurations and update DTOs for improved clarity ([58c2901](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/58c2901914a9a9bb8c2c333d7729d512f58df53d))
+* estandarizar reponses ([a2337a7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/a2337a7c68d82d63c0c4489c8ee85dd871f4a2b1))
+* impl area and seats functionality ([dbf84fb](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/dbf84fb32936686c08bceb4d808854713ec62b49))
+* implement complete crud of areas and do seat service ([84579df](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/84579dfa742ce5e3c85d7ea5d2d91a8f58f95f62))
+* implement complete crud of categories and events with their pre loaded data ([76cb01b](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/76cb01b5fb0c1df1c483db6d1966d4ace5364ad0))
+* implement crud of event ocurrences and modify Longs ids to use UUID ([27edadf](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/27edadfe8d096c8ee170ca3661033b4a6b8da486))
+* implement endpoints of order-service ([3433b90](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3433b90532c78c57a80b5f4354424ee41eb764a1))
+* implement organizer crud ([fe4283a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/fe4283a02181f0d1031043e0f85899a482313fce))
+* implement venue crud and load some pre data ([94e862b](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/94e862b03bf435bd6907ee5dbcf2cd4f8495cf66))
+* integrate Checkout Pro in payment service ([27bb18e](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/27bb18e5e016207049f693a420fde8c73d14cdfb))
+* **jwt,ui:** add custom exceptions and new UI components ([5539128](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/55391287e3c3974b6c44339a6b0427311f3d6d37))
+* standardization of responses ([828bb1a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/828bb1a74aa45f372c698073369d55cef3e964a4))
+* **ticket:** add controller, service & repo for generation ([14e27d6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/14e27d60e2b958e05448c8b420a5a17338298d16))
+* **ticket:** add pricing and expiration logic ([512653d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/512653daff147e18769e84d677eb0776ba227cac))
+
 # [1.0.0-next.5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.4...gateway-v1.0.0-next.5) (2025-11-08)
 
 
