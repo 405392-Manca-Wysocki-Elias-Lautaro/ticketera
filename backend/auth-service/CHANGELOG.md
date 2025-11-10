@@ -1,3 +1,27 @@
+# [1.0.0-next.4](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.3...auth-v1.0.0-next.4) (2025-11-10)
+
+
+### Bug Fixes
+
+* delete NotNull annotation in venueId and fix error in controller ([f9ebcaf](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/f9ebcafb58bb65083b579e61022d6bf1879819e7))
+* last changes to organizer crud ([0e50176](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/0e50176fea363a578ff433355877f4ac2dc94827))
+* resolve some errors in organizer impl ([9c3a21a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/9c3a21a5d72e1d989b2d811791b1c5decc046741))
+
+
+### Features
+
+* add seed of seat types table ([6967d7c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/6967d7ce2947000538039e2166a2807fd30c77f2))
+* add some changes and fix others ([5d7b6a0](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/5d7b6a061c07f85afa164a01473c8bc1260ee809))
+* change Id Long to UUID in Venues Areas an Seats, and sign of enpoints ([71d7674](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/71d76744b87a0f36326febd358570676240e2e62))
+* enhance seat generation functionality with flexible row configurations and update DTOs for improved clarity ([58c2901](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/58c2901914a9a9bb8c2c333d7729d512f58df53d))
+* impl area and seats functionality ([dbf84fb](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/dbf84fb32936686c08bceb4d808854713ec62b49))
+* implement complete crud of areas and do seat service ([84579df](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/84579dfa742ce5e3c85d7ea5d2d91a8f58f95f62))
+* implement complete crud of categories and events with their pre loaded data ([76cb01b](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/76cb01b5fb0c1df1c483db6d1966d4ace5364ad0))
+* implement crud of event ocurrences and modify Longs ids to use UUID ([27edadf](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/27edadfe8d096c8ee170ca3661033b4a6b8da486))
+* implement organizer crud ([fe4283a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/fe4283a02181f0d1031043e0f85899a482313fce))
+* implement venue crud and load some pre data ([94e862b](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/94e862b03bf435bd6907ee5dbcf2cd4f8495cf66))
+* standardization of responses ([828bb1a](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/828bb1a74aa45f372c698073369d55cef3e964a4))
+
 # [1.0.0-next.3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.2...auth-v1.0.0-next.3) (2025-11-10)
 
 
