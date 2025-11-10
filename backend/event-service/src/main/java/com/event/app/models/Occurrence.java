@@ -9,25 +9,22 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Event {
+public class Occurrence {
 
     private UUID id;
 
-    private UUID organizerId;
+    private UUID eventId;
 
-    private String title;
+    private UUID venueId;
 
-    private String slug;
+    private LocalDateTime startsAt;
 
-    private String description;
-
-    private UUID categoryId;
-
-    private String coverUrl;
+    private LocalDateTime endsAt;
 
     private String status;
 
-    private LocalDateTime createdAt;
+    private String slug;
 
     private Boolean active;
 }
+

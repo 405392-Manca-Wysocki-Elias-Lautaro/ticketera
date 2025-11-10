@@ -1,5 +1,6 @@
 package com.event.app.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -9,25 +10,30 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Event {
+public class Venue {
 
     private UUID id;
 
     private UUID organizerId;
 
-    private String title;
-
-    private String slug;
+    private String name;
 
     private String description;
 
-    private UUID categoryId;
+    private String addressLine;
 
-    private String coverUrl;
+    private String city;
 
-    private String status;
+    private String state;
+
+    private String country;
+
+    private BigDecimal lat;
+
+    private BigDecimal lng;
 
     private LocalDateTime createdAt;
 
     private Boolean active;
 }
+

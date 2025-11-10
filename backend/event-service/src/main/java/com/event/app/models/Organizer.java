@@ -9,25 +9,20 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Event {
+public class Organizer {
 
     private UUID id;
 
-    private UUID organizerId;
-
-    private String title;
+    private String name;
 
     private String slug;
 
-    private String description;
+    private String contactEmail;
 
-    private UUID categoryId;
-
-    private String coverUrl;
-
-    private String status;
+    private String phoneNumber;
 
     private LocalDateTime createdAt;
 
     private Boolean active;
+    
 }
