@@ -3,37 +3,42 @@ project:
 
 spring:
   application:
-    name: notification-service
+    name: payment-service
   main.banner-mode: "off"
   sql.init.mode: never
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:payment},public
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:payments},public
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     hikari:
-      schema: ${DB_SCHEMA:payment}
+      schema: ${DB_SCHEMA:payments}
       maximum-pool-size: 30
 
   jpa:
     hibernate:
       ddl-auto: validate
-      default_schema: ${DB_SCHEMA:payment}
+      default_schema: ${DB_SCHEMA:payments}
     properties:
-      hibernate.default_schema: ${DB_SCHEMA:payment}
+      hibernate.default_schema: ${DB_SCHEMA:payments}
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
 
   flyway:
     enabled: true
-    schemas: ${DB_SCHEMA:payment}
-    default-schema: ${DB_SCHEMA:payment}
+    schemas: ${DB_SCHEMA:payments}
+    default-schema: ${DB_SCHEMA:payments}
     table: ${FLYWAY_TABLE:flyway_history_payment}
     validate-on-migrate: true
     baseline-on-migrate: false
     locations:
       - classpath:db/migration
       - classpath:db/r
+
+# Mercado Pago Configuration
+mercadopago:
+  access-token: ${MERCADOPAGO_ACCESS_TOKEN:APP_USR-3149021535390307-110914-55fe675713252fa4a2d138b203497d1f-2977404984}
+  notification-url: ${MERCADOPAGO_NOTIFICATION_URL:}
 
 logging.level:
   root: INFO

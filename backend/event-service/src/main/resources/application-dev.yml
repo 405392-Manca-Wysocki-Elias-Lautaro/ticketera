@@ -14,32 +14,33 @@ spring:
       enabled: false
       
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:event},public
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:events},public
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     hikari:
-      schema: ${DB_SCHEMA:event}
+      schema: ${DB_SCHEMA:events}
       maximum-pool-size: 10
 
   jpa:
     hibernate:
       ddl-auto: validate
-      default_schema: ${DB_SCHEMA:event}
+      default_schema: ${DB_SCHEMA:events}
     properties:
-      hibernate.default_schema: ${DB_SCHEMA:event}
+      hibernate.default_schema: ${DB_SCHEMA:events}
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
 
   flyway:
     enabled: true
-    schemas: ${DB_SCHEMA:event}
-    default-schema: ${DB_SCHEMA:event}
+    schemas: ${DB_SCHEMA:events}
+    default-schema: ${DB_SCHEMA:events}
     table: ${FLYWAY_TABLE:flyway_history_event}
     validate-on-migrate: true
     baseline-on-migrate: false
     locations:
       - classpath:db/migration
       - classpath:db/r
+      - classpath:db/seeds
     clean-disabled: true
 
 logging.level:
