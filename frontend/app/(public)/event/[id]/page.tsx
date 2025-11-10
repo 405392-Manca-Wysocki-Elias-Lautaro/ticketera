@@ -16,8 +16,8 @@ import StarBorder from '@/components/StarBorder'
 export default function EventDetailPage() {
     const router = useRouter()
     const params = useParams()
-    const { user, isLoading } = useAuth()
-    const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
+    const { isLoading } = useAuth()
+    const [event] = useState(mockEvents.find((e) => e.id === params.id))
 
     if (isLoading) {
         return (
@@ -46,10 +46,10 @@ export default function EventDetailPage() {
     })
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="h-screen bg-background overflow-auto">
             <Navbar />
 
-            <main className="container mx-auto px-4 py-8">
+            <div className="h-auto w-full mx-auto px-6 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
@@ -182,7 +182,7 @@ export default function EventDetailPage() {
                         </Card>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     )
 }

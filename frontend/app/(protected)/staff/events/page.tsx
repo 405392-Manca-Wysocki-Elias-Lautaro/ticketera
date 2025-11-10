@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Users } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockEvents } from '@/mocks/mockEvents'
-import { RoleCode } from '@/types/enums/RoleCode'
-import { StaffSidebar } from '@/components/StaffSidebar'
 import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 

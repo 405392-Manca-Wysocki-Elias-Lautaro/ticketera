@@ -20,6 +20,12 @@ spring:
       forwarded-headers-strategy: framework
       set-status:
         enabled: false
+        
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: file:${JWT_PUBLIC_KEY_PATH:/app/keys/jwtRS256.key.pub}
 
   data:
     redis:
@@ -32,9 +38,6 @@ spring:
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
-
-jwt:
-  secret: ${JWT_SECRET}
 
 management:
   endpoints:

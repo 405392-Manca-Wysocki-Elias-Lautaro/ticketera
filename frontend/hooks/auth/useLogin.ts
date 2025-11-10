@@ -11,7 +11,7 @@ import { handleApiError } from "@/utils/handleApiError";
 import { ApiResponse } from '@/types/Response/ApiResponse';
 
 export function useLogin() {
-    const { setToken, setUser } = useAuthStore();
+    const { setToken, setUser, setSessionFlag } = useAuthStore();
     const router = useRouter();
     const { resend } = useResendVerificationEmail();
 
@@ -25,6 +25,7 @@ export function useLogin() {
 
             setToken(authResponse.accessToken);
             setUser(authResponse.user);
+            setSessionFlag(true);
 
             toast.success(`Bienvenido ${authResponse.user.firstName || ""}`);
             router.push("/dashboard");

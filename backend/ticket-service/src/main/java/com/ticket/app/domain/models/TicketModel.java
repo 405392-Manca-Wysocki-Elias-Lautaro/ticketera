@@ -1,0 +1,49 @@
+package com.ticket.app.domain.models;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import com.ticket.app.domain.enums.TicketStatus;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TicketModel {
+
+    private UUID id;
+
+    private UUID orderItemId;
+    private UUID occurrenceId;
+    private UUID eventVenueAreaId;
+    private UUID eventVenueSeatId;
+    private UUID userId;
+
+    private String code;
+    private String qrToken;
+    private String qrBase64;
+
+    private BigDecimal price;
+    private String currency;
+    private BigDecimal discount;
+    private BigDecimal finalPrice;
+
+    private TicketStatus status;
+    private OffsetDateTime issuedAt;
+    private OffsetDateTime checkedInAt;
+    private OffsetDateTime canceledAt;
+    private OffsetDateTime refundedAt;
+    private OffsetDateTime expiresAt;
+
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+
+    private List<TicketStatusHistoryModel> history;
+}

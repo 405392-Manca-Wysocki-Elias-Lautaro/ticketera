@@ -14,8 +14,8 @@ import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 import StarBorder from '@/components/StarBorder'
-import { StaffSidebar } from '@/components/StaffSidebar'
 import Link from 'next/link'
+import { StaffSidebar } from '@/components/sidebars/StaffSidebar'
 
 export default function ProfilePage() {
     const router = useRouter()

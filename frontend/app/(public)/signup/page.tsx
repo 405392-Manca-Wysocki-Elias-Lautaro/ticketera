@@ -16,7 +16,7 @@ import StarBorder from "@/components/StarBorder"
 import { signUpSchema, SignUpSchema } from "@/schemas/auth/SignUpSchema"
 import { useRegister } from '@/hooks/auth/useRegister'
 import { useState } from 'react'
-import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator'
+import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator'
 import GradientText from '@/components/GradientText'
 
 export default function SignUpPage() {
@@ -150,7 +150,7 @@ export default function SignUpPage() {
                         )}
 
                         {/* Botón */}
-                        <StarBorder>
+                        <StarBorder className='w-full'>>
                             <Button
                                 type="submit"
                                 className="w-full gradient-brand text-white cursor-pointer"

@@ -12,7 +12,7 @@ VALUES (
     'Elias', 
     'Manca', 
     'eliasmanca20@gmail.com',
-    '$2a$10$WWGU6Iju3fzygH/TooGX9OULCP8XRye7jT4CJMebYDg.7VqICukxi', 
+    '$2a$10$e7SCP0dxF.DSkZo0dkCy1ehmg.8ff7CLEHUrK7KefEqScKKlZZWpW', 
     (SELECT id FROM roles WHERE code = 'SUPER_ADMIN'),
     true,
     true, 
