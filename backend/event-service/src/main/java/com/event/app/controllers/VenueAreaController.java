@@ -3,14 +3,15 @@ package com.event.app.controllers;
 import com.event.app.dtos.GenerateSeatsRequestDTO;
 import com.event.app.dtos.VenueAreaDTO;
 import com.event.app.dtos.VenueSeatDTO;
+import com.event.app.dtos.response.ApiResponse;
 import com.event.app.models.VenueArea;
 import com.event.app.models.VenueSeat;
 import com.event.app.services.IVenueAreaService;
+import com.event.app.utils.ApiResponseFactory;
 
 import jakarta.validation.Valid;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,32 +35,33 @@ public class VenueAreaController {
      * Crear una nueva área de venue
      */
     @PostMapping
-    public ResponseEntity<VenueAreaDTO> createVenueArea(
+    public ResponseEntity<ApiResponse<VenueAreaDTO>> createVenueArea(
             @PathVariable UUID venueId,
             @Valid @RequestBody VenueAreaDTO venueAreaDTO) {
         venueAreaDTO.setVenueId(venueId);
         VenueArea venueArea = venueAreaService.createVenueArea(venueAreaDTO);
         VenueAreaDTO response = modelMapper.map(venueArea, VenueAreaDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponseFactory.created("Venue area created successfully", response);
     }
 
     /**
      * Obtener un área de venue por ID
      */
     @GetMapping("/{areaId}")
-    public ResponseEntity<VenueAreaDTO> getVenueAreaById(
+    public ResponseEntity<ApiResponse<VenueAreaDTO>> getVenueAreaById(
             @PathVariable UUID venueId,
             @PathVariable UUID areaId) {
         return venueAreaService.getVenueAreaById(areaId)
-                .map(venueArea -> ResponseEntity.ok(modelMapper.map(venueArea, VenueAreaDTO.class)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(venueArea -> ApiResponseFactory.success("Venue area retrieved successfully", 
+                        modelMapper.map(venueArea, VenueAreaDTO.class)))
+                .orElse(ApiResponseFactory.notFound("Venue area not found with ID: " + areaId));
     }
 
     /**
      * Obtener todas las áreas de un venue específico
      */
     @GetMapping
-    public ResponseEntity<List<VenueAreaDTO>> getAllAreasByVenueId(
+    public ResponseEntity<ApiResponse<List<VenueAreaDTO>>> getAllAreasByVenueId(
             @PathVariable UUID venueId) {
         
         List<VenueArea> venueAreas = venueAreaService.getVenueAreasByVenueId(venueId);
@@ -68,14 +70,14 @@ public class VenueAreaController {
                 .map(venueArea -> modelMapper.map(venueArea, VenueAreaDTO.class))
                 .collect(Collectors.toList());
         
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Venue areas retrieved successfully", response);
     }
 
     /**
      * Actualizar un área de venue
      */
     @PutMapping("/{areaId}")
-    public ResponseEntity<VenueAreaDTO> updateVenueArea(
+    public ResponseEntity<ApiResponse<VenueAreaDTO>> updateVenueArea(
             @PathVariable UUID venueId,
             @PathVariable UUID areaId,
             @Valid @RequestBody VenueAreaDTO venueAreaDTO) {
@@ -83,18 +85,18 @@ public class VenueAreaController {
         venueAreaDTO.setVenueId(venueId);
         VenueArea updated = venueAreaService.updateVenueArea(areaId, venueAreaDTO);
         VenueAreaDTO response = modelMapper.map(updated, VenueAreaDTO.class);
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Venue area updated successfully", response);
     }
 
     /**
      * Eliminar un área de venue
      */
     @DeleteMapping("/{areaId}")
-    public ResponseEntity<Void> deleteVenueArea(
+    public ResponseEntity<ApiResponse<Void>> deleteVenueArea(
             @PathVariable UUID venueId,
             @PathVariable UUID areaId) {
         venueAreaService.deleteVenueArea(areaId);
-        return ResponseEntity.noContent().build();
+        return ApiResponseFactory.success("Venue area deleted successfully");
     }
 
     // ============================================
@@ -105,14 +107,14 @@ public class VenueAreaController {
      * Obtener todos los asientos de un área
      */
     @GetMapping("/{areaId}/seats")
-    public ResponseEntity<List<VenueSeatDTO>> getSeatsByAreaId(
+    public ResponseEntity<ApiResponse<List<VenueSeatDTO>>> getSeatsByAreaId(
             @PathVariable UUID venueId,
             @PathVariable UUID areaId) {
         List<VenueSeat> seats = venueAreaService.getSeatsByVenueAreaId(areaId);
         List<VenueSeatDTO> response = seats.stream()
                 .map(seat -> modelMapper.map(seat, VenueSeatDTO.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Seats retrieved successfully", response);
     }
 
     /**
@@ -148,7 +150,7 @@ public class VenueAreaController {
      * @return Lista de asientos generados
      */
     @PostMapping("/{areaId}/seats/generate")
-    public ResponseEntity<List<VenueSeatDTO>> generateSeats(
+    public ResponseEntity<ApiResponse<List<VenueSeatDTO>>> generateSeats(
             @PathVariable UUID venueId,
             @PathVariable UUID areaId,
             @Valid @RequestBody GenerateSeatsRequestDTO request) {
@@ -156,7 +158,7 @@ public class VenueAreaController {
         List<VenueSeatDTO> response = seats.stream()
                 .map(seat -> modelMapper.map(seat, VenueSeatDTO.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponseFactory.created("Seats generated successfully", response);
     }
 }
 

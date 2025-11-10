@@ -1,13 +1,14 @@
 package com.event.app.controllers;
 
 import com.event.app.dtos.VenueDTO;
+import com.event.app.dtos.response.ApiResponse;
 import com.event.app.models.Venue;
 import com.event.app.services.IVenueService;
+import com.event.app.utils.ApiResponseFactory;
 
 import jakarta.validation.Valid;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,38 +29,39 @@ public class VenueController {
     }
 
     @PostMapping
-    public ResponseEntity<VenueDTO> createVenue(@Valid @RequestBody VenueDTO venueDTO) {
+    public ResponseEntity<ApiResponse<VenueDTO>> createVenue(@Valid @RequestBody VenueDTO venueDTO) {
         Venue venue = venueService.createVenue(venueDTO);
         VenueDTO response = modelMapper.map(venue, VenueDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponseFactory.created("Venue created successfully", response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<VenueDTO> getVenueById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<VenueDTO>> getVenueById(@PathVariable UUID id) {
         return venueService.getVenueById(id)
-                .map(venue -> ResponseEntity.ok(modelMapper.map(venue, VenueDTO.class)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(venue -> ApiResponseFactory.success("Venue retrieved successfully", 
+                        modelMapper.map(venue, VenueDTO.class)))
+                .orElse(ApiResponseFactory.notFound("Venue not found with ID: " + id));
     }
 
     @GetMapping
-    public ResponseEntity<List<VenueDTO>> getAllVenues() {
+    public ResponseEntity<ApiResponse<List<VenueDTO>>> getAllVenues() {
         List<VenueDTO> venues = venueService.getAllVenues().stream()
                 .map(venue -> modelMapper.map(venue, VenueDTO.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(venues);
+        return ApiResponseFactory.success("Venues retrieved successfully", venues);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VenueDTO> updateVenue(@PathVariable UUID id, @Valid @RequestBody VenueDTO venueDTO) {
+    public ResponseEntity<ApiResponse<VenueDTO>> updateVenue(@PathVariable UUID id, @Valid @RequestBody VenueDTO venueDTO) {
         Venue updated = venueService.updateVenue(id, venueDTO);
         VenueDTO response = modelMapper.map(updated, VenueDTO.class);
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Venue updated successfully", response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVenue(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteVenue(@PathVariable UUID id) {
         venueService.deleteVenue(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponseFactory.success("Venue deleted successfully");
     }
 }
 

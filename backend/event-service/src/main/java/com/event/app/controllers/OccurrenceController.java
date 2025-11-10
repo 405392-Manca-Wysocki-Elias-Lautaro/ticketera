@@ -1,13 +1,14 @@
 package com.event.app.controllers;
 
 import com.event.app.dtos.OccurrenceDTO;
+import com.event.app.dtos.response.ApiResponse;
 import com.event.app.models.Occurrence;
 import com.event.app.services.IOccurrenceService;
+import com.event.app.utils.ApiResponseFactory;
 
 import jakarta.validation.Valid;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,38 +29,39 @@ public class OccurrenceController {
     }
 
     @PostMapping
-    public ResponseEntity<OccurrenceDTO> createOccurrence(@Valid @RequestBody OccurrenceDTO eventOccurrenceDTO) {
+    public ResponseEntity<ApiResponse<OccurrenceDTO>> createOccurrence(@Valid @RequestBody OccurrenceDTO eventOccurrenceDTO) {
         Occurrence eventOccurrence = eventOccurrenceService.createOccurrence(eventOccurrenceDTO);
         OccurrenceDTO response = modelMapper.map(eventOccurrence, OccurrenceDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponseFactory.created("Occurrence created successfully", response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OccurrenceDTO> getOccurrenceById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<OccurrenceDTO>> getOccurrenceById(@PathVariable UUID id) {
         return eventOccurrenceService.getOccurrenceById(id)
-                .map(eventOccurrence -> ResponseEntity.ok(modelMapper.map(eventOccurrence, OccurrenceDTO.class)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(eventOccurrence -> ApiResponseFactory.success("Occurrence retrieved successfully", 
+                        modelMapper.map(eventOccurrence, OccurrenceDTO.class)))
+                .orElse(ApiResponseFactory.notFound("Occurrence not found with ID: " + id));
     }
 
     @GetMapping
-    public ResponseEntity<List<OccurrenceDTO>> getAllOccurrences() {
+    public ResponseEntity<ApiResponse<List<OccurrenceDTO>>> getAllOccurrences() {
         List<OccurrenceDTO> eventOccurrences = eventOccurrenceService.getAllOccurrences().stream()
                 .map(eventOccurrence -> modelMapper.map(eventOccurrence, OccurrenceDTO.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(eventOccurrences);
+        return ApiResponseFactory.success("Occurrences retrieved successfully", eventOccurrences);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OccurrenceDTO> updateOccurrence(@PathVariable UUID id, @Valid @RequestBody OccurrenceDTO eventOccurrenceDTO) {
+    public ResponseEntity<ApiResponse<OccurrenceDTO>> updateOccurrence(@PathVariable UUID id, @Valid @RequestBody OccurrenceDTO eventOccurrenceDTO) {
         Occurrence updated = eventOccurrenceService.updateOccurrence(id, eventOccurrenceDTO);
         OccurrenceDTO response = modelMapper.map(updated, OccurrenceDTO.class);
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Occurrence updated successfully", response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOccurrence(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteOccurrence(@PathVariable UUID id) {
         eventOccurrenceService.deleteOccurrence(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponseFactory.success("Occurrence deleted successfully");
     }
 }
 

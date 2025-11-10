@@ -39,7 +39,14 @@ public class VenueAreaServiceImpl implements IVenueAreaService {
     @Override
     @Transactional
     public VenueArea createVenueArea(VenueAreaDTO venueAreaDTO) {
-        VenueArea venueArea = modelMapper.map(venueAreaDTO, VenueArea.class);
+        // Mapeo manual para evitar conflictos con ModelMapper
+        VenueArea venueArea = new VenueArea();
+        venueArea.setVenueId(venueAreaDTO.getVenueId());
+        venueArea.setName(venueAreaDTO.getName());
+        venueArea.setIsGeneralAdmission(venueAreaDTO.getIsGeneralAdmission());
+        venueArea.setCapacity(venueAreaDTO.getCapacity());
+        venueArea.setPosition(venueAreaDTO.getPosition());
+        
         VenueAreaEntity entity = modelMapper.map(venueArea, VenueAreaEntity.class);
         VenueAreaEntity saved = venueAreaRepository.save(entity);
         return modelMapper.map(saved, VenueArea.class);

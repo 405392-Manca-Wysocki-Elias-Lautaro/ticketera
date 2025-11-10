@@ -1,13 +1,14 @@
 package com.event.app.controllers;
 
 import com.event.app.dtos.EventDTO;
+import com.event.app.dtos.response.ApiResponse;
 import com.event.app.models.Event;
 import com.event.app.services.IEventService;
+import com.event.app.utils.ApiResponseFactory;
 
 import jakarta.validation.Valid;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,38 +29,39 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventDTO> createEvent(@Valid @RequestBody EventDTO eventDTO) {
+    public ResponseEntity<ApiResponse<EventDTO>> createEvent(@Valid @RequestBody EventDTO eventDTO) {
         Event event = eventService.createEvent(eventDTO);
         EventDTO response = modelMapper.map(event, EventDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponseFactory.created("Event created successfully", response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EventDTO> getEventById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<EventDTO>> getEventById(@PathVariable UUID id) {
         return eventService.getEventById(id)
-                .map(event -> ResponseEntity.ok(modelMapper.map(event, EventDTO.class)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(event -> ApiResponseFactory.success("Event retrieved successfully", 
+                        modelMapper.map(event, EventDTO.class)))
+                .orElse(ApiResponseFactory.notFound("Event not found with ID: " + id));
     }
 
     @GetMapping
-    public ResponseEntity<List<EventDTO>> getAllEvents() {
+    public ResponseEntity<ApiResponse<List<EventDTO>>> getAllEvents() {
         List<EventDTO> events = eventService.getAllEvents().stream()
                 .map(event -> modelMapper.map(event, EventDTO.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(events);
+        return ApiResponseFactory.success("Events retrieved successfully", events);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventDTO> updateEvent(@PathVariable UUID id, @Valid @RequestBody EventDTO eventDTO) {
+    public ResponseEntity<ApiResponse<EventDTO>> updateEvent(@PathVariable UUID id, @Valid @RequestBody EventDTO eventDTO) {
         Event updated = eventService.updateEvent(id, eventDTO);
         EventDTO response = modelMapper.map(updated, EventDTO.class);
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Event updated successfully", response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable UUID id) {
         eventService.deleteEvent(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponseFactory.success("Event deleted successfully");
     }
 }
 

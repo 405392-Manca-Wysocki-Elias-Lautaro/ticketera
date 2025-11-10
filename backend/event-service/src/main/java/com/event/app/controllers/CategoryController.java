@@ -1,13 +1,14 @@
 package com.event.app.controllers;
 
 import com.event.app.dtos.CategoryDTO;
+import com.event.app.dtos.response.ApiResponse;
 import com.event.app.models.Category;
 import com.event.app.services.ICategoryService;
+import com.event.app.utils.ApiResponseFactory;
 
 import jakarta.validation.Valid;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,38 +29,39 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
+    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
         Category category = categoryService.createCategory(categoryDTO);
         CategoryDTO response = modelMapper.map(category, CategoryDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ApiResponseFactory.created("Category created successfully", response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<CategoryDTO>> getCategoryById(@PathVariable UUID id) {
         return categoryService.getCategoryById(id)
-                .map(category -> ResponseEntity.ok(modelMapper.map(category, CategoryDTO.class)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(category -> ApiResponseFactory.success("Category retrieved successfully", 
+                        modelMapper.map(category, CategoryDTO.class)))
+                .orElse(ApiResponseFactory.notFound("Category not found with ID: " + id));
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories() {
         List<CategoryDTO> categories = categoryService.getAllCategories().stream()
                 .map(category -> modelMapper.map(category, CategoryDTO.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(categories);
+        return ApiResponseFactory.success("Categories retrieved successfully", categories);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDTO> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryDTO categoryDTO) {
+    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryDTO categoryDTO) {
         Category updated = categoryService.updateCategory(id, categoryDTO);
         CategoryDTO response = modelMapper.map(updated, CategoryDTO.class);
-        return ResponseEntity.ok(response);
+        return ApiResponseFactory.success("Category updated successfully", response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponseFactory.success("Category deleted successfully");
     }
 }
 
