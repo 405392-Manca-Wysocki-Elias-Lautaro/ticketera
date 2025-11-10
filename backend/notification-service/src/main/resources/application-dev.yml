@@ -1,3 +1,6 @@
+project:
+  version: @project.version@
+
 spring:
   application:
     name: notification-service
@@ -39,10 +42,51 @@ spring:
       - classpath:db/r
     clean-disabled: true
 
-logging.level:
-  org.springframework.jdbc.core: DEBUG
-  org.hibernate.SQL: DEBUG
-  org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  mail:
+    host: mailhog
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls.enable: false
+  
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.sendgrid.SendGridAutoConfiguration
+      - org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    listener:
+      simple:
+        acknowledge-mode: auto          # auto/manual, según necesites ACK automático o controlado
+        default-requeue-rejected: false # evita reintentos infinitos
+        concurrency: 3                  # cuántos consumidores paralelos
+        max-concurrency: 10             # límite máximo de consumidores simultáneos
+        prefetch: 5                     # cuántos mensajes toma por consumidor antes de procesar
+        missing-queues-fatal: false     # evita crash si el exchange/queue aún no existe al iniciar
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    queue: notifications.queue
+    key: notifications.key
+    dlq: notifications.queue.dlq
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    root: INFO
+  file:
+    name: logs/notification-service.log
 
 management:
   endpoints.web.exposure.include: "health,info"

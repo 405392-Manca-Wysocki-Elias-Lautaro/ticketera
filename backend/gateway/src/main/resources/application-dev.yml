@@ -1,16 +1,7 @@
-server:
-  port: 8080
-
 spring:
   config:
     activate:
       on-profile: dev
-
-  main:
-    web-application-type: reactive
-
-  application:
-    name: gateway
 
   devtools:
     restart:
@@ -20,32 +11,25 @@ spring:
 
   cloud:
     gateway:
-      httpclient:
-        connect-timeout: 3000
-        response-timeout: 5s
-
-      default-filters:
-        - RemoveRequestHeader=Cookie
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
-
       discovery:
         locator:
           enabled: false
-
       routes:
-        # ===== Rutas DEV (Docker) con ENV + default seguros =====
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
             - Path=/api/auth/**
           filters:
+            - PreserveHostHeader
             - RewritePath=/api/auth/?(?<segment>.*), /${segment}
-
+        
         - id: events
           uri: "${SERVICES_EVENT_BASE_URL:http://event-dev:8080}"
           predicates:
             - Path=/api/events/**
           filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Cookie
             - RewritePath=/api/events/?(?<segment>.*), /${segment}
 
         - id: tickets
@@ -53,6 +37,8 @@ spring:
           predicates:
             - Path=/api/tickets/**
           filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Cookie
             - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
 
         - id: payments
@@ -60,6 +46,8 @@ spring:
           predicates:
             - Path=/api/payments/**
           filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Cookie
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
         - id: notifications
@@ -67,31 +55,106 @@ spring:
           predicates:
             - Path=/api/notifications/**
           filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Cookie
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
-        
+
         - id: orders
           uri: "${SERVICES_ORDER_BASE_URL:http://order-dev:8080}"
           predicates:
             - Path=/api/orders/**
           filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Cookie
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
 
+        # --- OpenAPI aggregation ---
+        - id: openapi-auth
+          uri: http://auth-dev:8080
+          predicates:
+            - Path=/v3/api-docs/auth
+          filters:
+            - RewritePath=/v3/api-docs/auth, /v3/api-docs
+        - id: openapi-events
+          uri: http://event-dev:8080
+          predicates:
+            - Path=/v3/api-docs/events
+          filters:
+            - RewritePath=/v3/api-docs/events, /v3/api-docs
+        - id: openapi-tickets
+          uri: http://ticket-dev:8080
+          predicates:
+            - Path=/v3/api-docs/tickets
+          filters:
+            - RewritePath=/v3/api-docs/tickets, /v3/api-docs
+        - id: openapi-payments
+          uri: http://payment-dev:8080
+          predicates:
+            - Path=/v3/api-docs/payments
+          filters:
+            - RewritePath=/v3/api-docs/payments, /v3/api-docs
+        - id: openapi-notifications
+          uri: http://notification-dev:8080
+          predicates:
+            - Path=/v3/api-docs/notifications
+          filters:
+            - RewritePath=/v3/api-docs/notifications, /v3/api-docs
+        - id: openapi-orders
+          uri: http://order-dev:8080
+          predicates:
+            - Path=/v3/api-docs/orders
+          filters:
+            - RewritePath=/v3/api-docs/orders, /v3/api-docs
+
       globalcors:
+        add-to-simple-url-handler-mapping: true
         corsConfigurations:
           "[/**]":
             allowedOrigins:
-              - "http://localhost:5173"
-              - "http://localhost:8081"
+              - "http://localhost:3000"
             allowedMethods: "*"
             allowedHeaders: "*"
+            exposedHeaders:
+              - "Set-Cookie"
             allowCredentials: true
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    urls:
+      - name: auth
+        url: /v3/api-docs/auth
+      - name: events
+        url: /v3/api-docs/events
+      - name: tickets
+        url: /v3/api-docs/tickets
+      - name: payments
+        url: /v3/api-docs/payments
+      - name: notifications
+        url: /v3/api-docs/notifications
+      - name: orders
+        url: /v3/api-docs/orders
+    persist-authorization: true
+    try-it-out-enabled: true
+    display-request-duration: true
+    disable-swagger-default-url: true
+    config-url: /v3/api-docs/swagger-config
+  server-url: http://localhost:8080
+  cors:
+    enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.security: DEBUG
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.web.reactive.function.client: TRACE
+    org.springframework.web.reactive.function.server: TRACE
+
 management:
-  endpoints:
-    web:
-      exposure:
-        include: "health,info"
   endpoint:
     health:
-      probes:
-        enabled: true
+      show-details: always

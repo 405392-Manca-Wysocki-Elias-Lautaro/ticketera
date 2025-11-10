@@ -1,8 +1,16 @@
+project:
+  version: @project.version@
+
 spring:
   application:
     name: auth-service
-  main.banner-mode: "off"
-  sql.init.mode: never
+  main:
+    banner-mode: "off"
+  sql:
+    init:
+      mode: never
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:auth},public
@@ -10,7 +18,7 @@ spring:
     password: ${POSTGRES_PASSWORD}
     hikari:
       schema: ${DB_SCHEMA:auth}
-      maximum-pool-size: 30
+      maximum-pool-size: ${DB_POOL_SIZE:10}
 
   jpa:
     hibernate:
@@ -31,12 +39,59 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/r
+      - classpath:db/seed
+    clean-disabled: true
 
-logging.level:
-  root: INFO
-  org.hibernate.SQL: WARN
-  org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        multiplier: 2.0
+        max-interval: 10000ms
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 1000
+
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    key: notifications.key
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration:
+    access: 900000 # 15 min
+
+security:
+  password-reset:
+    expiration-minutes: 30
+
+frontend:
+  url: ${FRONTEND_URL}
+
+support:
+  email: support@ticketly.com
 
 management:
-  endpoints.web.exposure.include: "health,info"
-  endpoint.health.show-details: never
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  endpoint:
+    health:
+      show-details: when_authorized

@@ -1,8 +1,20 @@
+project:
+  version: @project.version@
+
 spring:
   application:
     name: order-service
   main.banner-mode: "off"
   sql.init.mode: never
+  
+  # Configuración web para evitar conflictos con recursos estáticos
+  web:
+    resources:
+      add-mappings: true
+      static-locations: classpath:/static/
+  mvc:
+    throw-exception-if-no-handler-found: true
+    static-path-pattern: /static/**
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:orders},public
@@ -40,3 +52,7 @@ logging.level:
 management:
   endpoints.web.exposure.include: "health,info"
   endpoint.health.show-details: never
+
+services:
+  payment:
+    base-url: ${PAYMENT_SERVICE_URL:http://payment-dev:8080}

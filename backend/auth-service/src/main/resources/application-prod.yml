@@ -1,0 +1,39 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+
+  datasource:
+    hikari:
+      maximum-pool-size: 30
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/r
+
+app:
+  cookie:
+    domain: ticketera.dev
+    secure: true
+    same-site: None
+    path: /
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+management:
+  endpoint:
+    health:
+      show-details: never

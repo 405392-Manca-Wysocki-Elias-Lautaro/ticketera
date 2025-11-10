@@ -1,3 +1,6 @@
+project:
+  version: @project.version@
+
 spring:
   application:
     name: order-service
@@ -47,3 +50,7 @@ logging.level:
 management:
   endpoints.web.exposure.include: "health,info"
   endpoint.health.show-details: always
+
+services:
+  payment:
+    base-url: ${PAYMENT_SERVICE_URL:http://payment-dev:8080}

@@ -10,27 +10,78 @@ services:
     ports:
       - "${PG_PORT:-5432}:5432"
     volumes:
-      - ${PGDATA_VOL:-ticketera_dev_pgdata}:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
       - ./infra/postgres/dev/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 20
-    networks: [ backend ]
+    networks: [ backend_net ]
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq_data_dev:/var/lib/rabbitmq
+      - rabbitmq_data_dev:/var/log/rabbitmq
+    ports:
+      - "5672:5672"     # puerto AMQP (comunicación entre microservicios)
+      - "15672:15672"   # panel web http://localhost:15672
+    networks: [ backend_net ]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.2
+    container_name: redis-dev
+    restart: always
+    ports:
+      - "6379:6379"   # expuesto al host para acceder desde el IDE o RedisInsight
+    volumes:
+      - redis_data_dev:/data
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    environment:
+      TZ: ${TZ}
+    networks: [backend_net]
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "2525:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks: [ backend_net ]
 
   frontend-dev:
-    image: ${NODE_IMAGE:-node:20}
+    container_name: frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
     working_dir: /app
-    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "3000:3000"
     volumes:
       - ./frontend:/app
-    ports:
-      - "5173:5173"
-    networks: [ frontend_net, backend ]
+      - frontend_node_modules_dev:/app/node_modules
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    networks:
+      - backend_net
 
   gateway-dev:
+    container_name: gateway-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -46,7 +97,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/gateway:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SERVICES_AUTH_BASE_URL: http://auth-dev:8080
@@ -55,19 +106,25 @@ services:
       SERVICES_PAYMENT_BASE_URL: http://payment-dev:8080
       SERVICES_NOTIFICATION_BASE_URL: http://notification-dev:8080
       SERVICES_ORDER_BASE_URL: http://order-dev:8080
-    depends_on:
-      - auth-dev
-      - event-dev
-      - ticket-dev
-      - payment-dev
-      - notification-dev
-      - order-dev
-    networks: [backend]
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_URL: ${AUTH_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: 
+    # depends_on:
+    #   - auth-dev
+    #   - event-dev
+    #   - ticket-dev
+    #   - payment-dev
+    #   - notification-dev
+    #   - order-dev
+    networks: [backend_net]
     ports:
       - "8080:8080"
       - "5005:5005"
 
   auth-dev:
+    container_name: auth-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -84,7 +141,7 @@ services:
           
     volumes:
       - ./backend/auth-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${AUTH_DB_SCHEMA},public
@@ -93,13 +150,29 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      FRONTEND_URL: ${FRONTEND_URL}
+      NOTIFICATION_URL: ${NOTIFICATION_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: 
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8082:8080"
       - "5006:5005"
 
   event-dev:
+    container_name: event-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -115,7 +188,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/event-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${EVENT_DB_SCHEMA},public
@@ -124,13 +197,23 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${EVENT_DB_SCHEMA:-event-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8083:8080"
       - "5007:5005"
 
   ticket-dev:
+    container_name: ticket-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -146,7 +229,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/ticket-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${TICKET_DB_SCHEMA},public
@@ -155,13 +238,23 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${TICKET_DB_SCHEMA:-ticket-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8084:8080"
       - "5010:5005"
 
   payment-dev:
+    container_name: payment-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -177,22 +270,34 @@ services:
           spring-boot:run
     volumes:
       - ./backend/payment-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${PAYMENT_DB_SCHEMA},public
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payment-dev}
-      SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payment-dev}
+      SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payments}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payments}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-APP_USR-3149021535390307-110914-55fe675713252fa4a2d138b203497d1f-2977404984}
+      MERCADOPAGO_NOTIFICATION_URL: ${MERCADOPAGO_NOTIFICATION_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
-      - "8085:8080"
+      - "8081:8080"
       - "5009:5005"
 
   notification-dev:
+    container_name: notification-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -208,7 +313,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/notification-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${NOTIFICATION_DB_SCHEMA},public
@@ -217,13 +322,23 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8086:8080"
       - "5008:5005"
   
   order-dev:
+    container_name: order-dev
     image: maven:3.9.8-eclipse-temurin-17
     working_dir: /workspace
     command:
@@ -239,7 +354,7 @@ services:
           spring-boot:run
     volumes:
       - ./backend/order-service:/workspace
-      - m2cache:/root/.m2
+      - maven_cache_dev:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${ORDER_DB_SCHEMA},public
@@ -248,16 +363,27 @@ services:
       SPRING_FLYWAY_SCHEMAS: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${ORDER_DB_SCHEMA:-order-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
-    depends_on: [postgres]
-    networks: [backend]
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks: [backend_net]
     ports:
       - "8087:8080"
       - "5011:5005"
 
 networks:
-  backend:
-  frontend_net:
+  backend_net:
 
 volumes:
-  ticketera_dev_pgdata:
-  m2cache:
+  postgres_data_dev:
+  maven_cache_dev:
+  rabbitmq_data_dev:
+  redis_data_dev:
+  frontend_node_modules_dev:

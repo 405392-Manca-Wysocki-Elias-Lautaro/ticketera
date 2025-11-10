@@ -1,4 +1,10 @@
+project:
+  version: @project.version@
+
 spring:
+  config:
+    activate:
+      on-profile: prod
   application:
     name: notification-service
   main.banner-mode: "off"
@@ -32,6 +38,41 @@ spring:
       - classpath:db/migration
       - classpath:db/r
 
+  mail:
+    host: smtp.sendgrid.net
+    port: 587
+    username: apikey
+    password: ${SENDGRID_API_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    listener:
+      simple:
+        acknowledge-mode: auto          # auto/manual, según necesites ACK automático o controlado
+        default-requeue-rejected: false # evita reintentos infinitos
+        concurrency: 3                  # cuántos consumidores paralelos
+        max-concurrency: 10             # límite máximo de consumidores simultáneos
+        prefetch: 5                     # cuántos mensajes toma por consumidor antes de procesar
+        missing-queues-fatal: false     # evita crash si el exchange/queue aún no existe al iniciar
+
+rabbitmq:
+  notifications:
+    exchange: notifications.exchange
+    queue: notifications.queue
+    key: notifications.key
+    dlq: notifications.queue.dlq
+
+sendgrid:
+    api-key: ${SENDGRID_API_KEY}
+  
 logging.level:
   root: INFO
   org.hibernate.SQL: WARN

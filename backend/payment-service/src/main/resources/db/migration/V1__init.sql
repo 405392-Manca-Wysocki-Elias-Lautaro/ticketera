@@ -11,7 +11,7 @@ CREATE TABLE payments.payment_providers (
 
 CREATE TABLE payments.payment_intents (
   id           bigserial PRIMARY KEY,
-  order_id     bigint NOT NULL REFERENCES orders.orders(id) ON DELETE CASCADE,
+  order_id     bigint NOT NULL,
   provider_id  bigint NOT NULL REFERENCES payments.payment_providers(id),
   provider_ref text,
   status       text NOT NULL DEFAULT 'pending',
@@ -33,12 +33,12 @@ CREATE TABLE payments.payment_captures (
 
 CREATE TABLE payments.refunds (
   id            bigserial PRIMARY KEY,
-  order_id      bigint NOT NULL REFERENCES orders.orders(id) ON DELETE CASCADE,
+  order_id      bigint NOT NULL,
   payment_intent_id bigint REFERENCES payments.payment_intents(id),
   status        text NOT NULL DEFAULT 'requested',
   reason        text,
   amount_cents  bigint NOT NULL,
-  created_by    bigint REFERENCES auth.users(id),
+  created_user    bigint,
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now(),
   deleted_at    timestamptz,
@@ -50,15 +50,15 @@ CREATE TABLE payments.refunds (
 CREATE TABLE payments.refund_items (
   id            bigserial PRIMARY KEY,
   refund_id     bigint NOT NULL REFERENCES payments.refunds(id) ON DELETE CASCADE,
-  order_item_id bigint NOT NULL REFERENCES orders.order_items(id) ON DELETE CASCADE,
-  ticket_id     bigint REFERENCES tickets.tickets(id),
+  order_item_id bigint NOT NULL,
+  ticket_id     bigint,
   amount_cents  bigint NOT NULL
 );
 
 CREATE TABLE payments.refund_policies (
   id           bigserial PRIMARY KEY,
-  organizer_id bigint REFERENCES auth.organizers(id) ON DELETE CASCADE,
-  event_id     bigint REFERENCES events.events(id) ON DELETE CASCADE,
+  organizer_id bigint,
+  event_id     bigint,
   policy_json  jsonb NOT NULL,
   created_at   timestamptz NOT NULL DEFAULT now(),
   updated_at   timestamptz NOT NULL DEFAULT now(),

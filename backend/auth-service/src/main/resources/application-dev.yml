@@ -1,8 +1,7 @@
 spring:
-  application:
-    name: auth-service
-  main.banner-mode: "off"
-  sql.init.mode: never
+  config:
+    activate:
+      on-profile: dev
 
   devtools:
     restart:
@@ -10,40 +9,36 @@ spring:
     livereload:
       enabled: false
 
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${POSTGRES_DB}?currentSchema=${DB_SCHEMA:auth},public
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-    hikari:
-      schema: ${DB_SCHEMA:auth}
-      maximum-pool-size: 10
+  data:
+    redis:
+      password: ""
 
   jpa:
     hibernate:
       ddl-auto: validate
-      default_schema: ${DB_SCHEMA:auth}
-    properties:
-      hibernate.default_schema: ${DB_SCHEMA:auth}
-      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-    open-in-view: false
 
-  flyway:
-    enabled: true
-    schemas: ${DB_SCHEMA:auth}
-    default-schema: ${DB_SCHEMA:auth}
-    table: ${FLYWAY_TABLE:flyway_history_auth}
-    validate-on-migrate: true
-    baseline-on-migrate: false
-    locations:
-      - classpath:db/migration
-      - classpath:db/r
-    clean-disabled: true
+  notification:
+    url: http://localhost:8080
+    queue: notifications.queue
 
-logging.level:
-  org.springframework.jdbc.core: DEBUG
-  org.hibernate.SQL: DEBUG
-  org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+app:
+  cookie:
+    domain: localhost
+    secure: true
+    same-site: None
+    path: /
+
+logging:
+  level:
+    root: INFO
+    org.springframework.jdbc.core: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
 
 management:
-  endpoints.web.exposure.include: "health,info"
-  endpoint.health.show-details: always
+  endpoint:
+    health:
+      show-details: always

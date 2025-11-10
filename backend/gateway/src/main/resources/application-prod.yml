@@ -1,0 +1,74 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+
+  cloud:
+    gateway:
+      routes:
+        - id: auth
+          uri: http://auth:8080
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/?(?<segment>.*), /${segment}
+
+        - id: events
+          uri: http://events:8080
+          predicates:
+            - Path=/api/events/**
+          filters:
+            - RewritePath=/api/events/?(?<segment>.*), /${segment}
+
+        - id: tickets
+          uri: http://tickets:8080
+          predicates:
+            - Path=/api/tickets/**
+          filters:
+            - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
+
+        - id: payments
+          uri: http://payments:8080
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api/payments/?(?<segment>.*), /${segment}
+
+        - id: notifications
+          uri: http://notifications:8080
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
+
+        - id: orders
+          uri: http://orders:8080
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - RewritePath=/api/orders/?(?<segment>.*), /${segment}
+
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins: "http://localhost:5173,http://localhost:8081"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+auth:
+  service-url: ${AUTH_URL}
+  
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    reactor.netty.http.client: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: never

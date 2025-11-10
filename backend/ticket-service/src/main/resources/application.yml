@@ -1,3 +1,6 @@
+project:
+  version: @project.version@
+
 spring:
   application.name: notification-service
   main.banner-mode: "off"
