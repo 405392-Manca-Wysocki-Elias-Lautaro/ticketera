@@ -2,16 +2,16 @@ package com.order.app.controllers;
 
 import com.order.app.pkg.dtos.CreateOrderRequest;
 import com.order.app.pkg.dtos.OrderResponse;
+import com.order.app.pkg.dtos.response.ApiResponse;
 import com.order.app.services.OrderService;
+import com.order.app.utils.ApiResponseFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +34,12 @@ public class OrderController {
     @PostMapping("/create")
     @Operation(summary = "Create a new order", description = "Creates a new order and processes payment")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Order created successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid request data"),
-        @ApiResponse(responseCode = "409", description = "Conflict (e.g., seat already reserved)"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Order created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Conflict (e.g., seat already reserved)"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<OrderResponse> createOrder(
+    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @Valid @RequestBody CreateOrderRequest request) {
         
         logger.info("Received order creation request for customer: {}", request.getCustomer().getEmail());
@@ -48,29 +48,29 @@ public class OrderController {
             OrderResponse orderResponse = orderService.createOrder(request);
             
             logger.info("Order created successfully: {}", orderResponse.getId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(orderResponse);
+            return ApiResponseFactory.created("Order created successfully", orderResponse);
             
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid order request: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ApiResponseFactory.badRequest(e.getMessage());
             
         } catch (OrderService.OrderCreationException e) {
             logger.error("Error creating order: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ApiResponseFactory.internalError("Failed to create order: " + e.getMessage());
             
         } catch (Exception e) {
             logger.error("Unexpected error creating order: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ApiResponseFactory.internalError("Unexpected error occurred while creating order");
         }
     }
     
     @GetMapping("/{orderId}")
     @Operation(summary = "Get order by ID", description = "Retrieves an order by its ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Order found"),
-        @ApiResponse(responseCode = "404", description = "Order not found")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found")
     })
-    public ResponseEntity<OrderResponse> getOrder(
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrder(
             @Parameter(description = "Order ID") @PathVariable Long orderId) {
         
         logger.debug("Getting order: {}", orderId);
@@ -78,36 +78,36 @@ public class OrderController {
         Optional<OrderResponse> order = orderService.getOrder(orderId);
         
         if (order.isPresent()) {
-            return ResponseEntity.ok(order.get());
+            return ApiResponseFactory.success("Order retrieved successfully", order.get());
         } else {
             logger.warn("Order not found: {}", orderId);
-            return ResponseEntity.notFound().build();
+            return ApiResponseFactory.notFound("Order not found with ID: " + orderId);
         }
     }
     
     @GetMapping("/customer/{customerId}")
     @Operation(summary = "Get orders by customer", description = "Retrieves all orders for a specific customer")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Orders retrieved successfully"),
-        @ApiResponse(responseCode = "404", description = "Customer not found")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Orders retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Customer not found")
     })
-    public ResponseEntity<List<OrderResponse>> getOrdersByCustomer(
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByCustomer(
             @Parameter(description = "Customer ID") @PathVariable Long customerId) {
         
         logger.debug("Getting orders for customer: {}", customerId);
         
         List<OrderResponse> orders = orderService.getOrdersByCustomer(customerId);
-        return ResponseEntity.ok(orders);
+        return ApiResponseFactory.success("Orders retrieved successfully", orders);
     }
     
     @PostMapping("/{orderId}/cancel")
     @Operation(summary = "Cancel order", description = "Cancels an existing order")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Order cancelled successfully"),
-        @ApiResponse(responseCode = "400", description = "Order cannot be cancelled"),
-        @ApiResponse(responseCode = "404", description = "Order not found")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order cancelled successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Order cannot be cancelled"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found")
     })
-    public ResponseEntity<Void> cancelOrder(
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(
             @Parameter(description = "Order ID") @PathVariable Long orderId,
             @RequestBody(required = false) CancelOrderRequest request) {
         
@@ -118,14 +118,13 @@ public class OrderController {
         
         if (cancelled) {
             logger.info("Order cancelled successfully: {}", orderId);
-            return ResponseEntity.ok().build();
+            return ApiResponseFactory.success("Order cancelled successfully");
         } else {
             logger.warn("Failed to cancel order: {}", orderId);
-            return ResponseEntity.badRequest().build();
+            return ApiResponseFactory.badRequest("Order cannot be cancelled or does not exist");
         }
     }
     
-    // DTO para cancelación
     @lombok.Data
     @lombok.NoArgsConstructor
     @lombok.AllArgsConstructor
