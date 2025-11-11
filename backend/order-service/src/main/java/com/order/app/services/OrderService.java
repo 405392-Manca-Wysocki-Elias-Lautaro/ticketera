@@ -27,6 +27,7 @@ public class OrderService {
     private final PaymentServiceClient paymentServiceClient;
 
     public OrderService(
+            OrderRepository orderRepository,
             CustomerRepository customerRepository,
             OrderItemRepository orderItemRepository,
             OrderStatusHistoryRepository statusHistoryRepository,
