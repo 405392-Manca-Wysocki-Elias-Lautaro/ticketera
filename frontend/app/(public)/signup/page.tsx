@@ -150,7 +150,7 @@ export default function SignUpPage() {
                         )}
 
                         {/* Botón */}
-                        <StarBorder className='w-full'>>
+                        <StarBorder className='w-full'>
                             <Button
                                 type="submit"
                                 className="w-full gradient-brand text-white cursor-pointer"

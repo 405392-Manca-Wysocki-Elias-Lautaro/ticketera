@@ -1,49 +1,42 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { mockEvents } from '@/mocks/mockEvents'
 import GradientText from '@/components/GradientText'
 import { EventCard } from '@/components/dashboard/EventCard'
+import { useEvents } from '@/hooks/event/useEvents'
 
 //TODO: Borrar
 const categories = ["Todos", "Música", "Comedia", "Tecnología", "Deportes", "Teatro"]
 
 export default function DashboardPage() {
+
     const router = useRouter()
     const searchParams = useSearchParams()
-    const { user, isLoading } = useAuth()
+    const { isLoading: loadingAuth } = useAuth()
     const [selectedCategory, setSelectedCategory] = useState("Todos")
 
     const searchQuery = useMemo(() => {
         return searchParams.get("search")?.toLowerCase() || ""
     }, [searchParams])
 
+    const { data: events, isLoading: isLoadingEvent } = useEvents();
+
     const filteredEvents = useMemo(() => {
-        let filtered = mockEvents
+        return (events ?? []).filter((event: Event) => {
+            const matchesCategory = selectedCategory === "Todos" || event.category === selectedCategory;
+            const matchesSearch = !searchQuery ||
+                event.title.toLowerCase().includes(searchQuery) ||
+                event.description.toLowerCase().includes(searchQuery) ||
+                event.location.toLowerCase().includes(searchQuery);
+            return matchesCategory && matchesSearch;
+        });
+    }, [events, selectedCategory, searchQuery]);
 
-        // Filter by category
-        if (selectedCategory !== "Todos") {
-            filtered = filtered.filter((event) => event.category === selectedCategory)
-        }
-
-        // Filter by search query
-        if (searchQuery) {
-            filtered = filtered.filter(
-                (event) =>
-                    event.title.toLowerCase().includes(searchQuery) ||
-                    event.description.toLowerCase().includes(searchQuery) ||
-                    event.location.toLowerCase().includes(searchQuery),
-            )
-        }
-
-        return filtered
-    }, [selectedCategory, searchQuery])
-
-    if (isLoading) {
+    if (loadingAuth || isLoadingEvent) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -51,6 +44,7 @@ export default function DashboardPage() {
         )
     }
 
+    console.log(filteredEvents)
     return (
         <div className="h-screen bg-background overflow-auto">
             <Navbar />
@@ -78,7 +72,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Events Grid */}
-                {filteredEvents.length > 0 ? (
+                {filteredEvents?.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredEvents.map((event) => (
                             <EventCard key={event.id} event={event} />

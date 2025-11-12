@@ -4,22 +4,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import TiltedCard from "@/components/TiltedCard"
-import GradientText from '../GradientText'
 import StarBorder from '../StarBorder'
-
-//TODO: Borrar
-export interface Event {
-    id: string
-    title: string
-    description: string
-    category: string
-    date: string
-    time: string
-    location: string
-    availableTickets: number
-    price: number
-    image?: string
-}
+import { Event } from '@/types/Event'
 
 interface EventCardProps {
     event: Event
@@ -38,7 +24,7 @@ export function EventCard({ event }: EventCardProps) {
             <Link href={`/event/${event.id}`}>
                 <div className="relative h-48 w-full">
                     <TiltedCard
-                        imageSrc={event.image || "/placeholder.svg"}
+                        imageSrc={event.coverUrl || "/placeholder.svg"}
                         altText={event.title}
                         captionText={event.title}
                         containerHeight="12rem"
@@ -85,15 +71,15 @@ export function EventCard({ event }: EventCardProps) {
                 </div>
             </CardContent>
 
-            <CardFooter className="p-4 pt-0 flex items-center justify-between">
+            <CardFooter className="p-4 pt-0 flex items-center justify-end">
 
-                <div>
+                {/* <div>
                     <p className="text-xs text-muted-foreground">Desde</p>
                     <GradientText>
                         <p className="text-xl font-bold">${event.price.toLocaleString()}</p>
                     </GradientText>
 
-                </div>
+                </div> */}
 
                 <StarBorder>
                     <Button asChild className="gradient-brand text-white">

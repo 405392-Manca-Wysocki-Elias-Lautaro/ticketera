@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useAuth } from "@/hooks/auth/useAuth"
 import { Navbar } from "@/components/Navbar"
@@ -8,18 +7,19 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Clock, Navigation } from "lucide-react"
-import { mockEvents } from '@/mocks/mockEvents'
 import TiltedCard from '@/components/TiltedCard'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
+import { useEvent } from '@/hooks/event/useEvent'
 
 export default function EventDetailPage() {
-    const router = useRouter()
-    const params = useParams()
-    const { isLoading } = useAuth()
-    const [event] = useState(mockEvents.find((e) => e.id === params.id))
+    const router = useRouter();
+    const params = useParams();
+    const id = params.id;
+    const { isLoading: isLoadingAuth } = useAuth();
+    const {data: event, isLoading: isLoadingEvent } = useEvent(id);
 
-    if (isLoading) {
+    if (isLoadingAuth || isLoadingEvent) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -38,7 +38,7 @@ export default function EventDetailPage() {
         )
     }
 
-    const formattedDate = new Date(event.date).toLocaleDateString("es-ES", {
+    const formattedDate = new Date(event?.date).toLocaleDateString("es-ES", {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -56,9 +56,9 @@ export default function EventDetailPage() {
                         {/* Event Image */}
                         <div className="relative h-64 md:h-96 w-full rounded-xl overflow-hidden">
                             <TiltedCard
-                                imageSrc={event.image || "/placeholder.svg"}
-                                altText={event.title}
-                                captionText={event.title}
+                                imageSrc={event?.coverUrl || "/placeholder.svg"}
+                                altText={event?.title}
+                                captionText={event?.title}
                                 containerHeight="100%"
                                 imageHeight="100%"
                                 imageWidth="100%"
@@ -69,7 +69,7 @@ export default function EventDetailPage() {
                                 displayOverlayContent
                                 overlayContent={
                                     <Badge className="absolute top-10 right-16 gradient-brand  text-white border-0">
-                                        {event.category}
+                                        {event?.category}
                                     </Badge>
                                 }
                             />
@@ -77,7 +77,7 @@ export default function EventDetailPage() {
 
                         {/* Event Info */}
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{event.title}</h1>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{event?.title}</h1>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                                 <div className="flex items-start gap-3">
@@ -92,7 +92,7 @@ export default function EventDetailPage() {
                                     <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Hora</p>
-                                        <p className="text-sm text-muted-foreground">{event.time}</p>
+                                        <p className="text-sm text-muted-foreground">{event?.time}</p>
                                     </div>
                                 </div>
 
@@ -100,7 +100,7 @@ export default function EventDetailPage() {
                                     <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Lugar</p>
-                                        <p className="text-sm text-muted-foreground">{event.location}</p>
+                                        <p className="text-sm text-muted-foreground">{event?.location}</p>
                                     </div>
                                 </div>
 
@@ -108,14 +108,14 @@ export default function EventDetailPage() {
                                     <Navigation className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Dirección</p>
-                                        <p className="text-sm text-muted-foreground">{event.address}</p>
+                                        <p className="text-sm text-muted-foreground">{event?.address}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
                                 <h2 className="text-xl font-bold mb-3">Descripción</h2>
-                                <p className="text-muted-foreground leading-relaxed text-pretty">{event.description}</p>
+                                <p className="text-muted-foreground leading-relaxed text-pretty">{event?.description}</p>
                             </div>
                         </div>
 
@@ -123,7 +123,7 @@ export default function EventDetailPage() {
                         <div>
                             <h2 className="text-xl font-bold mb-4">Áreas Disponibles</h2>
                             <div className="space-y-3">
-                                {event.areas.map((area) => (
+                                {event?.areas?.map((area) => (
                                     <Card key={area.id}>
                                         <CardContent className="p-4">
                                             <div className="flex items-center justify-between">
@@ -154,14 +154,14 @@ export default function EventDetailPage() {
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Precio desde</p>
                                     <GradientText>
-                                        <p className="text-3xl font-bold">${event.price.toLocaleString()}</p>
+                                        <p className="text-3xl font-bold">${event?.price?.toLocaleString()}</p>
                                     </GradientText>
                                 </div>
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Entradas disponibles</span>
-                                        <span className="font-medium">{event.availableTickets}</span>
+                                        <span className="font-medium">{event?.availableTickets}</span>
                                     </div>
                                 </div>
 
@@ -169,7 +169,7 @@ export default function EventDetailPage() {
                                     <Button
                                         className="w-full gradient-brand text-white"
                                         size="lg"
-                                        onClick={() => router.push(`/event/${event.id}/select-seats`)}
+                                        onClick={() => router.push(`/event/${event?.id}/select-seats`)}
                                     >
                                         Comprar Entradas
                                     </Button>
