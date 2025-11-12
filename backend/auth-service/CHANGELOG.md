@@ -1,3 +1,17 @@
+# [1.0.0-next.5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.4...auth-v1.0.0-next.5) (2025-11-12)
+
+
+### Bug Fixes
+
+* fix build ([150b9de](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/150b9de0cf89901fbeed5e6812be81b981dd37bf))
+
+
+### Features
+
+* **jwt,ui:** add custom exceptions and new UI components ([5539128](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/55391287e3c3974b6c44339a6b0427311f3d6d37))
+* **ticket:** add controller, service & repo for generation ([14e27d6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/14e27d60e2b958e05448c8b420a5a17338298d16))
+* **ticket:** add pricing and expiration logic ([512653d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/512653daff147e18769e84d677eb0776ba227cac))
+
 # [1.0.0-next.4](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.3...auth-v1.0.0-next.4) (2025-11-10)
 
 

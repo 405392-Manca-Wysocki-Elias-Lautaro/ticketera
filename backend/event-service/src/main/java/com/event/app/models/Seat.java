@@ -8,16 +8,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VenueSeat {
+public class Seat {
 
     private UUID id;
 
-    private UUID venueAreaId;
+    private UUID areaId;
 
     private Integer seatNumber;
 
     private Integer rowNumber;
 
-    private String label; // Concatenación de rowNumber + seatNumber
+    private String label;
 }
 

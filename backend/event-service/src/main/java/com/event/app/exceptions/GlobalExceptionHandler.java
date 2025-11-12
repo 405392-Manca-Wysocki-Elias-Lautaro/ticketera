@@ -21,11 +21,6 @@ public class GlobalExceptionHandler {
         return ApiResponseFactory.notFound(ex.getMessage());
     }
 
-    @ExceptionHandler(VenueNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleVenueNotFound(VenueNotFoundException ex) {
-        return ApiResponseFactory.notFound(ex.getMessage());
-    }
-
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleCategoryNotFound(CategoryNotFoundException ex) {
         return ApiResponseFactory.notFound(ex.getMessage());
@@ -36,14 +31,36 @@ public class GlobalExceptionHandler {
         return ApiResponseFactory.notFound(ex.getMessage());
     }
 
-    @ExceptionHandler(OccurrenceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleOccurrenceNotFound(OccurrenceNotFoundException ex) {
+    @ExceptionHandler(AreaNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAreaNotFound(AreaNotFoundException ex) {
         return ApiResponseFactory.notFound(ex.getMessage());
     }
 
-    @ExceptionHandler(VenueAreaNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleVenueAreaNotFound(VenueAreaNotFoundException ex) {
+    @ExceptionHandler(SeatNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSeatNotFound(SeatNotFoundException ex) {
         return ApiResponseFactory.notFound(ex.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.<Void>builder()
+                        .success(false)
+                        .message(ex.getMessage())
+                        .timestamp(java.time.OffsetDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler({JwtNotFoundException.class, InvalidJwtUserIdException.class, JwtClaimNotFoundException.class})
+    public ResponseEntity<ApiResponse<Void>> handleJwtExceptions(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.<Void>builder()
+                        .success(false)
+                        .message(ex.getMessage())
+                        .timestamp(java.time.OffsetDateTime.now())
+                        .build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

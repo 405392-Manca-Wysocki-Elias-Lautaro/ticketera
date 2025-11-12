@@ -1,5 +1,6 @@
 package com.event.app.dtos;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -9,14 +10,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventDTO {
-
-    private UUID id;
+public class CreateEventRequest {
 
     @NotNull(message = "El ID del organizador es obligatorio")
     private UUID organizerId;
@@ -33,6 +33,7 @@ public class EventDTO {
     @Size(max = 2000, message = "La descripción no puede superar los 2000 caracteres")
     private String description;
 
+    @NotNull(message = "El ID de categoría es obligatorio")
     private UUID categoryId;
 
     @Size(max = 500, message = "La URL de portada no puede superar los 500 caracteres")
@@ -74,7 +75,51 @@ public class EventDTO {
     @NotNull(message = "La fecha de inicio es obligatoria")
     private LocalDateTime startsAt;
 
-    @NotNull(message = "La fecha de fin es obligatoria")
     private LocalDateTime endsAt;
+
+    // Áreas con asientos y precios
+    @Valid
+    private List<CreateAreaRequest> areas;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateAreaRequest {
+        
+        @NotBlank(message = "El nombre del área es obligatorio")
+        @Size(min = 3, max = 200, message = "El nombre del área debe tener entre 3 y 200 caracteres")
+        private String name;
+
+        @NotNull(message = "Debe especificar si es admisión general")
+        private Boolean isGeneralAdmission;
+
+        private Integer capacity;
+
+        private Integer position;
+
+        @NotNull(message = "El precio es obligatorio")
+        private Long priceCents;
+
+        private String currency;
+
+        @Valid
+        private List<CreateSeatRequest> seats;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateSeatRequest {
+        
+        @NotNull(message = "El número de asiento es obligatorio")
+        private Integer seatNumber;
+
+        @NotNull(message = "El número de fila es obligatorio")
+        private Integer rowNumber;
+
+        @NotBlank(message = "La etiqueta del asiento es obligatoria")
+        @Size(min = 1, max = 50, message = "La etiqueta del asiento debe tener entre 1 y 50 caracteres")
+        private String label;
+    }
 }
 
