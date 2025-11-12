@@ -17,7 +17,7 @@ export default function EventDetailPage() {
     const params = useParams();
     const id = params.id;
     const { isLoading: isLoadingAuth } = useAuth();
-    const {data: event, isLoading: isLoadingEvent } = useEvent(id);
+    const { data: event, isLoading: isLoadingEvent } = useEvent(id);
 
     if (isLoadingAuth || isLoadingEvent) {
         return (
@@ -38,11 +38,16 @@ export default function EventDetailPage() {
         )
     }
 
-    const formattedDate = new Date(event?.date).toLocaleDateString("es-ES", {
+    const formattedDate = new Date(event?.startsAt).toLocaleDateString("es-ES", {
         weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
+    })
+
+    const formattedHour = new Date(event.startsAt).toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
     })
 
     return (
@@ -69,7 +74,7 @@ export default function EventDetailPage() {
                                 displayOverlayContent
                                 overlayContent={
                                     <Badge className="absolute top-10 right-16 gradient-brand  text-white border-0">
-                                        {event?.category}
+                                        {event?.categoryName}
                                     </Badge>
                                 }
                             />
@@ -92,7 +97,7 @@ export default function EventDetailPage() {
                                     <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Hora</p>
-                                        <p className="text-sm text-muted-foreground">{event?.time}</p>
+                                        <p className="text-sm text-muted-foreground">{formattedHour}</p>
                                     </div>
                                 </div>
 
@@ -100,7 +105,7 @@ export default function EventDetailPage() {
                                     <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Lugar</p>
-                                        <p className="text-sm text-muted-foreground">{event?.location}</p>
+                                        <p className="text-sm text-muted-foreground">{event?.venueName}</p>
                                     </div>
                                 </div>
 
@@ -108,7 +113,7 @@ export default function EventDetailPage() {
                                     <Navigation className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Dirección</p>
-                                        <p className="text-sm text-muted-foreground">{event?.address}</p>
+                                        <p className="text-sm text-muted-foreground">{event?.addressLine}</p>
                                     </div>
                                 </div>
                             </div>
@@ -130,12 +135,12 @@ export default function EventDetailPage() {
                                                 <div>
                                                     <h3 className="font-semibold">{area.name}</h3>
                                                     <p className="text-sm text-muted-foreground">
-                                                        {area.type === "general" ? "Admisión General" : "Asientos Numerados"}
+                                                        {area.isGeneralAdmission ? "Admisión General" : "Asientos Numerados"}
                                                     </p>
                                                 </div>
                                                 <div className="text-right">
                                                     <GradientText>
-                                                        <p className="text-lg font-bold">${area.price.toLocaleString()}</p>
+                                                        <p className="text-lg font-bold">{area.currency}${area.priceCents}</p>
                                                     </GradientText>
                                                     <p className="text-xs text-muted-foreground">{area.capacity} lugares</p>
                                                 </div>
@@ -154,14 +159,14 @@ export default function EventDetailPage() {
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Precio desde</p>
                                     <GradientText>
-                                        <p className="text-3xl font-bold">${event?.price?.toLocaleString()}</p>
+                                        <p className="text-3xl font-bold">{event.currency}${event?.minPriceCents}</p>
                                     </GradientText>
                                 </div>
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Entradas disponibles</span>
-                                        <span className="font-medium">{event?.availableTickets}</span>
+                                        <span className="font-medium">{event?.totalAvailableTickets}</span>
                                     </div>
                                 </div>
 
@@ -169,7 +174,8 @@ export default function EventDetailPage() {
                                     <Button
                                         className="w-full gradient-brand text-white"
                                         size="lg"
-                                        onClick={() => router.push(`/event/${event?.id}/select-seats`)}
+                                        // onClick={() => router.push(`/event/${event?.id}/select-seats`)}
+                                        onClick={() => router.push(`/event/1/select-seats`)}
                                     >
                                         Comprar Entradas
                                     </Button>

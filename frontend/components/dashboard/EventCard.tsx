@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import TiltedCard from "@/components/TiltedCard"
 import StarBorder from '../StarBorder'
 import { Event } from '@/types/Event'
+import GradientText from '../GradientText'
 
 interface EventCardProps {
     event: Event
@@ -13,10 +14,15 @@ interface EventCardProps {
 
 
 export function EventCard({ event }: EventCardProps) {
-    const formattedDate = new Date(event.date).toLocaleDateString("es-ES", {
+    const formattedDate = new Date(event.startsAt).toLocaleDateString("es-ES", {
         day: "numeric",
         month: "long",
-        year: "numeric",
+        // year: "numeric",
+    })
+
+    const formattedHour = new Date(event.startsAt).toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
     })
 
     return (
@@ -37,7 +43,7 @@ export function EventCard({ event }: EventCardProps) {
                         displayOverlayContent
                         overlayContent={
                             <Badge className="absolute top-5 right-8 gradient-brand  text-white border-0">
-                                {event.category}
+                                {event?.categoryName}
                             </Badge>
                         }
                     />
@@ -57,29 +63,28 @@ export function EventCard({ event }: EventCardProps) {
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4 shrink-0" />
                         <span className="line-clamp-1">
-                            {formattedDate} - {event.time}
+                            {formattedDate} - {formattedHour}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="h-4 w-4 shrink-0" />
-                        <span className="line-clamp-1">{event.location}</span>
+                        <span className="line-clamp-1">{event.venueName}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Ticket className="h-4 w-4 shrink-0" />
-                        <span>{event.availableTickets} entradas disponibles</span>
+                        <span>{event.totalAvailableTickets} entradas disponibles</span>
                     </div>
                 </div>
             </CardContent>
 
-            <CardFooter className="p-4 pt-0 flex items-center justify-end">
+            <CardFooter className="p-4 pt-0 flex items-center justify-between">
 
-                {/* <div>
+                <div>
                     <p className="text-xs text-muted-foreground">Desde</p>
                     <GradientText>
-                        <p className="text-xl font-bold">${event.price.toLocaleString()}</p>
+                        <p className="text-xl font-bold">{event.currency}${event.minPriceCents}</p>
                     </GradientText>
-
-                </div> */}
+                </div>
 
                 <StarBorder>
                     <Button asChild className="gradient-brand text-white">
