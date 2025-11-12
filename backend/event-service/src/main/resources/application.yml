@@ -35,6 +35,10 @@ spring:
       - classpath:db/migration
       - classpath:db/r
 
+  security:
+    oauth2:
+      resourceserver:
+
 logging.level:
   root: INFO
   org.hibernate.SQL: WARN

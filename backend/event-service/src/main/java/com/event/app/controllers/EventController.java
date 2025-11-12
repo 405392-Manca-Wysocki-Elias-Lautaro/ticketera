@@ -1,10 +1,15 @@
 package com.event.app.controllers;
 
+import com.event.app.dtos.CreateEventRequest;
 import com.event.app.dtos.EventDTO;
+import com.event.app.dtos.EventDetailDTO;
+import com.event.app.dtos.EventSummaryDTO;
 import com.event.app.dtos.response.ApiResponse;
+import com.event.app.exceptions.UnauthorizedException;
 import com.event.app.models.Event;
 import com.event.app.services.IEventService;
 import com.event.app.utils.ApiResponseFactory;
+import com.event.app.utils.JwtUtils;
 
 import jakarta.validation.Valid;
 
@@ -14,41 +19,82 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/")
 public class EventController {
 
     private final IEventService eventService;
     private final ModelMapper modelMapper;
+    private final JwtUtils jwtUtils;
 
-    public EventController(IEventService eventService, ModelMapper modelMapper) {
+    public EventController(IEventService eventService, ModelMapper modelMapper, JwtUtils jwtUtils) {
         this.eventService = eventService;
         this.modelMapper = modelMapper;
+        this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * POST /events - Crear evento completo con áreas, asientos y precios
+     */
     @PostMapping
-    public ResponseEntity<ApiResponse<EventDTO>> createEvent(@Valid @RequestBody EventDTO eventDTO) {
-        Event event = eventService.createEvent(eventDTO);
-        EventDTO response = modelMapper.map(event, EventDTO.class);
-        return ApiResponseFactory.created("Event created successfully", response);
+    public ResponseEntity<ApiResponse<Event>> createCompleteEvent(@Valid @RequestBody CreateEventRequest request) {
+        Event event = eventService.createCompleteEvent(request);
+        return ApiResponseFactory.created("Evento completo creado exitosamente", event);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EventDTO>> getEventById(@PathVariable UUID id) {
-        return eventService.getEventById(id)
-                .map(event -> ApiResponseFactory.success("Event retrieved successfully", 
-                        modelMapper.map(event, EventDTO.class)))
-                .orElse(ApiResponseFactory.notFound("Event not found with ID: " + id));
-    }
-
+    /**
+     * GET /events - Obtener todos los eventos con información resumida enriquecida
+     */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<EventDTO>>> getAllEvents() {
-        List<EventDTO> events = eventService.getAllEvents().stream()
-                .map(event -> modelMapper.map(event, EventDTO.class))
-                .collect(Collectors.toList());
-        return ApiResponseFactory.success("Events retrieved successfully", events);
+    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getAllEventsSummary() {
+        List<EventSummaryDTO> events = eventService.getAllEventsSummary();
+        return ApiResponseFactory.success("Eventos obtenidos exitosamente", events);
+    }
+
+    /**
+     * GET /events/{id} - Obtener detalle completo de un evento
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<EventDetailDTO>> getEventDetail(@PathVariable UUID id) {
+        return eventService.getEventDetail(id)
+                .map(detail -> ApiResponseFactory.success("Detalle del evento obtenido exitosamente", detail))
+                .orElse(ApiResponseFactory.notFound("Evento no encontrado con ID: " + id));
+    }
+
+    /**
+     * GET /events/my-organization - Obtener eventos de mi organización (solo OWNER)
+     */
+    @GetMapping("/my-organization")
+    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getMyOrganizationEvents() {
+        // Verificar que sea OWNER
+        if (!jwtUtils.isOwner()) {
+            throw new UnauthorizedException("Solo los OWNER pueden acceder a esta funcionalidad");
+        }
+
+        // Obtener el organizerId del JWT
+        UUID organizerId = jwtUtils.getOrganizerId();
+        
+        // Obtener eventos del organizer
+        List<EventSummaryDTO> events = eventService.getEventsByOrganizerId(organizerId);
+        
+        return ApiResponseFactory.success("Eventos de la organización obtenidos exitosamente", events);
+    }
+
+    /**
+     * GET /events/staff - Obtener todos los eventos (para STAFF y OWNER)
+     */
+    @GetMapping("/staff")
+    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getEventsForStaff() {
+        // Verificar que sea STAFF u OWNER
+        if (!jwtUtils.isStaff()) {
+            throw new UnauthorizedException("Solo el personal autorizado puede acceder a esta funcionalidad");
+        }
+
+        // STAFF puede ver todos los eventos
+        List<EventSummaryDTO> events = eventService.getAllEventsSummary();
+        
+        return ApiResponseFactory.success("Eventos obtenidos exitosamente", events);
     }
 
     @PutMapping("/{id}")

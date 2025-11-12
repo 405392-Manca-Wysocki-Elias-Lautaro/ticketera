@@ -43,6 +43,10 @@ spring:
       - classpath:db/seeds
     clean-disabled: true
 
+  security:
+    oauth2:
+      resourceserver:
+
 logging.level:
   org.springframework.jdbc.core: DEBUG
   org.hibernate.SQL: DEBUG

@@ -1,5 +1,6 @@
 package com.event.app.models;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,18 +9,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VenueArea {
+public class AreaPricing {
 
     private UUID id;
 
-    private UUID venueId;
+    private UUID areaId;
 
-    private String name;
+    private Long priceCents;
 
-    private Boolean isGeneralAdmission;
+    private String currency;
 
-    private Integer capacity;
-
-    private Integer position;
+    private LocalDateTime createdAt;
 }
 

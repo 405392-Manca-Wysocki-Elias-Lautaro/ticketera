@@ -7,18 +7,18 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity
-@Table(name = "venue_areas", schema="events")
+@Table(name = "areas", schema="events")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VenueAreaEntity {
+public class AreaEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "venue_id", nullable = false)
-    private UUID venueId;
+    @Column(name = "event_id", nullable = false)
+    private UUID eventId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;

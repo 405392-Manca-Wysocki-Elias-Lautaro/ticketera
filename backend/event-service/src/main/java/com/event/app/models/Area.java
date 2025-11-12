@@ -1,6 +1,5 @@
 package com.event.app.models;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,22 +8,18 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Occurrence {
+public class Area {
 
     private UUID id;
 
     private UUID eventId;
 
-    private UUID venueId;
+    private String name;
 
-    private LocalDateTime startsAt;
+    private Boolean isGeneralAdmission;
 
-    private LocalDateTime endsAt;
+    private Integer capacity;
 
-    private String status;
-
-    private String slug;
-
-    private Boolean active;
+    private Integer position;
 }
 

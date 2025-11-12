@@ -7,18 +7,18 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity
-@Table(name = "venue_seats", schema="events")
+@Table(name = "seats", schema="events")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VenueSeatEntity {
+public class SeatEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "venue_area_id", nullable = false)
-    private UUID venueAreaId;
+    @Column(name = "area_id", nullable = false)
+    private UUID areaId;
 
     @Column(name = "seat_number", nullable = false)
     private Integer seatNumber;
@@ -26,7 +26,7 @@ public class VenueSeatEntity {
     @Column(name = "row_number", nullable = false)
     private Integer rowNumber;
 
-    @Column(name = "label", nullable = false, columnDefinition = "TEXT")
-    private String label; // Concatenación de rowNumber + seatNumber
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String label;
 }
 

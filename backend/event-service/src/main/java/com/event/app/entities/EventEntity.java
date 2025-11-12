@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -38,6 +39,38 @@ public class EventEntity {
 
     @Column(nullable = false)
     private String status;
+
+    // Campos de venue
+    @Column(name = "venue_name", nullable = false, columnDefinition = "TEXT")
+    private String venueName;
+
+    @Column(name = "venue_description", columnDefinition = "TEXT")
+    private String venueDescription;
+
+    @Column(name = "address_line", nullable = false, columnDefinition = "TEXT")
+    private String addressLine;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String city;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String state;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String country;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal lat;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal lng;
+
+    // Campos de occurrence
+    @Column(name = "starts_at", nullable = false)
+    private LocalDateTime startsAt;
+
+    @Column(name = "ends_at")
+    private LocalDateTime endsAt;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
