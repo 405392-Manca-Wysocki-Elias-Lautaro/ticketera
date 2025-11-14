@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Loader2, MapPin, QrCode } from "lucide-react"
-import { QRCodeSVG } from "qrcode.react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockTickets } from '@/mocks/mockTickets'
 import { Navbar } from '@/components/Navbar'
@@ -16,35 +13,37 @@ import { usePreloadLanyardAssets } from '@/hooks/usePreloaderLanyardAssets'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
 import TicketCard from '@/components/tickets/TicketCard'
+import { Ticket } from '@/types/Ticket'
+import { useTicketsByUser } from '@/hooks/ticket/useTicketsByUser'
+import { TicketStatus } from '@/types/enums/TicketStatus'
 
 export default function MyTicketsPage() {
-    const router = useRouter()
-    const { user, isLoading } = useAuth()
-    //TODO: Usar type Ticket
-    const [tickets, setTickets] = useState<any[]>(mockTickets)
-    //TODO: Usar type Ticket
-    const [selectedTicket, setSelectedTicket] = useState<any | null>(null)
+    const router = useRouter();
+    const { user, isLoading: isLoadingAuth } = useAuth();
+    const { data: tickets, isLoading: isLoadingTickets } = useTicketsByUser();
+    const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
     usePreloadLanyardAssets();
 
     useEffect(() => {
-        if (!isLoading && !user) {
+        if (!isLoadingAuth && !user) {
             router.push("/login")
         }
-    }, [user, isLoading, router])
+    }, [user, isLoadingAuth, router])
 
-    if (isLoading || !user) {
+    if (isLoadingAuth || !user || isLoadingTickets || !tickets) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             </div>
         )
-    }
+    };
 
-    const validTickets = tickets.filter((t) => t.status === "valid")
-    const usedTickets = tickets.filter((t) => t.status === "used")
+    const validTickets = tickets.filter((t: Ticket) => t.status === TicketStatus.ISSUED);
+    const usedTickets = tickets.filter((t: Ticket) => t.status === TicketStatus.CHECKED_IN);
 
-    const handleViewQR = (ticket: any) => {
+    console.log("valid tickets", validTickets);
+    const handleViewQR = (ticket: Ticket) => {
         setSelectedTicket(ticket)
     }
 
@@ -67,7 +66,7 @@ export default function MyTicketsPage() {
                     <TabsContent value="valid" className="space-y-4">
                         {validTickets.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {validTickets.map((ticket) => (
+                                {validTickets.map((ticket: Ticket) => (
                                     <TicketCard key={ticket.id} ticket={ticket} onViewQR={() => handleViewQR(ticket)} />
                                 ))}
                             </div>
@@ -88,7 +87,7 @@ export default function MyTicketsPage() {
                     <TabsContent value="used" className="space-y-4">
                         {usedTickets.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {usedTickets.map((ticket) => (
+                                {usedTickets.map((ticket: Ticket) => (
                                     <TicketCard key={ticket.id} ticket={ticket} />
                                 ))}
                             </div>
@@ -105,10 +104,11 @@ export default function MyTicketsPage() {
                 {/* QR Modal */}
                 {selectedTicket && (
                     <LanyardTicket
-                        qrCode={selectedTicket.qrCode}
-                        eventTitle={selectedTicket.eventTitle}
-                        areaName={selectedTicket.areaName}
-                        seatNumber={selectedTicket.seatNumber}
+                        code={selectedTicket.code}
+                        qrCode={selectedTicket.qrBase64}
+                        eventTitle={selectedTicket.event?.eventTitle}
+                        areaName={selectedTicket.event?.area?.name}
+                        seatNumber={selectedTicket.event?.area?.seat || null}
                         onClose={() => setSelectedTicket(null)}
                     />
                 )}

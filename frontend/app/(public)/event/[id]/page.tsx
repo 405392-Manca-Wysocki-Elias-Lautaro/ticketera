@@ -45,7 +45,7 @@ export default function EventDetailPage() {
         year: "numeric",
     })
 
-    const formattedHour = new Date(event.startsAt).toLocaleTimeString("es-ES", {
+    const formattedTime = new Date(event.startsAt).toLocaleTimeString("es-ES", {
         hour: "2-digit",
         minute: "2-digit",
     })
@@ -97,7 +97,7 @@ export default function EventDetailPage() {
                                     <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                                     <div>
                                         <p className="font-medium">Hora</p>
-                                        <p className="text-sm text-muted-foreground">{formattedHour}</p>
+                                        <p className="text-sm text-muted-foreground">{formattedTime}</p>
                                     </div>
                                 </div>
 

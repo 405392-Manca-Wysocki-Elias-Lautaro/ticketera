@@ -19,32 +19,46 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config
-        const status = error.response?.status
-        const data = error.response?.data
+        const originalRequest = error.config;
+        const status = error.response?.status;
+        const data = error.response?.data;
 
-        // 🧭 Manejo de expiración de token (401) con refresh automático
-        if (status === 401 && !originalRequest._retry && data.data.code != "INVALID_CREDENTIALS") {
-            originalRequest._retry = true
+        if (originalRequest.url.includes("/auth/refresh")) {
+            useAuthStore.getState().logout();
+            if (typeof window !== "undefined") window.location.href = "/login";
+            return Promise.reject(error);
+        }
+
+        originalRequest._retryCount = originalRequest._retryCount || 0;
+        const MAX_RETRIES = 1;
+
+        if (
+            status === 401 &&
+            data?.data?.code !== "INVALID_CREDENTIALS" &&
+            originalRequest._retryCount < MAX_RETRIES
+        ) {
+            originalRequest._retryCount++;
+
             try {
                 const { data } = await authService.refresh();
-
                 const newAccessToken = data?.data?.accessToken;
-                useAuthStore.getState().setToken(newAccessToken);
 
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
-                return api(originalRequest)
-            } catch (refreshError) {
-                useAuthStore.getState().logout()
-                if (typeof window !== "undefined") window.location.href = "/login"
-                return Promise.reject(refreshError)
+                useAuthStore.getState().setToken(newAccessToken);
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+                return api(originalRequest);
+
+            } catch (err) {
+                useAuthStore.getState().logout();
+                if (typeof window !== "undefined") window.location.href = "/login";
+                return Promise.reject(err);
             }
         }
 
-        handleApiError(error)
-
-        return Promise.reject(error)
+        handleApiError(error);
+        return Promise.reject(error);
     }
-)
+);
+
 
 export default api

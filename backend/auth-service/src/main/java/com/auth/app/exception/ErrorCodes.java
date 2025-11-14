@@ -14,6 +14,7 @@ public final class ErrorCodes {
     public static final String TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS";
     public static final String ACCOUNT_NOT_VERIFIED = "ACCOUNT_NOT_VERIFIED";
     public static final String INVALID_REFRESH_TOKEN = "INVALID_REFRESH_TOKEN";
+    public static final String INVALID_COOKIE = "INVALID_COOKIE";
 
     // 📥 Validaciones
     public static final String VALIDATION_FAILED = "VALIDATION_FAILED";

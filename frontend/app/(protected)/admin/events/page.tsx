@@ -118,7 +118,7 @@ export default function AdminEventsPage() {
                                 year: "numeric",
                             })
 
-                            const formattedHour = new Date(event?.startsAt).toLocaleTimeString("es-ES", {
+                            const formattedTime = new Date(event?.startsAt).toLocaleTimeString("es-ES", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                             })
@@ -138,7 +138,7 @@ export default function AdminEventsPage() {
                                                     <div className="flex items-center gap-2 text-muted-foreground">
                                                         <Calendar className="h-4 w-4 shrink-0" />
                                                         <span>
-                                                            {formattedDate} - {formattedHour}
+                                                            {formattedDate} - {formattedTime}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-muted-foreground">

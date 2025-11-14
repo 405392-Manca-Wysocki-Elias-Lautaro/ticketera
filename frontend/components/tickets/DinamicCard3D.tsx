@@ -3,33 +3,37 @@ import * as THREE from 'three'
 import { useMemo, useEffect, useState } from 'react'
 
 interface DynamicCard3DProps {
+    code: string
+    qrCode: string
     eventTitle: string
     areaName?: string
     seatNumber?: string
-    qrCode: string
 }
 
 export default function DynamicCard3D({
+    code,
+    qrCode,
     eventTitle,
     areaName,
     seatNumber,
-    qrCode,
 }: DynamicCard3DProps) {
     const [backTexture, setBackTexture] = useState<THREE.CanvasTexture | null>(null)
 
-    // === 🎨 TEXTURA FRENTE (igual que antes) ===
+    // === TEXTURA FRENTE ===
     const frontTexture = useMemo(() => {
         const canvas = document.createElement('canvas')
         canvas.width = 2048
         canvas.height = 2048
         const ctx = canvas.getContext('2d')!
 
+        // --- Fondo
         const gradient = ctx.createLinearGradient(0, 0, 2048, 2048)
         gradient.addColorStop(0, '#141414')
         gradient.addColorStop(1, '#141414')
         ctx.fillStyle = gradient
         ctx.fillRect(0, 0, 2048, 2048)
 
+        // --- Título
         const textGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
         textGradient.addColorStop(0.0, 'oklch(0.65 0.18 35)')
         textGradient.addColorStop(0.33, 'oklch(0.6 0.24 350)')
@@ -37,36 +41,45 @@ export default function DynamicCard3D({
         textGradient.addColorStop(1.0, 'oklch(0.6 0.22 290)')
         ctx.fillStyle = textGradient
         ctx.font = 'bold 120px Poppins, sans-serif'
-        ctx.fillText(eventTitle, 160, 300)
+        ctx.fillStyle = textGradient
+
+        drawWrappedText(
+            ctx,
+            eventTitle,
+            200,      // x
+            200,      // y inicial
+            1600,     // ancho máximo permitido
+            150       // lineHeight (separa líneas)
+        )
 
         ctx.font = '75px Poppins, sans-serif'
         ctx.fillStyle = '#ccc'
-        ctx.fillText(areaName || '', 160, 500)
-        if (seatNumber) ctx.fillText(`Asiento: ${seatNumber}`, 160, 640)
+        ctx.fillText(areaName || '', 200, 500)
+        if (seatNumber) ctx.fillText(`Asiento: ${seatNumber}`, 180, 660)
 
-        const qrX = 350
-        const qrY = 750
-        const qrSizeY = 900
-        const qrSizeX = 1350
-        ctx.fillStyle = '#fff'
-        ctx.fillRect(qrX, qrY, qrSizeX, qrSizeY)
-        ctx.fillStyle = '#000'
-        for (let i = 0; i < 10; i++) {
-            for (let j = 0; j < 10; j++) {
-                if (Math.random() > 0.5) {
-                    const x = qrX + i * (qrSizeX / 10)
-                    const y = qrY + j * (qrSizeY / 10)
-                    ctx.fillRect(x, y, qrSizeX / 10 - 2, qrSizeY / 10 - 2)
-                }
-            }
+        // === 🔥 QR (base64) ===
+        const qrX = 200
+        const qrY = 650
+        const qrSizeY = 1000
+        const qrSizeX = 1600
+
+        const qrImg = new Image()
+        qrImg.src = qrCode
+        qrImg.onload = () => {
+            ctx.drawImage(qrImg, qrX, qrY, qrSizeX, qrSizeY)
+
+            tex.needsUpdate = true
         }
+
+        // Borde del QR
         ctx.lineWidth = 6
         ctx.strokeStyle = '#fff'
         ctx.strokeRect(qrX - 4, qrY - 4, qrSizeX + 8, qrSizeY + 8)
 
+        // Código del ticket
         ctx.fillStyle = '#ccc'
         ctx.font = 'bold 95px monospace'
-        ctx.fillText(qrCode, 650, 1900)
+        ctx.fillText(code, 650, 1900)
 
         const tex = new THREE.CanvasTexture(canvas)
         tex.anisotropy = 16
@@ -74,8 +87,9 @@ export default function DynamicCard3D({
         tex.magFilter = THREE.LinearFilter
         tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping
         tex.needsUpdate = true
+
         return tex
-    }, [eventTitle, areaName, seatNumber, qrCode])
+    }, [eventTitle, areaName, seatNumber, code, qrCode])
 
     // === 🪪 TEXTURA DORSO (gradient-brand + logo centrado) ===
     useEffect(() => {
@@ -141,4 +155,25 @@ export default function DynamicCard3D({
             ))}
         </mesh>
     )
+}
+
+function drawWrappedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
+    const words = text.split(' ')
+    let line = ''
+
+    for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' '
+        const metrics = ctx.measureText(testLine)
+        const testWidth = metrics.width
+
+        if (testWidth > maxWidth && i > 0) {
+            ctx.fillText(line, x, y)
+            line = words[i] + ' '
+            y += lineHeight
+        } else {
+            line = testLine
+        }
+    }
+
+    ctx.fillText(line, x, y)
 }

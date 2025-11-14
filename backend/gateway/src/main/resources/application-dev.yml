@@ -29,7 +29,6 @@ spring:
             - Path=/api/events/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/events/?(?<segment>.*), /${segment}
 
         - id: tickets
@@ -38,7 +37,6 @@ spring:
             - Path=/api/tickets/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
 
         - id: payments
@@ -47,7 +45,6 @@ spring:
             - Path=/api/payments/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
         - id: notifications
@@ -56,7 +53,6 @@ spring:
             - Path=/api/notifications/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
 
         - id: orders
@@ -65,7 +61,6 @@ spring:
             - Path=/api/orders/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
 
         # --- OpenAPI aggregation ---

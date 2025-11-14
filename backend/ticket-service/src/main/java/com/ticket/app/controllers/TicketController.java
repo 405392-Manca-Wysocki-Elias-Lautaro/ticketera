@@ -60,7 +60,7 @@ public class TicketController {
     }
 
     // 👤 Get tickets by user ID
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user")
     public ResponseEntity<?> getByUserId() {
         
         List<TicketModel> tickets = ticketService.getByUserId();

@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE IF NOT EXISTS tickets.tickets (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_item_id       UUID NOT NULL,
-  event_id       UUID NOT NULL,
+  event_id            UUID NOT NULL,
   event_venue_area_id UUID,
   event_venue_seat_id UUID,
   user_id             UUID NOT NULL,
@@ -69,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_ticket_history_ticket_id ON tickets.ticket_status
 CREATE TABLE IF NOT EXISTS tickets.holds (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_id         UUID,
-  event_id       UUID NOT NULL,
+  event_id            UUID NOT NULL,
   event_venue_area_id UUID,
   event_venue_seat_id UUID,
   quantity            int NOT NULL DEFAULT 1,

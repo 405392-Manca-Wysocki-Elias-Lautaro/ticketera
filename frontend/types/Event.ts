@@ -1,4 +1,4 @@
-import { EventArea } from './Areas'
+import { EventArea } from './EventArea'
 import { Category } from "./Category"
 
 export interface Event {

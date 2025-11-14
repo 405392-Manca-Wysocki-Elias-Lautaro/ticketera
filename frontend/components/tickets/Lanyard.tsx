@@ -19,16 +19,18 @@ import DynamicCard3D from './DinamicCard3D';
 extend({ MeshLineGeometry, MeshLineMaterial });
 
 export default function Lanyard({
+    code,
+    qrCode,
     eventTitle,
     areaName,
     seatNumber,
-    qrCode,
     ...props
 }: {
+    code: string;
+    qrCode: string;
     eventTitle: string;
     areaName?: string;
     seatNumber?: string;
-    qrCode: string;
     scale?: number | [number, number, number];
     position?: [number, number, number];
     rotation?: [number, number, number];
@@ -39,10 +41,11 @@ export default function Lanyard({
             <ambientLight intensity={Math.PI} />
             <Physics gravity={[0, -25, 0]} timeStep={1 / 60}>
                 <Band
+                    code={code}
+                    qrCode={qrCode}
                     eventTitle={eventTitle}
                     areaName={areaName}
                     seatNumber={seatNumber}
-                    qrCode={qrCode}
                 />
             </Physics>
             <Environment blur={0.75}>
@@ -81,6 +84,7 @@ export default function Lanyard({
 }
 
 interface BandProps {
+    code: string;
     qrCode: string;
     eventTitle: string;
     areaName?: string;
@@ -90,6 +94,7 @@ interface BandProps {
 }
 
 function Band({
+    code,
     qrCode,
     eventTitle,
     areaName,
@@ -266,10 +271,11 @@ function Band({
                         onTouchEnd={() => drag(false)}
                     >
                         <DynamicCard3D
+                            code={code}
+                            qrCode={qrCode}
                             eventTitle={eventTitle}
                             areaName={areaName}
                             seatNumber={seatNumber}
-                            qrCode={qrCode}
                         />
                     </group>
                 </RigidBody>

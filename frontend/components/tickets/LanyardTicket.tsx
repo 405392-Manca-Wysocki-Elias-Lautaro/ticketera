@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Suspense, useEffect } from 'react';
 
 interface LanyardTicketProps {
+    code: string;
     qrCode: string;
     eventTitle: string;
     areaName?: string;
@@ -17,6 +18,7 @@ interface LanyardTicketProps {
 }
 
 export default function LanyardTicket({
+    code,
     qrCode,
     eventTitle,
     areaName,
@@ -77,10 +79,11 @@ export default function LanyardTicket({
                                 <Physics gravity={[0, -25, 0]} timeStep="vary">
                                     <Lanyard
                                         scale={1.2}
+                                        code={code}
+                                        qrCode={qrCode}
                                         eventTitle={eventTitle}
                                         areaName={areaName}
                                         seatNumber={seatNumber}
-                                        qrCode={qrCode}
                                     />
                                 </Physics>
 

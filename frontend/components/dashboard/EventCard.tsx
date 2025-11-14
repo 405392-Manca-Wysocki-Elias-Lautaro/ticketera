@@ -20,7 +20,7 @@ export function EventCard({ event }: EventCardProps) {
         // year: "numeric",
     })
 
-    const formattedHour = new Date(event.startsAt).toLocaleTimeString("es-ES", {
+    const formattedTime = new Date(event.startsAt).toLocaleTimeString("es-ES", {
         hour: "2-digit",
         minute: "2-digit",
     })
@@ -63,7 +63,7 @@ export function EventCard({ event }: EventCardProps) {
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4 shrink-0" />
                         <span className="line-clamp-1">
-                            {formattedDate} - {formattedHour}
+                            {formattedDate} - {formattedTime}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">

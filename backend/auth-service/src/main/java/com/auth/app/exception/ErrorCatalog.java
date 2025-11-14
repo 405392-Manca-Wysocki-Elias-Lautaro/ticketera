@@ -24,6 +24,10 @@ public enum ErrorCatalog {
             "Please verify your email address before signing in."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, ErrorCodes.INVALID_REFRESH_TOKEN,
             "Invalid or expired refresh token."),
+    MISSING_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, ErrorCodes.INVALID_REFRESH_TOKEN,
+            "Refresh token is missing or invalid"),
+    MISSING_REQUIRED_COOKIE(HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_COOKIE,
+            "Required cookie is missing"),
     // 📥 Validations
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, ErrorCodes.VALIDATION_FAILED,
             "One or more fields do not meet the required criteria."),
