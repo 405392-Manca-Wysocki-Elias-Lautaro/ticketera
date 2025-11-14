@@ -1,3 +1,10 @@
+# [1.0.0-next.6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.5...auth-v1.0.0-next.6) (2025-11-14)
+
+
+### Features
+
+* connect Checkout Pro with frontend ([e1cbf71](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/e1cbf71f9a7a8cb01cef2fb42c02a32d3c8ea140))
+
 # [1.0.0-next.5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.4...auth-v1.0.0-next.5) (2025-11-12)
 
 
