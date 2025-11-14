@@ -31,15 +31,15 @@ public class OrderItem {
     @NotNull
     private Order order;
     
-    @Column(name = "occurrence_id", nullable = false)
+    @Column(name = "event_id", nullable = false)
     @NotNull
-    private Long occurrenceId;
+    private Long eventId;
     
-    @Column(name = "event_venue_area_id")
-    private Long eventVenueAreaId;
+    @Column(name = "venue_area_id")
+    private Long venueAreaId;
     
-    @Column(name = "event_venue_seat_id")
-    private Long eventVenueSeatId;
+    @Column(name = "venue_seat_id")
+    private Long venueSeatId;
     
     @Column(name = "ticket_type_id", nullable = false)
     @NotNull
@@ -72,18 +72,18 @@ public class OrderItem {
     }
     
     public boolean isForSpecificSeat() {
-        return eventVenueSeatId != null;
+        return venueSeatId != null;
     }
     
     public boolean isGeneralAdmission() {
-        return eventVenueSeatId == null;
+        return venueSeatId == null;
     }
     
     public void validateSeatAndQuantity() {
-        if (eventVenueSeatId != null && quantity != 1) {
+        if (venueSeatId != null && quantity != 1) {
             throw new IllegalStateException("Specific seat items must have quantity = 1");
         }
-        if (eventVenueSeatId == null && quantity <= 0) {
+        if (venueSeatId == null && quantity <= 0) {
             throw new IllegalStateException("General admission items must have quantity > 0");
         }
     }

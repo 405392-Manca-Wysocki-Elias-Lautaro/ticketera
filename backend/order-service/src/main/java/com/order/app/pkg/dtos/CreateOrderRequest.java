@@ -75,10 +75,11 @@ public class CreateOrderRequest {
         @Size(max = 100, message = "Last name cannot exceed 100 characters")
         private String lastName;
         
-        @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Invalid phone number format")
+        // Aceptar formato internacional (+549...) o nacional (0351...)
+        @Pattern(regexp = "^(\\+?[1-9]\\d{1,14}|0\\d{9,14})$", message = "Invalid phone number format")
         private String phone;
         
-        private Long userId; // Optional, for registered users
+        private String userId; // Optional, for registered users (UUID string from auth-service)
         
         // Constructors
         public CustomerInfo() {}
@@ -96,18 +97,18 @@ public class CreateOrderRequest {
         public String getPhone() { return phone; }
         public void setPhone(String phone) { this.phone = phone; }
         
-        public Long getUserId() { return userId; }
-        public void setUserId(Long userId) { this.userId = userId; }
+        public String getUserId() { return userId; }
+        public void setUserId(String userId) { this.userId = userId; }
     }
     
     public static class OrderItemRequest {
-        @NotNull(message = "Occurrence ID is required")
-        @Positive(message = "Occurrence ID must be positive")
-        private Long occurrenceId;
+        @NotNull(message = "Event ID is required")
+        @Positive(message = "Event ID must be positive")
+        private Long eventId;
         
-        private Long eventVenueAreaId;
+        private Long venueAreaId;
         
-        private Long eventVenueSeatId;
+        private Long venueSeatId;
         
         @NotNull(message = "Ticket type ID is required")
         @Positive(message = "Ticket type ID must be positive")
@@ -125,14 +126,14 @@ public class CreateOrderRequest {
         public OrderItemRequest() {}
         
         // Getters and Setters
-        public Long getOccurrenceId() { return occurrenceId; }
-        public void setOccurrenceId(Long occurrenceId) { this.occurrenceId = occurrenceId; }
+        public Long getEventId() { return eventId; }
+        public void setEventId(Long eventId) { this.eventId = eventId; }
         
-        public Long getEventVenueAreaId() { return eventVenueAreaId; }
-        public void setEventVenueAreaId(Long eventVenueAreaId) { this.eventVenueAreaId = eventVenueAreaId; }
+        public Long getVenueAreaId() { return venueAreaId; }
+        public void setVenueAreaId(Long venueAreaId) { this.venueAreaId = venueAreaId; }
         
-        public Long getEventVenueSeatId() { return eventVenueSeatId; }
-        public void setEventVenueSeatId(Long eventVenueSeatId) { this.eventVenueSeatId = eventVenueSeatId; }
+        public Long getVenueSeatId() { return venueSeatId; }
+        public void setVenueSeatId(Long venueSeatId) { this.venueSeatId = venueSeatId; }
         
         public Long getTicketTypeId() { return ticketTypeId; }
         public void setTicketTypeId(Long ticketTypeId) { this.ticketTypeId = ticketTypeId; }
@@ -145,7 +146,7 @@ public class CreateOrderRequest {
         
         // Validation method
         public void validate() {
-            if (eventVenueSeatId != null && quantity != 1) {
+            if (venueSeatId != null && quantity != 1) {
                 throw new IllegalArgumentException("Specific seat items must have quantity = 1");
             }
         }

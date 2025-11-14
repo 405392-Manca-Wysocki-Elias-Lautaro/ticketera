@@ -82,7 +82,7 @@ public class OrderResponse {
         private String firstName;
         private String lastName;
         private String phone;
-        private Long userId;
+        private String userId; // UUID string from auth-service
         
         public static CustomerResponse fromEntity(com.order.app.models.Customer customer) {
             return CustomerResponse.builder()
@@ -111,9 +111,9 @@ public class OrderResponse {
     @Builder
     public static class OrderItemResponse {
         private Long id;
-        private Long occurrenceId;
-        private Long eventVenueAreaId;
-        private Long eventVenueSeatId;
+        private Long eventId;
+        private Long venueAreaId;
+        private Long venueSeatId;
         private Long ticketTypeId;
         private Long unitPriceCents;
         private Integer quantity;
@@ -122,9 +122,9 @@ public class OrderResponse {
         public static OrderItemResponse fromEntity(OrderItem item) {
             return OrderItemResponse.builder()
                 .id(item.getId())
-                .occurrenceId(item.getOccurrenceId())
-                .eventVenueAreaId(item.getEventVenueAreaId())
-                .eventVenueSeatId(item.getEventVenueSeatId())
+                .eventId(item.getEventId())
+                .venueAreaId(item.getVenueAreaId())
+                .venueSeatId(item.getVenueSeatId())
                 .ticketTypeId(item.getTicketTypeId())
                 .unitPriceCents(item.getUnitPriceCents())
                 .quantity(item.getQuantity())
@@ -133,7 +133,7 @@ public class OrderResponse {
         }
         
         public boolean isForSpecificSeat() {
-            return eventVenueSeatId != null;
+            return venueSeatId != null;
         }
     }
 }

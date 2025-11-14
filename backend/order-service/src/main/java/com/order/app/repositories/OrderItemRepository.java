@@ -14,20 +14,20 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     
     List<OrderItem> findByOrderIdAndDeletedAtIsNull(Long orderId);
     
-    List<OrderItem> findByOccurrenceIdAndDeletedAtIsNull(Long occurrenceId);
+    List<OrderItem> findByEventIdAndDeletedAtIsNull(Long eventId);
     
     List<OrderItem> findByTicketTypeIdAndDeletedAtIsNull(Long ticketTypeId);
     
-    Optional<OrderItem> findByOrderIdAndEventVenueSeatIdAndDeletedAtIsNull(Long orderId, Long eventVenueSeatId);
+    Optional<OrderItem> findByOrderIdAndVenueSeatIdAndDeletedAtIsNull(Long orderId, Long venueSeatId);
     
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.order.id = :orderId AND oi.eventVenueSeatId = :seatId AND oi.deletedAt IS NULL")
+    @Query("SELECT oi FROM OrderItem oi WHERE oi.order.id = :orderId AND oi.venueSeatId = :seatId AND oi.deletedAt IS NULL")
     Optional<OrderItem> findByOrderAndSeat(@Param("orderId") Long orderId, @Param("seatId") Long seatId);
     
-    @Query("SELECT COUNT(oi) FROM OrderItem oi WHERE oi.occurrenceId = :occurrenceId AND oi.eventVenueSeatId = :seatId AND oi.deletedAt IS NULL")
-    Long countBySeatAndOccurrence(@Param("occurrenceId") Long occurrenceId, @Param("seatId") Long seatId);
+    @Query("SELECT COUNT(oi) FROM OrderItem oi WHERE oi.eventId = :eventId AND oi.venueSeatId = :seatId AND oi.deletedAt IS NULL")
+    Long countBySeatAndEvent(@Param("eventId") Long eventId, @Param("seatId") Long seatId);
     
-    @Query("SELECT SUM(oi.quantity) FROM OrderItem oi WHERE oi.occurrenceId = :occurrenceId AND oi.ticketTypeId = :ticketTypeId AND oi.deletedAt IS NULL")
-    Long sumQuantityByOccurrenceAndTicketType(@Param("occurrenceId") Long occurrenceId, @Param("ticketTypeId") Long ticketTypeId);
+    @Query("SELECT SUM(oi.quantity) FROM OrderItem oi WHERE oi.eventId = :eventId AND oi.ticketTypeId = :ticketTypeId AND oi.deletedAt IS NULL")
+    Long sumQuantityByEventAndTicketType(@Param("eventId") Long eventId, @Param("ticketTypeId") Long ticketTypeId);
     
-    boolean existsByEventVenueSeatIdAndDeletedAtIsNull(Long eventVenueSeatId);
+    boolean existsByVenueSeatIdAndDeletedAtIsNull(Long venueSeatId);
 }

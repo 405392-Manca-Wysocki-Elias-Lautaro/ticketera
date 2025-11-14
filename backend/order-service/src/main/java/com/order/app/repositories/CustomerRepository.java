@@ -13,15 +13,15 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     
     Optional<Customer> findByEmailAndDeletedAtIsNull(String email);
     
-    Optional<Customer> findByUserIdAndDeletedAtIsNull(Long userId);
+    Optional<Customer> findByUserIdAndDeletedAtIsNull(String userId);
     
     @Query("SELECT c FROM Customer c WHERE c.email = :email AND c.deletedAt IS NULL")
     Optional<Customer> findActiveByEmail(@Param("email") String email);
     
     @Query("SELECT c FROM Customer c WHERE c.userId = :userId AND c.deletedAt IS NULL")
-    Optional<Customer> findActiveByUserId(@Param("userId") Long userId);
+    Optional<Customer> findActiveByUserId(@Param("userId") String userId);
     
     boolean existsByEmailAndDeletedAtIsNull(String email);
     
-    boolean existsByUserIdAndDeletedAtIsNull(Long userId);
+    boolean existsByUserIdAndDeletedAtIsNull(String userId);
 }

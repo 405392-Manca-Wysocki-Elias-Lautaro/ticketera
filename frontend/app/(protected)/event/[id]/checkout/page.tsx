@@ -9,13 +9,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ArrowLeft, CreditCard, Lock, ChevronDown, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, ChevronDown, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { mockEvents } from '@/mocks/mockEvents'
 import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
+import { useMercadoPagoCheckout } from '@/hooks/useMercadoPagoCheckout'
+import { orderService } from '@/services/orderService'
+import type { CreateOrderRequest } from '@/types/Order'
+import { toast } from 'sonner'
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -24,10 +28,7 @@ export default function CheckoutPage() {
     const { user, isLoading } = useAuth()
     const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
     const [isProcessing, setIsProcessing] = useState(false)
-
-    const [cardNumber, setCardNumber] = useState("")
-    const [expiry, setExpiry] = useState("")
-    const [cvv, setCvv] = useState("")
+    const [preferenceId, setPreferenceId] = useState<string | undefined>()
     const [phone, setPhone] = useState("")
     const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -39,7 +40,7 @@ export default function CheckoutPage() {
     const selectedArea = event?.areas.find((a) => a.id === areaId)
 
     const parsedSeats = seats
-        ? seats.split(",").map((s) => {
+        ? seats.split(",").map((s: string) => {
             const [row, seat] = s.split("-")
             return { row, seat: Number(seat) }
         })
@@ -48,86 +49,43 @@ export default function CheckoutPage() {
     const serviceFee = Math.round(total * 0.1)
     const finalTotal = total + serviceFee
 
+    // Hook de Mercado Pago
+    const { isSDKReady, isLoading: isMPLoading, renderPaymentButton } = useMercadoPagoCheckout({
+        preferenceId,
+        onReady: () => {
+            console.log("Botón de Mercado Pago renderizado exitosamente");
+        },
+        onError: (error) => {
+            console.error("Error en Mercado Pago:", error);
+            toast.error("Error al cargar el botón de pago");
+        },
+    });
+
     useEffect(() => {
         if (!isLoading && !user) {
             router.push("/login")
         }
     }, [user, isLoading, router])
 
-    const validateCardNumber = (value: string) => {
-        const cleaned = value.replace(/\s/g, "")
-        if (cleaned.length !== 16 || !/^\d+$/.test(cleaned)) {
-            return "Número de tarjeta inválido (16 dígitos)"
+    // Renderizar el botón cuando el SDK esté listo y tengamos el preferenceId
+    useEffect(() => {
+        if (isSDKReady && preferenceId) {
+            renderPaymentButton("wallet-container");
         }
-        return ""
-    }
-
-    const validateExpiry = (value: string) => {
-        if (!/^\d{2}\/\d{2}$/.test(value)) {
-            return "Formato inválido (MM/AA)"
-        }
-        const [month, year] = value.split("/").map(Number)
-        if (month < 1 || month > 12) {
-            return "Mes inválido"
-        }
-        const currentYear = new Date().getFullYear() % 100
-        const currentMonth = new Date().getMonth() + 1
-        if (year < currentYear || (year === currentYear && month < currentMonth)) {
-            return "Tarjeta vencida"
-        }
-        return ""
-    }
-
-    const validateCVV = (value: string) => {
-        if (!/^\d{3,4}$/.test(value)) {
-            return "CVV inválido (3-4 dígitos)"
-        }
-        return ""
-    }
+    }, [isSDKReady, preferenceId, renderPaymentButton]);
 
     const validatePhone = (value: string) => {
-        const cleaned = value.replace(/[\s\-$$$$]/g, "")
+        const cleaned = value.replace(/[\s\-()]/g, "")
         if (cleaned.length < 10 || !/^\+?\d+$/.test(cleaned)) {
             return "Teléfono inválido"
         }
         return ""
     }
 
-    const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.replace(/\s/g, "")
-        if (value.length <= 16 && /^\d*$/.test(value)) {
-            const formatted = value.match(/.{1,4}/g)?.join(" ") || value
-            setCardNumber(formatted)
-            if (errors.cardNumber) {
-                setErrors((prev) => ({ ...prev, cardNumber: "" }))
-            }
-        }
-    }
-
-    const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value.replace(/\D/g, "")
-        if (value.length >= 2) {
-            value = value.slice(0, 2) + "/" + value.slice(2, 4)
-        }
-        setExpiry(value)
-        if (errors.expiry) {
-            setErrors((prev) => ({ ...prev, expiry: "" }))
-        }
-    }
-
-    const handlePayment = async (e: React.FormEvent) => {
+    const handleCreateOrder = async (e: React.FormEvent) => {
         e.preventDefault()
 
         const newErrors: Record<string, string> = {}
-
-        const cardError = validateCardNumber(cardNumber)
-        if (cardError) newErrors.cardNumber = cardError
-
-        const expiryError = validateExpiry(expiry)
-        if (expiryError) newErrors.expiry = expiryError
-
-        const cvvError = validateCVV(cvv)
-        if (cvvError) newErrors.cvv = cvvError
 
         const phoneError = validatePhone(phone)
         if (phoneError) newErrors.phone = phoneError
@@ -139,11 +97,79 @@ export default function CheckoutPage() {
 
         setIsProcessing(true)
 
-        // Simulate payment processing
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        try {
+            if (!user || !event || !selectedArea) {
+                throw new Error("Información incompleta");
+            }
 
-        // Redirect to success page
-        router.push(`/event/${event?.id}/success`)
+            // Construir los items de la orden con datos reales
+            // Convertir IDs de string a number para el backend
+            const eventIdNum = parseInt(event.id) || 1;
+            const areaIdNum = parseInt(areaId || "1");
+            
+            const items = parsedSeats.length > 0
+                ? parsedSeats.map((seat: { row: string; seat: number }) => {
+                    // Generar un ID único para el asiento basado en fila y número
+                    // Ej: Fila "A" = 1, asiento 5 = 105
+                    const rowCode = seat.row.charCodeAt(0) - 64; // A=1, B=2, etc
+                    const seatId = rowCode * 100 + seat.seat;
+                    
+                    return {
+                        eventId: eventIdNum,
+                        venueAreaId: areaIdNum,
+                        venueSeatId: seatId,
+                        ticketTypeId: 1, // 1 = adulto estándar
+                        unitPriceCents: selectedArea.price * 100,
+                        quantity: 1,
+                    };
+                })
+                : [{
+                    // Área general (sin asiento específico)
+                    eventId: eventIdNum,
+                    venueAreaId: areaIdNum,
+                    venueSeatId: undefined,
+                    ticketTypeId: 1, // 1 = adulto estándar
+                    unitPriceCents: selectedArea.price * 100,
+                    quantity: parseInt(quantity || "1"),
+                }];
+
+            // Crear el request de la orden
+            const orderRequest: CreateOrderRequest = {
+                customer: {
+                    email: user.email,
+                    firstName: user.firstName || "Usuario",
+                    lastName: user.lastName || "Apellido",
+                    phone: phone,
+                    userId: user.id, // UUID del usuario desde auth-service
+                },
+                organizerId: parseInt(event.id) || 1, // Usar el mismo ID del evento como organizerId temporal
+                items: items,
+                currency: "ARS",
+                paymentDescription: `Entradas para ${event.title}`,
+                notes: `Compra de ${items.length} entrada(s) para ${event.title} - ${selectedArea.name}`,
+            };
+
+            console.log("Creando orden:", orderRequest);
+
+            // Crear la orden y obtener la URL de pago
+            const orderResponse = await orderService.createOrder(orderRequest);
+
+            console.log("Orden creada:", orderResponse);
+
+            if (orderResponse.paymentUrl) {
+                // Si el backend devuelve una URL directa, redirigir
+                toast.success("Redirigiendo a Mercado Pago...");
+                window.location.href = orderResponse.paymentUrl;
+            } else {
+                toast.error("No se pudo obtener la URL de pago");
+            }
+
+        } catch (error: any) {
+            console.error("Error creando orden:", error);
+            toast.error(error.response?.data?.message || "Error al procesar el pago");
+        } finally {
+            setIsProcessing(false);
+        }
     }
 
     if (isLoading || !user || !event || !selectedArea) {
@@ -171,76 +197,44 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Payment Form */}
                     <div className="md:col-span-2">
-                        <form onSubmit={handlePayment} className="space-y-6">
+                        <form onSubmit={handleCreateOrder} className="space-y-6">
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <CreditCard className="h-5 w-5" />
-                                        Información de Pago
+                                        Información de Contacto
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-                                        <Input
-                                            id="cardNumber"
-                                            placeholder="1234 5678 9012 3456"
-                                            value={cardNumber}
-                                            onChange={handleCardNumberChange}
-                                            maxLength={19}
-                                            required
-                                        />
-                                        {errors.cardNumber && <p className="text-sm text-destructive">{errors.cardNumber}</p>}
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="expiry">Vencimiento</Label>
-                                            <Input
-                                                id="expiry"
-                                                placeholder="MM/AA"
-                                                value={expiry}
-                                                onChange={handleExpiryChange}
-                                                maxLength={5}
-                                                required
-                                            />
-                                            {errors.expiry && <p className="text-sm text-destructive">{errors.expiry}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="cvv">CVV</Label>
-                                            <Input
-                                                id="cvv"
-                                                placeholder="123"
-                                                value={cvv}
-                                                onChange={(e) => {
-                                                    const value = e.target.value
-                                                    if (/^\d*$/.test(value) && value.length <= 4) {
-                                                        setCvv(value)
-                                                        if (errors.cvv) setErrors((prev) => ({ ...prev, cvv: "" }))
-                                                    }
-                                                }}
-                                                maxLength={4}
-                                                required
-                                            />
-                                            {errors.cvv && <p className="text-sm text-destructive">{errors.cvv}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
-                                        <Input id="cardName" placeholder="Juan Pérez" required />
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Información de Contacto</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
                                         <Label htmlFor="email">Email</Label>
-                                        <Input id="email" type="email" defaultValue={user.email} required />
+                                        <Input 
+                                            id="email" 
+                                            type="email" 
+                                            defaultValue={user.email} 
+                                            disabled
+                                            className="bg-muted"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="firstName">Nombre</Label>
+                                        <Input 
+                                            id="firstName" 
+                                            defaultValue={user.firstName || ""} 
+                                            disabled
+                                            className="bg-muted"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="lastName">Apellido</Label>
+                                        <Input 
+                                            id="lastName" 
+                                            defaultValue={user.lastName || ""} 
+                                            disabled
+                                            className="bg-muted"
+                                        />
                                     </div>
 
                                     <div className="space-y-2">
@@ -261,25 +255,48 @@ export default function CheckoutPage() {
                                 </CardContent>
                             </Card>
 
-                            <StarBorder className='w-full'>
-                                <Button type="submit" className="w-full gradient-brand text-white" size="lg" disabled={isProcessing}>
-                                    {isProcessing ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Lock className="mr-2 h-4 w-4" />
-                                            Pagar ${finalTotal.toLocaleString()}
-                                        </>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Método de Pago</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="text-sm text-muted-foreground mb-4">
+                                        Serás redirigido a Mercado Pago para completar tu pago de forma segura.
+                                    </div>
+
+                                    {/* Contenedor para el botón de Mercado Pago */}
+                                    {preferenceId && (
+                                        <div id="wallet-container" className="min-h-[48px]"></div>
                                     )}
-                                </Button>
-                            </StarBorder>
 
+                                    <StarBorder className='w-full'>
+                                        <Button 
+                                            type="submit" 
+                                            className="w-full gradient-brand text-white" 
+                                            size="lg" 
+                                            disabled={isProcessing}
+                                        >
+                                            {isProcessing ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Procesando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Continuar con el pago
+                                                </>
+                                            )}
+                                        </Button>
+                                    </StarBorder>
+                                </CardContent>
+                            </Card>
 
-                            <p className="text-xs text-center text-muted-foreground">
-                                Tu pago está protegido con encriptación de nivel bancario
-                            </p>
+                            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                                <span>Pago seguro procesado por Mercado Pago</span>
+                            </div>
                         </form>
                     </div>
 
@@ -318,7 +335,7 @@ export default function CheckoutPage() {
                                             </div>
                                             {parsedSeats.length <= 3 ? (
                                                 <div className="space-y-1 pl-4">
-                                                    {parsedSeats.map((seat, idx) => (
+                                                    {parsedSeats.map((seat: { row: string; seat: number }, idx: number) => (
                                                         <p key={idx} className="text-xs text-muted-foreground">
                                                             Fila {seat.row} - Asiento {seat.seat}
                                                         </p>
@@ -327,7 +344,7 @@ export default function CheckoutPage() {
                                             ) : (
                                                 <Collapsible>
                                                     <div className="space-y-1 pl-4">
-                                                        {parsedSeats.slice(0, 2).map((seat, idx) => (
+                                                        {parsedSeats.slice(0, 2).map((seat: { row: string; seat: number }, idx: number) => (
                                                             <p key={idx} className="text-xs text-muted-foreground">
                                                                 Fila {seat.row} - Asiento {seat.seat}
                                                             </p>
@@ -340,7 +357,7 @@ export default function CheckoutPage() {
                                                         </Button>
                                                     </CollapsibleTrigger>
                                                     <CollapsibleContent className="space-y-1 pl-4 mt-1">
-                                                        {parsedSeats.slice(2).map((seat, idx) => (
+                                                        {parsedSeats.slice(2).map((seat: { row: string; seat: number }, idx: number) => (
                                                             <p key={idx} className="text-xs text-muted-foreground">
                                                                 Fila {seat.row} - Asiento {seat.seat}
                                                             </p>

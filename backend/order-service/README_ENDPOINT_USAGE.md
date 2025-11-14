@@ -24,9 +24,9 @@ Crea una nueva orden de compra y procesa el pago automáticamente.
   "organizerId": 456,
   "items": [
     {
-      "occurrenceId": 789,
-      "eventVenueAreaId": 101,
-      "eventVenueSeatId": 202,
+      "eventId": 789,
+      "venueAreaId": 101,
+      "venueSeatId": 202,
       "ticketTypeId": 303,
       "unitPriceCents": 5000,
       "quantity": 1
@@ -66,9 +66,9 @@ Crea una nueva orden de compra y procesa el pago automáticamente.
   "items": [
     {
       "id": 1,
-      "occurrenceId": 789,
-      "eventVenueAreaId": 101,
-      "eventVenueSeatId": 202,
+      "eventId": 789,
+      "venueAreaId": 101,
+      "venueSeatId": 202,
       "ticketTypeId": 303,
       "unitPriceCents": 5000,
       "quantity": 1,

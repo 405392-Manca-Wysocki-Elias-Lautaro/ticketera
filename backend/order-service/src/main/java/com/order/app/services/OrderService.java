@@ -165,9 +165,9 @@ public class OrderService {
             item.validate();
             
             // Validar que el asiento no esté ya reservado
-            if (item.getEventVenueSeatId() != null) {
-                if (orderItemRepository.existsByEventVenueSeatIdAndDeletedAtIsNull(item.getEventVenueSeatId())) {
-                    throw new IllegalArgumentException("Seat already reserved: " + item.getEventVenueSeatId());
+            if (item.getVenueSeatId() != null) {
+                if (orderItemRepository.existsByVenueSeatIdAndDeletedAtIsNull(item.getVenueSeatId())) {
+                    throw new IllegalArgumentException("Seat already reserved: " + item.getVenueSeatId());
                 }
             }
         }
@@ -262,18 +262,18 @@ public class OrderService {
             .map(itemRequest -> {
                 OrderItem item = OrderItem.builder()
                     .order(order)
-                    .occurrenceId(itemRequest.getOccurrenceId())
+                    .eventId(itemRequest.getEventId())
                     .ticketTypeId(itemRequest.getTicketTypeId())
                     .unitPriceCents(itemRequest.getUnitPriceCents())
                     .quantity(itemRequest.getQuantity())
                     .build();
                 
-                if (itemRequest.getEventVenueAreaId() != null) {
-                    item.setEventVenueAreaId(itemRequest.getEventVenueAreaId());
+                if (itemRequest.getVenueAreaId() != null) {
+                    item.setVenueAreaId(itemRequest.getVenueAreaId());
                 }
                 
-                if (itemRequest.getEventVenueSeatId() != null) {
-                    item.setEventVenueSeatId(itemRequest.getEventVenueSeatId());
+                if (itemRequest.getVenueSeatId() != null) {
+                    item.setVenueSeatId(itemRequest.getVenueSeatId());
                 }
                 
                 // No guardamos aquí - se guardará automáticamente con cascade cuando se guarde la Order

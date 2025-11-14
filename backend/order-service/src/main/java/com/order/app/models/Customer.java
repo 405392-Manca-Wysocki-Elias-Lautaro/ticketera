@@ -40,8 +40,8 @@ public class Customer {
     
     private String phone;
     
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "user_id", length = 36)
+    private String userId; // UUID string from auth-service
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

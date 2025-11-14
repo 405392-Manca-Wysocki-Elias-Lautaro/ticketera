@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ReactQueryProvider from '@/components/providers/QueryClientProvider';
 import { Toaster } from 'sonner';
@@ -29,14 +30,23 @@ export default function RootLayout({
     if (process.env.NODE_ENV !== "production") showBrandConsoleMessage();
 
     return (
-        <html lang="es">
-            <body className={`${geist.className} antialiased bg-background text-foreground overflow-hidden`}>
+        <html lang="es" suppressHydrationWarning>
+            <body 
+                className={`${geist.className} antialiased bg-background text-foreground overflow-hidden`}
+                suppressHydrationWarning
+            >
                 <Toaster position="top-center" richColors />
                 <ReactQueryProvider>
                     <TooltipProvider>
                         {children}
                     </TooltipProvider>
                 </ReactQueryProvider>
+                
+                {/* Mercado Pago SDK - Al final del body */}
+                <Script 
+                    src="https://sdk.mercadopago.com/js/v2" 
+                    strategy="lazyOnload"
+                />
             </body>
         </html>
     );
