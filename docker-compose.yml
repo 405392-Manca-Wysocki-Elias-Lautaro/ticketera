@@ -153,7 +153,6 @@ services:
       SPRING_FLYWAY_DEFAULT_SCHEMA: ${AUTH_DB_SCHEMA:-auth-dev}
       SPRING_FLYWAY_CREATE_SCHEMAS: "true"
       FRONTEND_URL: ${FRONTEND_URL}
-      NOTIFICATION_URL: ${NOTIFICATION_URL}
       JWT_PRIVATE_KEY: /app/keys/jwtRS256.key
       JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
       RABBITMQ_HOST: rabbitmq
@@ -247,6 +246,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
+      EVENT_URL: ${EVENT_DEV:-http://event-dev:8080}
     depends_on:
       postgres:
         condition: service_healthy

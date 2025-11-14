@@ -61,8 +61,9 @@ public class TicketController {
 
     // 👤 Get tickets by user ID
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getByUserId(@PathVariable UUID userId) {
-        List<TicketModel> tickets = ticketService.getByUserId(userId);
+    public ResponseEntity<?> getByUserId() {
+        
+        List<TicketModel> tickets = ticketService.getByUserId();
 
         return ApiResponseFactory.success("User tickets retrieved successfully.", tickets);
     }

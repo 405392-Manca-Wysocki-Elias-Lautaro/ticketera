@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useAuthStore } from "@/lib/store"
 import { handleApiError } from "@/utils/handleApiError"
+import { authService } from '@/services/authService'
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -26,14 +27,10 @@ api.interceptors.response.use(
         if (status === 401 && !originalRequest._retry && data.data.code != "INVALID_CREDENTIALS") {
             originalRequest._retry = true
             try {
-                const { data } = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-                    {},
-                    { withCredentials: true }
-                )
+                const { data } = await authService.refresh();
 
-                const newAccessToken = data.accessToken
-                useAuthStore.getState().setToken(newAccessToken)
+                const newAccessToken = data?.data?.accessToken;
+                useAuthStore.getState().setToken(newAccessToken);
 
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
                 return api(originalRequest)

@@ -18,7 +18,7 @@ public class TicketResponse {
     private UUID id;
 
     private UUID orderItemId;
-    private UUID occurrenceId;
+    private UUID eventId;
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;
     private UUID userId;
@@ -31,4 +31,6 @@ public class TicketResponse {
     private OffsetDateTime checkedInAt;
     private OffsetDateTime canceledAt;
     private OffsetDateTime refundedAt;
+
+    private EventResponse event;
 }

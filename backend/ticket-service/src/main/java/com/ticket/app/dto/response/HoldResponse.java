@@ -10,7 +10,7 @@ import lombok.Data;
 public class HoldResponse {
     private UUID id;
     private UUID customerId;
-    private UUID occurrenceId;
+    private UUID eventId;
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;
     private Integer quantity;

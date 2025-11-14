@@ -1,6 +1,8 @@
 package com.ticket.app.services.impl;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,10 +10,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.ticket.app.clients.EventClient;
 import com.ticket.app.domain.entities.Ticket;
 import com.ticket.app.domain.entities.TicketStatusHistory;
 import com.ticket.app.domain.enums.HoldStatus;
 import com.ticket.app.domain.enums.TicketStatus;
+import com.ticket.app.domain.enums.UserRole;
+import com.ticket.app.domain.models.AreaModel;
+import com.ticket.app.domain.models.EventModel;
 import com.ticket.app.domain.models.TicketModel;
 import com.ticket.app.dto.request.TicketGenerateRequest;
 import com.ticket.app.exception.exceptions.InvalidTicketStatusException;
@@ -25,8 +32,12 @@ import com.ticket.app.repositories.TicketStatusHistoryRepository;
 import com.ticket.app.services.TicketService;
 import com.ticket.app.utils.JwtUtils;
 import com.ticket.app.utils.QrGeneratorUtil;
+import com.ticket.app.utils.RoleUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
@@ -34,19 +45,22 @@ public class TicketServiceImpl implements TicketService {
     private final HoldRepository holdRepository;
     private final ModelMapper modelMapper;
     private final JwtUtils jwtUtils;
+    private final EventClient eventClient;
 
     public TicketServiceImpl(
             TicketRepository ticketRepository,
             TicketStatusHistoryRepository historyRepository,
             HoldRepository holdRepository,
             ModelMapper modelMapper,
-            JwtUtils jwtUtils
+            JwtUtils jwtUtils,
+            EventClient eventClient
     ) {
         this.ticketRepository = ticketRepository;
         this.historyRepository = historyRepository;
         this.holdRepository = holdRepository;
         this.modelMapper = modelMapper;
         this.jwtUtils = jwtUtils;
+        this.eventClient = eventClient;
     }
 
     // ------------------------------------------------------------
@@ -57,7 +71,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketModel generateTicket(TicketGenerateRequest request) {
         try {
             // 1️⃣ Convert hold if exists
-            holdRepository.findActiveByOccurrenceId(request.getOccurrenceId())
+            holdRepository.findActiveByeventId(request.getEventId())
                     .ifPresent(hold -> {
                         hold.setStatus(HoldStatus.CONVERTED);
                         hold.setUpdatedAt(OffsetDateTime.now());
@@ -72,7 +86,9 @@ public class TicketServiceImpl implements TicketService {
             // 3️⃣ Create ticket
             TicketModel model = new TicketModel();
             model.setOrderItemId(request.getOrderItemId());
-            model.setOccurrenceId(request.getOccurrenceId());
+            model.setEventId(request.getEventId());
+            model.setEventVenueAreaId(request.getEventVenueAreaId());
+            model.setEventVenueSeatId(request.getEventVenueSeatId());
             model.setUserId(jwtUtils.getUserId());
             model.setCode("TCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             model.setQrToken(UUID.randomUUID().toString());
@@ -99,7 +115,7 @@ public class TicketServiceImpl implements TicketService {
 
             TicketModel response = modelMapper.map(saved, TicketModel.class);
             response.setQrBase64(model.getQrBase64());
-            return response;
+            return this.getById(response.getId());
 
         } catch (Exception e) {
             throw new RuntimeException("Error generating ticket: " + e.getMessage(), e);
@@ -112,6 +128,13 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public TicketModel validateByQrToken(String qrToken) {
+
+        UserRole role = jwtUtils.getRole();
+
+        if (!RoleUtil.isPrivileged(role)) {
+            throw new UnauthorizedTicketAccessException();
+        }
+
         Ticket entity = ticketRepository.findByQrToken(qrToken)
                 .orElseThrow(TicketNotFoundException::new);
         return validateAndUpdate(entity);
@@ -129,11 +152,9 @@ public class TicketServiceImpl implements TicketService {
     private TicketModel validateAndUpdate(Ticket entity) {
 
         UUID currentUserId = jwtUtils.getUserId();
-        String role = jwtUtils.getRole();
+        UserRole role = jwtUtils.getRole();
 
-        List<String> allowedRoles = List.of("STAFF", "ADMIN", "SUPER_ADMIN");
-
-        if (!entity.getUserId().equals(currentUserId) && !allowedRoles.contains(role)) {
+        if (!entity.getUserId().equals(currentUserId) && !RoleUtil.isPrivileged(role)) {
             throw new UnauthorizedTicketAccessException();
         }
 
@@ -180,11 +201,92 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional(readOnly = true)
     public TicketModel getById(UUID id) {
+
+        UserRole role = jwtUtils.getRole();
+        if (!RoleUtil.hasAnyRole(role, UserRole.SUPER_ADMIN)) {
+            throw new UnauthorizedTicketAccessException();
+        }
+
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(TicketNotFoundException::new);
 
-        TicketModel model = modelMapper.map(ticket, TicketModel.class);
-        return model;
+        TicketModel ticketModel = modelMapper.map(ticket, TicketModel.class);
+
+        JsonNode eventJson = eventClient.getEventById(ticket.getEventId());
+        JsonNode eventData = eventJson.get("data");
+
+        if (eventData == null) {
+            throw new RuntimeException("Event service returned null data");
+        }
+
+        List<AreaModel> areas = new ArrayList<>();
+
+        if (eventData.has("areas") && eventData.get("areas").isArray()) {
+            for (JsonNode areaNodeJson : eventData.get("areas")) {
+                AreaModel area = AreaModel.builder()
+                        .id(areaNodeJson.get("id").asText())
+                        .name(areaNodeJson.get("name").asText())
+                        .isGeneralAdmission(areaNodeJson.get("isGeneralAdmission").asBoolean())
+                        .capacity(areaNodeJson.get("capacity").asInt())
+                        .position(areaNodeJson.get("position").asInt())
+                        .priceCents(new BigDecimal(areaNodeJson.get("priceCents").asText()))
+                        .currency(areaNodeJson.get("currency").asText())
+                        .availableTickets(areaNodeJson.get("availableTickets").asInt())
+                        .totalSeats(areaNodeJson.get("totalSeats").asInt())
+                        .build();
+
+                areas.add(area);
+            }
+        }
+        log.info("areas: {}", areas);
+        
+
+        log.info("eventVenueAreaId: {}", ticket.getEventVenueAreaId());
+
+
+        AreaModel selectedArea = null;
+
+        if (ticket.getEventVenueAreaId() != null) {
+            String areaId = ticket.getEventVenueAreaId().toString();
+
+            selectedArea = areas.stream()
+                    .filter(a -> a.getId().equals(areaId))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        log.info("area: {}", selectedArea);
+
+        EventModel eventModel = EventModel.builder()
+                .eventTitle(eventData.get("title").asText())
+                .eventDescription(eventData.get("description").asText())
+                .venueName(eventData.get("venueName").asText())
+                .addressLine(eventData.get("addressLine").asText())
+                .city(eventData.get("city").asText())
+                .state(eventData.get("state").asText())
+                .country(eventData.get("country").asText())
+                .categoryName(eventData.get("categoryName").asText())
+                .startsAt(eventData.get("startsAt").asText())
+                .endsAt(eventData.get("endsAt").asText())
+                .area(selectedArea)
+                .build();
+
+        return TicketModel.builder()
+                .id(ticketModel.getId())
+                .orderItemId(ticketModel.getOrderItemId())
+                .eventId(ticketModel.getEventId())
+                .eventVenueAreaId(ticketModel.getEventVenueAreaId())
+                .eventVenueSeatId(ticketModel.getEventVenueSeatId())
+                .userId(ticketModel.getUserId())
+                .code(ticketModel.getCode())
+                .qrBase64(ticketModel.getQrBase64())
+                .status(ticketModel.getStatus())
+                .issuedAt(ticketModel.getIssuedAt())
+                .checkedInAt(ticketModel.getCheckedInAt())
+                .canceledAt(ticketModel.getCanceledAt())
+                .refundedAt(ticketModel.getRefundedAt())
+                .event(eventModel)
+                .build();
     }
 
     // ------------------------------------------------------------
@@ -192,7 +294,10 @@ public class TicketServiceImpl implements TicketService {
     // ------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
-    public List<TicketModel> getByUserId(UUID userId) {
+    public List<TicketModel> getByUserId() {
+
+        UUID userId = jwtUtils.getUserId();
+
         List<Ticket> tickets = ticketRepository.findByUserId(userId);
 
         return tickets.stream()

@@ -22,7 +22,7 @@ export function useAuth() {
             toast.warning("Sesión cerrada localmente");
         } finally {
             localLogout();
-            router.push("/login");
+            router.push("/dashboard");
         }
     }
 

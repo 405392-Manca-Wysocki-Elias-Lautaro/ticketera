@@ -16,9 +16,10 @@ public class TicketGenerateRequest {
     @NotNull(message = "The field 'orderItemId' is required.")
     private UUID orderItemId;
 
-    @NotNull(message = "The field 'occurrenceId' is required.")
-    private UUID occurrenceId;
+    @NotNull(message = "The field 'eventId' is required.")
+    private UUID eventId;
 
+    @NotNull(message = "The field 'eventVenueAreaId' is required.")
     private UUID eventVenueAreaId;
 
     private UUID eventVenueSeatId;

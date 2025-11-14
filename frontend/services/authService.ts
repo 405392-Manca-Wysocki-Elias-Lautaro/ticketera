@@ -29,7 +29,6 @@ export const authService = {
         `${BASE_URL}/verify`, null, { params: { token } }
     ),
 
-
     forgotPassword: (email: string) => api.post<ApiResponse<AuthResponse>>(
         `${BASE_URL}/forgot-password`, { email }
     ),
@@ -46,4 +45,7 @@ export const authService = {
         `${BASE_URL}/me`
     ),
 
+    refresh: () => api.post<ApiResponse<AuthResponse>>(
+        `${BASE_URL}/refresh`
+    ),
 };

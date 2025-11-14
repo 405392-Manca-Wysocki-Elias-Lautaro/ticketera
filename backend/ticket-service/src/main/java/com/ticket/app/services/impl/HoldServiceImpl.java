@@ -32,7 +32,7 @@ public class HoldServiceImpl implements HoldService {
     // ------------------------------------------------------------
     @Override
     @Transactional
-    public Hold createHold(UUID customerId, UUID occurrenceId, UUID areaId, UUID seatId, Integer quantity) {
+    public Hold createHold(UUID customerId, UUID eventId, UUID areaId, UUID seatId, Integer quantity) {
         // 🎯 Seat-based hold
         if (seatId != null) {
             Optional<Hold> existing = holdRepository.findActiveBySeatId(seatId);
@@ -42,7 +42,7 @@ public class HoldServiceImpl implements HoldService {
 
             Hold hold = Hold.builder()
                     .customerId(customerId)
-                    .occurrenceId(occurrenceId)
+                    .eventId(eventId)
                     .eventVenueAreaId(areaId)
                     .eventVenueSeatId(seatId)
                     .quantity(1)
@@ -60,7 +60,7 @@ public class HoldServiceImpl implements HoldService {
 
         Hold hold = Hold.builder()
                 .customerId(customerId)
-                .occurrenceId(occurrenceId)
+                .eventId(eventId)
                 .eventVenueAreaId(areaId)
                 .quantity(quantity)
                 .status(HoldStatus.ACTIVE)
@@ -75,8 +75,8 @@ public class HoldServiceImpl implements HoldService {
     // ------------------------------------------------------------
     @Override
     @Transactional
-    public void convertHold(UUID occurrenceId) {
-        Hold hold = holdRepository.findActiveByOccurrenceId(occurrenceId)
+    public void convertHold(UUID eventId) {
+        Hold hold = holdRepository.findActiveByeventId(eventId)
                 .orElseThrow(HoldNotFoundException::new);
 
         if (hold.getStatus() != HoldStatus.ACTIVE) {

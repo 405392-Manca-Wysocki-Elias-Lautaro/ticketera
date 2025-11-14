@@ -10,8 +10,8 @@ import java.util.UUID;
 
 public interface HoldRepository extends JpaRepository<Hold, UUID> {
 
-    @Query("SELECT h FROM Hold h WHERE h.occurrenceId = :occurrenceId AND h.status = 'ACTIVE' AND h.expiresAt > CURRENT_TIMESTAMP")
-    Optional<Hold> findActiveByOccurrenceId(UUID occurrenceId);
+    @Query("SELECT h FROM Hold h WHERE h.eventId = :eventId AND h.status = 'ACTIVE' AND h.expiresAt > CURRENT_TIMESTAMP")
+    Optional<Hold> findActiveByeventId(UUID eventId);
 
     @Query("SELECT h FROM Hold h WHERE h.eventVenueSeatId = :seatId AND h.status = 'ACTIVE' AND h.expiresAt > CURRENT_TIMESTAMP")
     Optional<Hold> findActiveBySeatId(UUID seatId);

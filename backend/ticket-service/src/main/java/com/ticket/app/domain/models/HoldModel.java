@@ -16,7 +16,7 @@ public class HoldModel {
     private UUID id;
 
     private UUID customerId;
-    private UUID occurrenceId;
+    private UUID eventId;
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;
     private Integer quantity;

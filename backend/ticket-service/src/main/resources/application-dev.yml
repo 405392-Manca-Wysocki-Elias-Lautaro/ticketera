@@ -48,6 +48,11 @@ spring:
       - classpath:db/r
     clean-disabled: true
 
+external:
+  event:
+    url: ${EVENT_URL:http://event-dev:8080}
+
+
 logging.level:
   org.springframework.jdbc.core: DEBUG
   org.hibernate.SQL: DEBUG
