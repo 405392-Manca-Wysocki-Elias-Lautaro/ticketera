@@ -78,7 +78,6 @@ export default function LanyardTicket({
                                 <ambientLight intensity={Math.PI} />
                                 <Physics gravity={[0, -25, 0]} timeStep="vary">
                                     <Lanyard
-                                        scale={1.2}
                                         code={code}
                                         qrCode={qrCode}
                                         eventTitle={eventTitle}

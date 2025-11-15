@@ -127,7 +127,7 @@ export default function DynamicCard3D({
 
     // === 🎬 Render ===
     return (
-        <mesh scale={[1.7, 2.8, 0.1]}>
+        <mesh scale={[2.5, 3.8, 0.1]}>
             <boxGeometry args={[1, 1, 0.05]} />
             {[
                 new THREE.MeshPhysicalMaterial({ color: '#111' }),

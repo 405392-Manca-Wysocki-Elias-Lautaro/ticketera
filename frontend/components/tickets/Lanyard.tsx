@@ -14,6 +14,7 @@ import {
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 import * as THREE from 'three';
 import DynamicCard3D from './DinamicCard3D';
+import { useDeviceContext } from '@/hooks/useDeviceContext';
 
 
 extend({ MeshLineGeometry, MeshLineMaterial });
@@ -109,6 +110,8 @@ function Band({
     const j3 = useRef<any>(null);
     const card = useRef<any>(null);
 
+    const isMobile = useDeviceContext();
+
     const vec = new THREE.Vector3();
     const ang = new THREE.Vector3();
     const rot = new THREE.Vector3();
@@ -147,25 +150,27 @@ function Band({
     useEffect(() => {
         const handleResize = () => {
             const w = window.innerWidth;
+
             if (w < 600) {
-                setScale(0.75);
-                setCordLength(0.7);
+                setScale(1.15);      // antes 1.35 (demasiado)
+                setCordLength(0.78);
             } else if (w < 1024) {
-                setScale(0.95);
-                setCordLength(0.85);
+                setScale(1.05);      // antes 1.1
+                setCordLength(0.82);
             } else {
-                setScale(1.2);
-                setCordLength(0.9);
+                setScale(0.95);      // antes 1.08
+                setCordLength(1);
             }
         };
+
         handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
-    useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
-    useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
+    useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], cordLength]);
+    useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], cordLength]);
+    useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], cordLength]);
     useSphericalJoint(j3, card, [[0, 0, 0], [0, 0.85, 0]]);
 
     // Cursor de agarre
@@ -216,14 +221,63 @@ function Band({
             rot.copy(card.current.rotation());
             card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
         }
-
-        
     });
+
+    const [cardPosition, setCardPosition] = useState<[number, number, number]>([0, 3.9, 0]);
+
+    useEffect(() => {
+        const updateScale = () => {
+            const w = window.innerWidth;
+
+            if (w < 600) setCardPosition([0, 3.9, 0]);
+            else setCardPosition([0, 3.9, 0]);
+        };
+
+        updateScale();
+        window.addEventListener("resize", updateScale);
+        return () => window.removeEventListener("resize", updateScale);
+    }, []);
+
+    const [anchorPosition, setAnchorPosition] = useState<[number, number, number]>([0, 5.5, 0]);
+
+    useEffect(() => {
+        const updateAnchor = () => {
+            const w = window.innerWidth;
+
+            if (w < 600) {
+                setAnchorPosition([0, 0.8, 0]);
+            } else {
+                setAnchorPosition([0, -0.2, 0]);
+            }
+        };
+
+        updateAnchor();
+        window.addEventListener("resize", updateAnchor);
+        return () => window.removeEventListener("resize", updateAnchor);
+    }, []);
+
+    const [lineWidth, setLineWidth] = useState<number>(0.3);
+
+    useEffect(() => {
+        const updateLineWidth = () => {
+            const w = window.innerWidth;
+
+            if (w < 600) {
+                setLineWidth(1.5);
+            } else {
+                setLineWidth(0.5);
+            }
+        };
+
+        updateLineWidth();
+        window.addEventListener("resize", updateLineWidth);
+        return () => window.removeEventListener("resize", updateLineWidth);
+    }, []);
 
     return (
         <>
-            <group position={[0, 3.9, 0]} scale={scale}>
-                <RigidBody ref={fixed} {...segmentProps} type="fixed" />
+            <group position={cardPosition} scale={scale}>
+                <RigidBody ref={fixed} {...segmentProps} type="fixed" position={anchorPosition} />
 
                 <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
                     <BallCollider args={[0.1]} />
@@ -290,7 +344,7 @@ function Band({
                     useMap
                     map={texture}
                     repeat={[-10, 1]} // 🔹 menos repeticiones = logo más grande
-                    lineWidth={0.5}    // 🔹 grosor del cordón
+                    lineWidth={lineWidth}    // 🔹 grosor del cordón
                 />
             </mesh>
         </>
