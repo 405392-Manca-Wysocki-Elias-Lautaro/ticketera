@@ -30,7 +30,7 @@ public class TicketServiceClient {
      * Genera un ticket
      */
     public boolean generateTicket(GenerateTicketRequest request) {
-        String url = ticketServiceBaseUrl + "/api/tickets/generate";
+        String url = ticketServiceBaseUrl + "/generate";
         
         logger.info("Generating ticket at: {} for orderItem: {}", url, request.getOrderItemId());
         

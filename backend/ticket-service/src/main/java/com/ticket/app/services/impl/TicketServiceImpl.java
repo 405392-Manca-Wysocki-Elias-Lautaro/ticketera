@@ -57,7 +57,8 @@ public class TicketServiceImpl implements TicketService {
     public TicketModel generateTicket(TicketGenerateRequest request) {
         try {
             // 1️⃣ Convert hold if exists
-            holdRepository.findActiveByOccurrenceId(request.getOccurrenceId())
+            UUID occurrenceUuid = UUID.nameUUIDFromBytes(("occurrence:" + request.getOccurrenceId()).getBytes());
+            holdRepository.findActiveByOccurrenceId(occurrenceUuid)
                     .ifPresent(hold -> {
                         hold.setStatus(HoldStatus.CONVERTED);
                         hold.setUpdatedAt(OffsetDateTime.now());
@@ -71,9 +72,14 @@ public class TicketServiceImpl implements TicketService {
 
             // 3️⃣ Create ticket
             TicketModel model = new TicketModel();
-            model.setOrderItemId(request.getOrderItemId());
-            model.setOccurrenceId(request.getOccurrenceId());
-            model.setUserId(jwtUtils.getUserId());
+            // Convert string IDs to UUIDs - for now we generate deterministic UUIDs from the strings
+            model.setOrderItemId(UUID.nameUUIDFromBytes(("orderItem:" + request.getOrderItemId()).getBytes()));
+            model.setOccurrenceId(UUID.nameUUIDFromBytes(("occurrence:" + request.getOccurrenceId()).getBytes()));
+            // Use userId from request (for internal service calls) or JWT (for authenticated calls)
+            UUID userId = request.getUserId() != null ? 
+                UUID.fromString(request.getUserId()) : 
+                jwtUtils.getUserId();
+            model.setUserId(userId);
             model.setCode("TCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             model.setQrToken(UUID.randomUUID().toString());
             model.setStatus(TicketStatus.ISSUED);
@@ -95,7 +101,7 @@ public class TicketServiceImpl implements TicketService {
             // 5️⃣ Persist ticket
             Ticket saved = ticketRepository.save(modelMapper.map(model, Ticket.class));
 
-            logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued");
+            logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued", userId);
 
             TicketModel response = modelMapper.map(saved, TicketModel.class);
             response.setQrBase64(model.getQrBase64());
@@ -163,11 +169,23 @@ public class TicketServiceImpl implements TicketService {
     // 🧾 Register status change history
     // ------------------------------------------------------------
     private void logTicketStatusChange(Ticket ticket, TicketStatus from, TicketStatus to, String note) {
+        logTicketStatusChange(ticket, from, to, note, null);
+    }
+    
+    private void logTicketStatusChange(Ticket ticket, TicketStatus from, TicketStatus to, String note, UUID userId) {
         TicketStatusHistory history = new TicketStatusHistory();
         history.setTicket(ticket);
         history.setFromStatus(from != null ? from.name().toLowerCase() : null);
         history.setToStatus(to.name().toLowerCase());
-        history.setUpdatedUser(jwtUtils.getUserId());
+        
+        // Use provided userId or get from JWT
+        try {
+            history.setUpdatedUser(userId != null ? userId : jwtUtils.getUserId());
+        } catch (Exception e) {
+            // If no JWT and no userId provided, use the ticket's userId
+            history.setUpdatedUser(ticket.getUserId());
+        }
+        
         history.setUpdatedAt(OffsetDateTime.now());
         history.setNote(note);
 
