@@ -1,3 +1,11 @@
+# [1.0.0-next.7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.6...auth-v1.0.0-next.7) (2025-11-16)
+
+
+### Features
+
+* create ticket and show in my-ticket ([0d8d018](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/0d8d01874bfc081e82b637ed669e81ac7571f919))
+* webhook ([08a69b5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/08a69b5c0d2108c506aef5821fa9ce07772cf42b))
+
 # [1.0.0-next.6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.5...auth-v1.0.0-next.6) (2025-11-14)
 
 
