@@ -1,3 +1,11 @@
+# [1.0.0-next.7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.6...gateway-v1.0.0-next.7) (2025-11-16)
+
+
+### Features
+
+* connect Checkout Pro with frontend ([e1cbf71](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/e1cbf71f9a7a8cb01cef2fb42c02a32d3c8ea140))
+* webhook ([08a69b5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/08a69b5c0d2108c506aef5821fa9ce07772cf42b))
+
 # [1.0.0-next.6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.5...gateway-v1.0.0-next.6) (2025-11-10)
 
 
