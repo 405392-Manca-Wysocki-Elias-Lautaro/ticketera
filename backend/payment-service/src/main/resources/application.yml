@@ -39,6 +39,17 @@ spring:
 mercadopago:
   access-token: ${MERCADOPAGO_ACCESS_TOKEN:APP_USR-3149021535390307-110914-55fe675713252fa4a2d138b203497d1f-2977404984}
   notification-url: ${MERCADOPAGO_NOTIFICATION_URL:}
+  webhook-secret: ${MERCADOPAGO_WEBHOOK_SECRET:}
+  success-url: ${MERCADOPAGO_SUCCESS_URL:http://localhost:3000/my-tickets}
+  failure-url: ${MERCADOPAGO_FAILURE_URL:http://localhost:3000/dashboard}
+  pending-url: ${MERCADOPAGO_PENDING_URL:http://localhost:3000/my-tickets}
+
+# Service URLs for inter-service communication
+services:
+  order:
+    base-url: ${ORDER_SERVICE_URL:http://order-service:8080}
+  ticket:
+    base-url: ${TICKET_SERVICE_URL:http://ticket-service:8080}
 
 logging.level:
   root: INFO

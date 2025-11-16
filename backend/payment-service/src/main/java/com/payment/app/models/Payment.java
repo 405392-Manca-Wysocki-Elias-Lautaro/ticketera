@@ -29,6 +29,9 @@ public class Payment {
     @Column(name = "preference_id", length = 255)
     private String preferenceId;
     
+    @Column(name = "mercadopago_payment_id")
+    private Long mercadopagoPaymentId;
+    
     @Convert(converter = PaymentStatusConverter.class)
     @Column(name = "status", nullable = false, length = 50)
     private PaymentStatus status;

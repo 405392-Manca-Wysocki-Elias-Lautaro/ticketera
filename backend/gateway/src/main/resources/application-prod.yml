@@ -38,6 +38,14 @@ spring:
           filters:
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
 
+        # Webhook route for MercadoPago (public, no auth required)
+        - id: mercadopago-webhook
+          uri: http://payments:8080
+          predicates:
+            - Path=/webhook
+          filters:
+            - PreserveHostHeader
+
         - id: notifications
           uri: http://notifications:8080
           predicates:

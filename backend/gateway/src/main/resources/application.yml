@@ -69,6 +69,7 @@ gateway:
     - /forgot-password
     - /reset-password
     - /refresh
+    - /webhook
 
 auth:
   service-url: ${AUTH_URL}
