@@ -11,26 +11,27 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, CheckCircle } from "lucide-react"
 import GradientText from '@/components/GradientText'
+import StarBorder from '@/components/StarBorder'
+import { useRouter } from 'next/navigation'
+import { useForgotPassword } from '@/hooks/auth/useForgotPassword'
 
 export default function ForgotPasswordPage() {
-    const [email, setEmail] = useState("")
-    const [isLoading, setIsLoading] = useState(false)
-    const [emailSent, setEmailSent] = useState(false)
+    const navigate = useRouter();
+
+    const [email, setEmail] = useState("");
+    const [emailSent, setEmailSent] = useState(false);
+    const { mutateAsync: forgotPassword, isPending } = useForgotPassword();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsLoading(true)
+        e.preventDefault();
 
         try {
-            // Mock API call - in production this would send a reset email
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-            setEmailSent(true)
+            await forgotPassword({ email });
+            setEmailSent(true);
         } catch (err) {
-            // Handle error
-        } finally {
-            setIsLoading(false)
+            console.error("Error:", err);
         }
-    }
+    };
 
     if (emailSent) {
         return (
@@ -53,9 +54,14 @@ export default function ForgotPasswordPage() {
                         <p className="text-sm text-muted-foreground text-center">
                             Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.
                         </p>
-                        <Button asChild className="w-full cursor-pointer">
-                            <Link href="/login">Volver al login</Link>
-                        </Button>
+                        <StarBorder className="w-full">
+                            <Button
+                                className="w-full gradient-brand text-white cursor-pointer"
+                                onClick={() => navigate.push("/login")}
+                            >
+                                Volver al login
+                            </Button>
+                        </StarBorder>
                     </CardContent>
                 </Card>
             </div>
@@ -98,9 +104,11 @@ export default function ForgotPasswordPage() {
                             />
                         </div>
 
-                        <Button type="submit" className="w-full gradient-brand text-white cursor-pointer" disabled={isLoading}>
-                            {isLoading ? "Enviando..." : "Enviar Enlace de Recuperación"}
-                        </Button>
+                        <StarBorder className='w-full'>
+                            <Button type="submit" className="w-full gradient-brand text-white cursor-pointer" disabled={isPending}>
+                                {isPending ? "Enviando..." : "Enviar Enlace de Recuperación"}
+                            </Button>
+                        </StarBorder>
                     </form>
                 </CardContent>
             </Card>

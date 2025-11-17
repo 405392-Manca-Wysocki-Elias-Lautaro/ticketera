@@ -117,5 +117,3 @@ export default function MyTicketsPage() {
         </div>
     )
 }
-
-//TODO: Usar type Ticket

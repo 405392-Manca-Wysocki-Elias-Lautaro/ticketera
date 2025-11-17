@@ -5,6 +5,7 @@ import ReactQueryProvider from '@/components/providers/QueryClientProvider';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { showBrandConsoleMessage } from '@/utils/showBrandConsoleMessage';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -33,9 +34,13 @@ export default function RootLayout({
             <body className={`${geist.className} antialiased bg-background text-foreground overflow-hidden`}>
                 <Toaster position="top-center" richColors />
                 <ReactQueryProvider>
-                    <TooltipProvider>
-                        {children}
-                    </TooltipProvider>
+                    <SidebarProvider>
+                        <TooltipProvider>
+                            <div className='h-screen w-screen'>
+                                {children}
+                            </div>
+                        </TooltipProvider>
+                    </SidebarProvider>
                 </ReactQueryProvider>
             </body>
         </html>

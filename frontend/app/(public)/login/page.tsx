@@ -70,9 +70,6 @@ export default function LoginPage() {
                                 placeholder="tu@email.com"
                                 {...register("email")}
                             />
-                            {errors.email && (
-                                <p className="text-sm text-destructive">{errors.email.message}</p>
-                            )}
                         </div>
 
                         {/* Password */}
@@ -101,9 +98,6 @@ export default function LoginPage() {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
-                            {errors.password && (
-                                <p className="text-sm text-destructive">{errors.password.message}</p>
-                            )}
                         </div>
 
                         {/* Remember me */}
@@ -111,7 +105,7 @@ export default function LoginPage() {
                             name="remembered"
                             control={control}
                             render={({ field }) => (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 cursor-pointer">
                                     <Checkbox
                                         id="remembered"
                                         checked={field.value}

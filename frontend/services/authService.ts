@@ -1,5 +1,6 @@
 import api from '@/lib/api';
 import { ChangePasswordRequest } from '@/types/Request/ChangePasswordRequest';
+import { ForgotPasswordRequest } from '@/types/Request/ForgotPasswordRequest';
 import { LoginRequest } from '@/types/Request/LoginRequest';
 import { RegisterRequest } from '@/types/Request/RegisterRequest';
 import { ResetPasswordRequest } from '@/types/Request/ResetPasswordRequest';
@@ -29,8 +30,8 @@ export const authService = {
         `${BASE_URL}/verify`, null, { params: { token } }
     ),
 
-    forgotPassword: (email: string) => api.post<ApiResponse<AuthResponse>>(
-        `${BASE_URL}/forgot-password`, { email }
+    forgotPassword: (data: ForgotPasswordRequest) => api.post<ApiResponse<AuthResponse>>(
+        `${BASE_URL}/forgot-password`, data
     ),
 
     resetPassword: (data: ResetPasswordRequest) => api.post<ApiResponse<AuthResponse>>(
