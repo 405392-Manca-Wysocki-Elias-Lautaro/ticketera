@@ -84,7 +84,7 @@ public class EventController {
     }
 
     /**
-     * GET /events/staff - Obtener todos los eventos (para STAFF y OWNER)
+     * GET /events/staff - Obtener eventos asignados al usuario (STAFF u OWNER)
      */
     @GetMapping("/staff")
     public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getEventsForStaff() {
@@ -93,8 +93,11 @@ public class EventController {
             throw new UnauthorizedException("Solo el personal autorizado puede acceder a esta funcionalidad");
         }
 
-        // STAFF puede ver todos los eventos
-        List<EventSummaryDTO> events = eventService.getAllEventsSummary();
+        // Obtener el organizerId del JWT
+        UUID organizerId = jwtUtils.getOrganizerId();
+        
+        // Obtener eventos del organizador asignado al usuario
+        List<EventSummaryDTO> events = eventService.getEventsByOrganizerId(organizerId);
         
         return ApiResponseFactory.success("Eventos obtenidos exitosamente", events);
     }
