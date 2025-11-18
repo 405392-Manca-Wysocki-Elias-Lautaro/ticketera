@@ -1,3 +1,11 @@
+# [1.0.0-next.8](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.7...gateway-v1.0.0-next.8) (2025-11-18)
+
+
+### Features
+
+* add title event filter in event-service ([4e4a153](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4e4a15314fe4c956a23402111913edc36d681508))
+* create ticket and show in my-ticket ([0d8d018](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/0d8d01874bfc081e82b637ed669e81ac7571f919))
+
 # [1.0.0-next.7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/gateway-v1.0.0-next.6...gateway-v1.0.0-next.7) (2025-11-16)
 
 
