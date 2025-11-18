@@ -17,6 +17,7 @@ public class CorsGlobalConfig {
 
         cors.setAllowedOrigins(List.of(
             "http://localhost:3000",
+            "https://windy-nydia-noncoincident.ngrok-free.dev",
             "https://frontend.ticketera.dev",
             "https://app.ticketera.com"
         ));

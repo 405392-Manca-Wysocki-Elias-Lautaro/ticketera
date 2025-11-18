@@ -7,8 +7,10 @@ import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.preference.Preference;
+import com.payment.app.clients.OrderServiceClient;
 import com.payment.app.models.Payment;
 import com.payment.app.pkg.dtos.CreatePaymentIntentRequest;
+import com.payment.app.pkg.dtos.OrderInfoResponse;
 import com.payment.app.pkg.dtos.PaymentIntentResponse;
 import com.payment.app.repositories.PaymentRepository;
 import jakarta.annotation.PostConstruct;
@@ -31,6 +33,7 @@ public class PaymentService {
     
     private final PaymentRepository paymentRepository;
     private final PreferenceClient preferenceClient;
+    private final OrderServiceClient orderServiceClient;
     
     @Value("${mercadopago.notification-url:}")
     private String notificationUrl;
@@ -44,8 +47,12 @@ public class PaymentService {
     @Value("${mercadopago.pending-url:http://localhost:3000/my-tickets}")
     private String pendingUrl;
     
-    public PaymentService(PaymentRepository paymentRepository) {
+    @Value("${app.frontend-base-url:http://localhost:3000}")
+    private String frontendBaseUrl;
+    
+    public PaymentService(PaymentRepository paymentRepository, OrderServiceClient orderServiceClient) {
         this.paymentRepository = paymentRepository;
+        this.orderServiceClient = orderServiceClient;
         this.preferenceClient = new PreferenceClient();
     }
     
@@ -178,6 +185,15 @@ public class PaymentService {
         logger.info("Initial URLs - Success: '{}', Failure: '{}', Pending: '{}'", 
                     finalSuccessUrl, finalFailureUrl, finalPendingUrl);
         
+        // Intentar obtener el eventId desde el order para construir la URL de éxito
+        String eventId = getEventIdFromOrder(request.getOrderId());
+        if (eventId != null) {
+            // Construir URL de éxito con el eventId: /payment/success?orderId={orderId}
+            finalSuccessUrl = frontendBaseUrl + "/payment/success?orderId=" + request.getOrderId();
+            finalPendingUrl = finalSuccessUrl;
+            logger.info("Event ID found: {}, using custom success URL: {}", eventId, finalSuccessUrl);
+        }
+        
         if (request.getMetadata() != null) {
             if (request.getMetadata().getReturnUrl() != null) {
                 finalSuccessUrl = request.getMetadata().getReturnUrl();
@@ -205,15 +221,17 @@ public class PaymentService {
             
             preferenceBuilder.backUrls(backUrls);
             
-            // Solo agregar autoReturn si success URL está definida Y NO es localhost
-            // MercadoPago no acepta autoReturn con URLs de localhost
+            // Habilitar autoReturn para redirección automática después del pago
+            // Solo si la URL de éxito está definida y es una URL pública (no localhost)
             if (finalSuccessUrl != null && !finalSuccessUrl.isEmpty() && 
                 !finalSuccessUrl.contains("localhost") && !finalSuccessUrl.contains("127.0.0.1")) {
                 preferenceBuilder.autoReturn("approved");
-                logger.info("Auto-return enabled for success URL: {}", finalSuccessUrl);
+                logger.info("✅ Auto-return enabled for success URL: {}", finalSuccessUrl);
             } else {
-                logger.info("Auto-return NOT enabled (localhost URL or not defined)");
+                logger.warn("⚠️ Auto-return NOT enabled - URL: {} (localhost or not defined)", finalSuccessUrl);
             }
+            
+            logger.info("📋 Mercado Pago preference will redirect to: {}", finalSuccessUrl);
         }
         
         // Agregar URL de notificación si está configurada
@@ -416,5 +434,27 @@ public class PaymentService {
         public PaymentWebhookException(String message, Throwable cause) {
             super(message, cause);
         }
+    }
+    
+    /**
+     * Obtiene el eventId desde el order
+     * @param orderId ID de la orden
+     * @return eventId o null si no se puede obtener
+     */
+    private String getEventIdFromOrder(String orderId) {
+        try {
+            Optional<OrderInfoResponse> orderOpt = orderServiceClient.getOrderById(orderId);
+            if (orderOpt.isPresent()) {
+                OrderInfoResponse order = orderOpt.get();
+                if (order.getItems() != null && !order.getItems().isEmpty()) {
+                    String eventId = order.getItems().get(0).getEventId();
+                    logger.info("Event ID retrieved from order {}: {}", orderId, eventId);
+                    return eventId;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Could not retrieve event ID from order {}: {}", orderId, e.getMessage());
+        }
+        return null;
     }
 }

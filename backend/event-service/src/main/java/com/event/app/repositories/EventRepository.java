@@ -14,4 +14,5 @@ public interface EventRepository extends JpaRepository<EventEntity, UUID>{
     List<EventEntity> findByOrganizerIdAndActiveTrue(UUID organizerId);
     List<EventEntity> findByCategoryIdAndActiveTrue(UUID categoryId);
     List<EventEntity> findByStatusAndActiveTrue(String status);
+    List<EventEntity> findByTitleContainingIgnoreCaseAndActiveTrue(String title);
 }

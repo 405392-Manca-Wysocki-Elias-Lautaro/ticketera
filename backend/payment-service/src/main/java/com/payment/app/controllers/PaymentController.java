@@ -1,6 +1,8 @@
 package com.payment.app.controllers;
 
+import com.payment.app.clients.OrderServiceClient;
 import com.payment.app.pkg.dtos.CreatePaymentIntentRequest;
+import com.payment.app.pkg.dtos.OrderInfoResponse;
 import com.payment.app.pkg.dtos.PaymentIntentResponse;
 import com.payment.app.services.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("")
 @Tag(name = "Payments", description = "Payment management API with Mercado Pago Checkout Pro")
@@ -22,9 +28,11 @@ public class PaymentController {
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
     
     private final PaymentService paymentService;
+    private final OrderServiceClient orderServiceClient;
     
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, OrderServiceClient orderServiceClient) {
         this.paymentService = paymentService;
+        this.orderServiceClient = orderServiceClient;
     }
     
     @PostMapping("/intents")
@@ -52,6 +60,40 @@ public class PaymentController {
             
         } catch (Exception e) {
             logger.error("Unexpected error creating payment intent: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/orders/{orderId}/event-id")
+    @Operation(summary = "Get event ID from order", 
+               description = "Retrieves the event ID associated with an order")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Event ID retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Order not found or has no items")
+    })
+    public ResponseEntity<Map<String, String>> getEventIdFromOrder(
+            @PathVariable String orderId) {
+        
+        logger.info("Getting event ID for order: {}", orderId);
+        
+        try {
+            Optional<OrderInfoResponse> orderOpt = orderServiceClient.getOrderById(orderId);
+            if (orderOpt.isPresent()) {
+                OrderInfoResponse order = orderOpt.get();
+                if (order.getItems() != null && !order.getItems().isEmpty()) {
+                    String eventId = order.getItems().get(0).getEventId();
+                    Map<String, String> response = new HashMap<>();
+                    response.put("eventId", eventId);
+                    response.put("orderId", orderId);
+                    return ResponseEntity.ok(response);
+                }
+            }
+            
+            logger.warn("Order {} not found or has no items", orderId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            
+        } catch (Exception e) {
+            logger.error("Error getting event ID for order {}: {}", orderId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

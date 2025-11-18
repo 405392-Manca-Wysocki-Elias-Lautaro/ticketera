@@ -1,0 +1,11 @@
+version: "2"
+authtoken: 35WajvzaXLVJXIfBCYWRCAlBzms_6eBXGCWsiUz5CDo4ePCR3
+tunnels:
+  backend:
+    addr: 8080
+    proto: http
+    schemes:
+      - https
+    # Este túnel será para TODO: webhook y redirecciones
+    # El gateway manejará el webhook y las redirecciones irán al frontend local
+

@@ -45,10 +45,12 @@ public class EventController {
 
     /**
      * GET /events - Obtener todos los eventos con información resumida enriquecida
+     * Filtro opcional: title (String) - nombre del evento para búsqueda parcial
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getAllEventsSummary() {
-        List<EventSummaryDTO> events = eventService.getAllEventsSummary();
+    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getAllEventsSummary(
+            @RequestParam(required = false) String title) {
+        List<EventSummaryDTO> events = eventService.getAllEvents(title);
         return ApiResponseFactory.success("Eventos obtenidos exitosamente", events);
     }
 

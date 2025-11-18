@@ -170,6 +170,19 @@ public class EventServiceImpl implements IEventService {
     }
 
     @Override
+    public List<EventSummaryDTO> getAllEvents(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return getAllEventsSummary();
+        }
+        
+        List<EventEntity> events = eventRepository.findByTitleContainingIgnoreCaseAndActiveTrue(title.trim());
+        
+        return events.stream()
+                .map(this::mapToEventSummary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<EventDetailDTO> getEventDetail(UUID id) {
         return eventRepository.findById(id)
                 .filter(EventEntity::getActive)

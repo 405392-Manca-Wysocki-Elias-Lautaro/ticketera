@@ -15,6 +15,7 @@ spring:
         locator:
           enabled: false
       routes:
+        # Rutas de API - orden negativo para máxima prioridad
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
@@ -22,6 +23,7 @@ spring:
           filters:
             - PreserveHostHeader
             - RewritePath=/api/auth/?(?<segment>.*), /${segment}
+          order: -100
         
         - id: events
           uri: "${SERVICES_EVENT_BASE_URL:http://event-dev:8080}"
@@ -31,6 +33,7 @@ spring:
             - PreserveHostHeader
             - RemoveRequestHeader=Cookie
             - RewritePath=/api/events/?(?<segment>.*), /${segment}
+          order: -100
 
         - id: tickets
           uri: "${SERVICES_TICKET_BASE_URL:http://ticket-dev:8080}"
@@ -40,6 +43,7 @@ spring:
             - PreserveHostHeader
             - RemoveRequestHeader=Cookie
             - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
+          order: -100
 
         - id: payments
           uri: "${SERVICES_PAYMENT_BASE_URL:http://payment-dev:8080}"
@@ -49,14 +53,16 @@ spring:
             - PreserveHostHeader
             - RemoveRequestHeader=Cookie
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
+          order: -100
 
-        # Webhook route for MercadoPago (public, no auth required)
+        # Webhook route for MercadoPago (public, no auth required) - alta prioridad
         - id: mercadopago-webhook
           uri: "${SERVICES_PAYMENT_BASE_URL:http://payment-dev:8080}"
           predicates:
             - Path=/webhook
           filters:
             - PreserveHostHeader
+          order: -100
 
         - id: notifications
           uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification-dev:8080}"
@@ -66,6 +72,7 @@ spring:
             - PreserveHostHeader
             - RemoveRequestHeader=Cookie
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
+          order: -100
 
         - id: orders
           uri: "${SERVICES_ORDER_BASE_URL:http://order-dev:8080}"
@@ -75,6 +82,19 @@ spring:
             - PreserveHostHeader
             - RemoveRequestHeader=Cookie
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
+          order: -100
+
+        # Frontend proxy - redirige todo lo que no sea API o webhook al frontend local
+        # Usa host.docker.internal para acceder al localhost desde Docker
+        # Orden alto (0 por defecto) para que se evalúe después de las rutas de API
+        - id: frontend
+          uri: "http://host.docker.internal:3000"
+          predicates:
+            - Path=/**
+            - Method=GET,POST,PUT,DELETE,OPTIONS,PATCH
+          filters:
+            - PreserveHostHeader
+          order: 0
 
         # --- OpenAPI aggregation ---
         - id: openapi-auth
@@ -120,6 +140,7 @@ spring:
           "[/**]":
             allowedOrigins:
               - "http://localhost:3000"
+              - "https://windy-nydia-noncoincident.ngrok-free.dev"
             allowedMethods: "*"
             allowedHeaders: "*"
             exposedHeaders:

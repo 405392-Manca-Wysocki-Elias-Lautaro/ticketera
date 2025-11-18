@@ -16,6 +16,8 @@ public interface IEventService {
     Event createCompleteEvent(CreateEventRequest request);
 
     List<EventSummaryDTO> getAllEventsSummary();
+    
+    List<EventSummaryDTO> getAllEvents(String title);
 
     Optional<EventDetailDTO> getEventDetail(UUID id);
 
