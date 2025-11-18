@@ -1,3 +1,15 @@
+# [1.0.0-next.8](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.7...auth-v1.0.0-next.8) (2025-11-18)
+
+
+### Bug Fixes
+
+* refactor get all events by staff or owner ([823a312](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/823a312c3a1a9d104a5180943a2105a375b8109e))
+
+
+### Features
+
+* add title event filter in event-service ([4e4a153](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4e4a15314fe4c956a23402111913edc36d681508))
+
 # [1.0.0-next.7](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.6...auth-v1.0.0-next.7) (2025-11-16)
 
 
