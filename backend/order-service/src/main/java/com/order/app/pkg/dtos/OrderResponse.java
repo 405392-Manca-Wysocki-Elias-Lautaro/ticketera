@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 @Builder
 public class OrderResponse {
     
-    private Long id;
+    private String id;
     private CustomerResponse customer;
-    private Long organizerId;
+    private String organizerId;
     private OrderStatus status;
     private Long totalCents;
     private String currency;
@@ -41,9 +41,9 @@ public class OrderResponse {
     // Factory method to create from entity with payment URL
     public static OrderResponse fromEntity(Order order, String paymentUrl) {
         return OrderResponse.builder()
-            .id(order.getId())
+            .id(order.getId() != null ? order.getId().toString() : null)
             .customer(CustomerResponse.fromEntity(order.getCustomer()))
-            .organizerId(order.getOrganizerId())
+            .organizerId(order.getOrganizerId() != null ? order.getOrganizerId().toString() : null)
             .status(order.getStatus())
             .totalCents(order.getTotalCents())
             .currency(order.getCurrency())
@@ -77,7 +77,7 @@ public class OrderResponse {
     @AllArgsConstructor
     @Builder
     public static class CustomerResponse {
-        private Long id;
+        private String id;
         private String email;
         private String firstName;
         private String lastName;
@@ -86,7 +86,7 @@ public class OrderResponse {
         
         public static CustomerResponse fromEntity(com.order.app.models.Customer customer) {
             return CustomerResponse.builder()
-                .id(customer.getId())
+                .id(customer.getId() != null ? customer.getId().toString() : null)
                 .email(customer.getEmail())
                 .firstName(customer.getFirstName())
                 .lastName(customer.getLastName())
@@ -110,22 +110,22 @@ public class OrderResponse {
     @AllArgsConstructor
     @Builder
     public static class OrderItemResponse {
-        private Long id;
-        private Long eventId;
-        private Long venueAreaId;
-        private Long venueSeatId;
-        private Long ticketTypeId;
+        private String id;
+        private String eventId;
+        private String venueAreaId;
+        private String venueSeatId;
+        private String ticketTypeId;
         private Long unitPriceCents;
         private Integer quantity;
         private Long totalPriceCents;
         
         public static OrderItemResponse fromEntity(OrderItem item) {
             return OrderItemResponse.builder()
-                .id(item.getId())
-                .eventId(item.getEventId())
-                .venueAreaId(item.getVenueAreaId())
-                .venueSeatId(item.getVenueSeatId())
-                .ticketTypeId(item.getTicketTypeId())
+                .id(item.getId() != null ? item.getId().toString() : null)
+                .eventId(item.getEventId() != null ? item.getEventId().toString() : null)
+                .venueAreaId(item.getVenueAreaId() != null ? item.getVenueAreaId().toString() : null)
+                .venueSeatId(item.getVenueSeatId() != null ? item.getVenueSeatId().toString() : null)
+                .ticketTypeId(item.getTicketTypeId() != null ? item.getTicketTypeId().toString() : null)
                 .unitPriceCents(item.getUnitPriceCents())
                 .quantity(item.getQuantity())
                 .totalPriceCents(item.getTotalPriceCents())

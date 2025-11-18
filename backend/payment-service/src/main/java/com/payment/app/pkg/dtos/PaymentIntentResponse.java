@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class PaymentIntentResponse {
     
     private Long id;
-    private Long orderId;
+    private String orderId;
     private Long providerId;
     private String providerRef;
     

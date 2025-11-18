@@ -17,9 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderInfoResponse {
     
-    private Long id;
+    private String id;
     private CustomerInfo customer;
-    private Long organizerId;
+    private String organizerId;
     private String status;
     private Long totalCents;
     private String currency;
@@ -36,7 +36,7 @@ public class OrderInfoResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CustomerInfo {
-        private Long id;
+        private String id;
         private String email;
         private String firstName;
         private String lastName;
@@ -48,11 +48,11 @@ public class OrderInfoResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderItemInfo {
-        private Long id;
-        private Long eventId;
-        private Long venueAreaId;
-        private Long venueSeatId;
-        private Long ticketTypeId;
+        private String id;  // UUID como String
+        private String eventId;  // UUID como String
+        private String venueAreaId;  // UUID como String
+        private String venueSeatId;  // UUID como String (puede ser null)
+        private String ticketTypeId;  // UUID como String
         private Long unitPriceCents;
         private Integer quantity;
         private Long totalPriceCents;

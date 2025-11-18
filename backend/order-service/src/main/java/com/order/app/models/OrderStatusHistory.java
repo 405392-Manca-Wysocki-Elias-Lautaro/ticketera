@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "order_status_history", schema = "orders")
@@ -19,9 +20,9 @@ import java.time.LocalDateTime;
 public class OrderStatusHistory {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    private Long id;
+    private UUID id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -36,7 +37,7 @@ public class OrderStatusHistory {
     private String toStatus;
     
     @Column(name = "changed_by")
-    private Long changedBy;
+    private UUID changedBy;
     
     @CreationTimestamp
     @Column(name = "changed_at", nullable = false, updatable = false)
@@ -45,7 +46,7 @@ public class OrderStatusHistory {
     private String note;
     
     // Static factory methods
-    public static OrderStatusHistory create(Order order, OrderStatus fromStatus, OrderStatus toStatus, Long changedBy, String note) {
+    public static OrderStatusHistory create(Order order, OrderStatus fromStatus, OrderStatus toStatus, UUID changedBy, String note) {
         return OrderStatusHistory.builder()
             .order(order)
             .fromStatus(fromStatus != null ? fromStatus.getValue() : null)
@@ -55,7 +56,7 @@ public class OrderStatusHistory {
             .build();
     }
     
-    public static OrderStatusHistory create(Order order, OrderStatus toStatus, Long changedBy, String note) {
+    public static OrderStatusHistory create(Order order, OrderStatus toStatus, UUID changedBy, String note) {
         return create(order, null, toStatus, changedBy, note);
     }
     

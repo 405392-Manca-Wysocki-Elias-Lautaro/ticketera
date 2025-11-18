@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("")
@@ -29,6 +30,26 @@ public class OrderController {
     
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
+    }
+    
+    /**
+     * Convierte un string a UUID. Si el string es un número, genera un UUID determinístico.
+     */
+    private UUID parseOrGenerateUUID(String idString) {
+        if (idString == null) {
+            return null;
+        }
+        
+        try {
+            return UUID.fromString(idString);
+        } catch (IllegalArgumentException e) {
+            try {
+                long id = Long.parseLong(idString);
+                return new UUID(0L, id);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid ID format: " + idString);
+            }
+        }
     }
     
     @PostMapping("/create")
@@ -71,17 +92,23 @@ public class OrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found")
     })
     public ResponseEntity<ApiResponse<OrderResponse>> getOrder(
-            @Parameter(description = "Order ID") @PathVariable Long orderId) {
+            @Parameter(description = "Order ID") @PathVariable String orderId) {
         
         logger.debug("Getting order: {}", orderId);
         
-        Optional<OrderResponse> order = orderService.getOrder(orderId);
-        
-        if (order.isPresent()) {
-            return ApiResponseFactory.success("Order retrieved successfully", order.get());
-        } else {
-            logger.warn("Order not found: {}", orderId);
-            return ApiResponseFactory.notFound("Order not found with ID: " + orderId);
+        try {
+            UUID orderUuid = parseOrGenerateUUID(orderId);
+            Optional<OrderResponse> order = orderService.getOrder(orderUuid);
+            
+            if (order.isPresent()) {
+                return ApiResponseFactory.success("Order retrieved successfully", order.get());
+            } else {
+                logger.warn("Order not found: {}", orderId);
+                return ApiResponseFactory.notFound("Order not found with ID: " + orderId);
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid ID format for orderId: {}", orderId);
+            return ApiResponseFactory.badRequest("Invalid order ID format: " + e.getMessage());
         }
     }
     
@@ -92,12 +119,18 @@ public class OrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Customer not found")
     })
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByCustomer(
-            @Parameter(description = "Customer ID") @PathVariable Long customerId) {
+            @Parameter(description = "Customer ID") @PathVariable String customerId) {
         
         logger.debug("Getting orders for customer: {}", customerId);
         
-        List<OrderResponse> orders = orderService.getOrdersByCustomer(customerId);
-        return ApiResponseFactory.success("Orders retrieved successfully", orders);
+        try {
+            UUID customerUuid = parseOrGenerateUUID(customerId);
+            List<OrderResponse> orders = orderService.getOrdersByCustomer(customerUuid);
+            return ApiResponseFactory.success("Orders retrieved successfully", orders);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid ID format for customerId: {}", customerId);
+            return ApiResponseFactory.badRequest("Invalid customer ID format: " + e.getMessage());
+        }
     }
     
     @PostMapping("/{orderId}/cancel")
@@ -108,20 +141,26 @@ public class OrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found")
     })
     public ResponseEntity<ApiResponse<Void>> cancelOrder(
-            @Parameter(description = "Order ID") @PathVariable Long orderId,
+            @Parameter(description = "Order ID") @PathVariable String orderId,
             @RequestBody(required = false) CancelOrderRequest request) {
         
         String reason = request != null ? request.getReason() : "Cancelled by user";
         logger.info("Cancelling order: {} with reason: {}", orderId, reason);
         
-        boolean cancelled = orderService.cancelOrder(orderId, reason);
-        
-        if (cancelled) {
-            logger.info("Order cancelled successfully: {}", orderId);
-            return ApiResponseFactory.success("Order cancelled successfully");
-        } else {
-            logger.warn("Failed to cancel order: {}", orderId);
-            return ApiResponseFactory.badRequest("Order cannot be cancelled or does not exist");
+        try {
+            UUID orderUuid = parseOrGenerateUUID(orderId);
+            boolean cancelled = orderService.cancelOrder(orderUuid, reason);
+            
+            if (cancelled) {
+                logger.info("Order cancelled successfully: {}", orderId);
+                return ApiResponseFactory.success("Order cancelled successfully");
+            } else {
+                logger.warn("Failed to cancel order: {}", orderId);
+                return ApiResponseFactory.badRequest("Order cannot be cancelled or does not exist");
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid ID format for orderId: {}", orderId);
+            return ApiResponseFactory.badRequest("Invalid order ID format: " + e.getMessage());
         }
     }
     

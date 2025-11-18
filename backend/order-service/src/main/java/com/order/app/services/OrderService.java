@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,7 +92,7 @@ public class OrderService {
      * Obtiene una orden por ID
      */
     @Transactional(readOnly = true)
-    public Optional<OrderResponse> getOrder(Long orderId) {
+    public Optional<OrderResponse> getOrder(UUID orderId) {
         logger.debug("Getting order: {}", orderId);
         
         return orderRepository.findByIdAndDeletedAtIsNull(orderId)
@@ -102,7 +103,7 @@ public class OrderService {
      * Obtiene órdenes por customer ID
      */
     @Transactional(readOnly = true)
-    public List<OrderResponse> getOrdersByCustomer(Long customerId) {
+    public List<OrderResponse> getOrdersByCustomer(UUID customerId) {
         logger.debug("Getting orders for customer: {}", customerId);
         
         return orderRepository.findByCustomerIdAndDeletedAtIsNull(customerId)
@@ -114,7 +115,7 @@ public class OrderService {
     /**
      * Cancela una orden
      */
-    public boolean cancelOrder(Long orderId, String reason) {
+    public boolean cancelOrder(UUID orderId, String reason) {
         logger.info("Cancelling order: {} with reason: {}", orderId, reason);
         
         Optional<Order> orderOpt = orderRepository.findByIdAndDeletedAtIsNull(orderId);
@@ -153,6 +154,30 @@ public class OrderService {
     
     // Métodos privados de apoyo
     
+    /**
+     * Convierte un string a UUID. Si el string es un número, genera un UUID determinístico.
+     * Si ya es un UUID válido, lo retorna directamente.
+     */
+    private UUID parseOrGenerateUUID(String idString) {
+        if (idString == null) {
+            return null;
+        }
+        
+        try {
+            // Intentar parsear como UUID
+            return UUID.fromString(idString);
+        } catch (IllegalArgumentException e) {
+            // Si falla, intentar como número y generar UUID determinístico
+            try {
+                long id = Long.parseLong(idString);
+                // Generar UUID determinístico usando el número como parte menos significativa
+                return new UUID(0L, id);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid ID format: " + idString + ". Must be a valid UUID or numeric ID.");
+            }
+        }
+    }
+    
     private void validateOrderRequest(CreateOrderRequest request) {
         // Validar que no exista una orden con la misma referencia externa
         if (request.getExternalReference() != null && 
@@ -166,7 +191,8 @@ public class OrderService {
             
             // Validar que el asiento no esté ya reservado
             if (item.getVenueSeatId() != null) {
-                if (orderItemRepository.existsByVenueSeatIdAndDeletedAtIsNull(item.getVenueSeatId())) {
+                UUID venueSeatUuid = parseOrGenerateUUID(item.getVenueSeatId());
+                if (orderItemRepository.existsByVenueSeatIdAndDeletedAtIsNull(venueSeatUuid)) {
                     throw new IllegalArgumentException("Seat already reserved: " + item.getVenueSeatId());
                 }
             }
@@ -234,7 +260,7 @@ public class OrderService {
     private Order createOrderEntity(CreateOrderRequest request, Customer customer) {
         Order order = Order.builder()
             .customer(customer)
-            .organizerId(request.getOrganizerId())
+            .organizerId(parseOrGenerateUUID(request.getOrganizerId()))
             .expiresAt(LocalDateTime.now().plusMinutes(15))
             .build();
         
@@ -262,18 +288,18 @@ public class OrderService {
             .map(itemRequest -> {
                 OrderItem item = OrderItem.builder()
                     .order(order)
-                    .eventId(itemRequest.getEventId())
-                    .ticketTypeId(itemRequest.getTicketTypeId())
+                    .eventId(parseOrGenerateUUID(itemRequest.getEventId()))
+                    .ticketTypeId(parseOrGenerateUUID(itemRequest.getTicketTypeId()))
                     .unitPriceCents(itemRequest.getUnitPriceCents())
                     .quantity(itemRequest.getQuantity())
                     .build();
                 
                 if (itemRequest.getVenueAreaId() != null) {
-                    item.setVenueAreaId(itemRequest.getVenueAreaId());
+                    item.setVenueAreaId(parseOrGenerateUUID(itemRequest.getVenueAreaId()));
                 }
                 
                 if (itemRequest.getVenueSeatId() != null) {
-                    item.setVenueSeatId(itemRequest.getVenueSeatId());
+                    item.setVenueSeatId(parseOrGenerateUUID(itemRequest.getVenueSeatId()));
                 }
                 
                 // No guardamos aquí - se guardará automáticamente con cascade cuando se guarde la Order
@@ -347,7 +373,7 @@ public class OrderService {
         orderRepository.save(order);
     }
     
-    private void createStatusHistory(Order order, OrderStatus fromStatus, OrderStatus toStatus, Long changedBy, String note) {
+    private void createStatusHistory(Order order, OrderStatus fromStatus, OrderStatus toStatus, UUID changedBy, String note) {
         OrderStatusHistory history = OrderStatusHistory.create(order, fromStatus, toStatus, changedBy, note);
         statusHistoryRepository.save(history);
     }

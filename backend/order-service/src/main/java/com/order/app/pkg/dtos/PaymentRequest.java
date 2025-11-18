@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,8 +14,7 @@ import lombok.*;
 public class PaymentRequest {
     
     @NotNull(message = "Order ID is required")
-    @Positive(message = "Order ID must be positive")
-    private Long orderId;
+    private String orderId;
     
     @NotNull(message = "Provider ID is required")
     @Positive(message = "Provider ID must be positive")
@@ -30,8 +31,8 @@ public class PaymentRequest {
     private PaymentMetadata metadata;
     
     // Constructor personalizado para casos comunes
-    public PaymentRequest(Long orderId, Long providerId, Long amountCents, String currency) {
-        this.orderId = orderId;
+    public PaymentRequest(UUID orderId, Long providerId, Long amountCents, String currency) {
+        this.orderId = orderId != null ? orderId.toString() : null;
         this.providerId = providerId;
         this.amountCents = amountCents;
         this.currency = currency;

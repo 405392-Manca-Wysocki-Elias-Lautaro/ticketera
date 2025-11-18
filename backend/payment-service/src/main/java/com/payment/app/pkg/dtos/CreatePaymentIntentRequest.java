@@ -12,8 +12,7 @@ import lombok.*;
 public class CreatePaymentIntentRequest {
     
     @NotNull(message = "Order ID is required")
-    @Positive(message = "Order ID must be positive")
-    private Long orderId;
+    private String orderId;
     
     @NotNull(message = "Provider ID is required")
     @Positive(message = "Provider ID must be positive")

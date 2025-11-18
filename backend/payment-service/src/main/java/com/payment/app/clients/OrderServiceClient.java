@@ -33,7 +33,7 @@ public class OrderServiceClient {
     /**
      * Obtiene la información de una orden por su ID
      */
-    public Optional<OrderInfoResponse> getOrderById(Long orderId) {
+    public Optional<OrderInfoResponse> getOrderById(String orderId) {
         String url = orderServiceBaseUrl + "/" + orderId;
         
         logger.info("Fetching order from: {}", url);
@@ -52,8 +52,11 @@ public class OrderServiceClient {
             
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 ApiResponseWrapper<OrderInfoResponse> wrapper = response.getBody();
-                logger.info("Order {} retrieved successfully", orderId);
-                return Optional.ofNullable(wrapper.getData());
+                // El order-service devuelve success: true/false
+                if (wrapper.getSuccess() != null && wrapper.getSuccess() && wrapper.getData() != null) {
+                    logger.info("Order {} retrieved successfully", orderId);
+                    return Optional.of(wrapper.getData());
+                }
             }
             
             logger.warn("Order {} not found or invalid response", orderId);
@@ -71,14 +74,18 @@ public class OrderServiceClient {
     
     /**
      * DTO para unwrap la respuesta del API que viene envuelta en un objeto genérico
+     * Compatible con ApiResponse del order-service que tiene: success, message, data, timestamp
      */
     @lombok.Data
     @lombok.NoArgsConstructor
     @lombok.AllArgsConstructor
     private static class ApiResponseWrapper<T> {
-        private int status;
+        private Boolean success;  // boolean del order-service
         private String message;
         private T data;
+        private java.time.OffsetDateTime timestamp;
+        // Campo legacy para compatibilidad
+        private Integer status;
     }
 }
 

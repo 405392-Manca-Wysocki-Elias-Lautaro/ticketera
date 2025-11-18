@@ -312,14 +312,9 @@ public class PaymentService {
         
         // Si no se encuentra, buscar por Order ID (external reference)
         if (externalReference != null) {
-            try {
-                Long orderId = Long.parseLong(externalReference);
-                Optional<Payment> payment = paymentRepository.findByOrderId(orderId);
-                if (payment.isPresent()) {
-                    return payment.get();
-                }
-            } catch (NumberFormatException e) {
-                logger.warn("Invalid external reference format: {}", externalReference);
+            Optional<Payment> payment = paymentRepository.findByOrderId(externalReference);
+            if (payment.isPresent()) {
+                return payment.get();
             }
         }
         
@@ -391,7 +386,7 @@ public class PaymentService {
     /**
      * Obtiene un pago por su Order ID
      */
-    public Payment getPaymentByOrderId(Long orderId) {
+    public Payment getPaymentByOrderId(String orderId) {
         return paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found for order: " + orderId));
     }

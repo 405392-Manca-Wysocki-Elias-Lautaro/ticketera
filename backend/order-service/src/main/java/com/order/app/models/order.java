@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders", schema = "orders")
@@ -22,9 +23,9 @@ import java.util.List;
 public class Order {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    private Long id;
+    private UUID id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -33,7 +34,7 @@ public class Order {
     
     @Column(name = "organizer_id", nullable = false)
     @NotNull
-    private Long organizerId;
+    private UUID organizerId;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

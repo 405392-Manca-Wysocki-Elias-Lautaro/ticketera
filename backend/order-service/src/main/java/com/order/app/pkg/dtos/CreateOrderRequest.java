@@ -13,8 +13,7 @@ public class CreateOrderRequest {
     private CustomerInfo customer;
     
     @NotNull(message = "Organizer ID is required")
-    @Positive(message = "Organizer ID must be positive")
-    private Long organizerId;
+    private String organizerId;
     
     @Valid
     @NotEmpty(message = "Order must contain at least one item")
@@ -42,8 +41,8 @@ public class CreateOrderRequest {
     public CustomerInfo getCustomer() { return customer; }
     public void setCustomer(CustomerInfo customer) { this.customer = customer; }
     
-    public Long getOrganizerId() { return organizerId; }
-    public void setOrganizerId(Long organizerId) { this.organizerId = organizerId; }
+    public String getOrganizerId() { return organizerId; }
+    public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
     
     public List<OrderItemRequest> getItems() { return items; }
     public void setItems(List<OrderItemRequest> items) { this.items = items; }
@@ -103,16 +102,14 @@ public class CreateOrderRequest {
     
     public static class OrderItemRequest {
         @NotNull(message = "Event ID is required")
-        @Positive(message = "Event ID must be positive")
-        private Long eventId;
+        private String eventId;
         
-        private Long venueAreaId;
+        private String venueAreaId;
         
-        private Long venueSeatId;
+        private String venueSeatId;
         
         @NotNull(message = "Ticket type ID is required")
-        @Positive(message = "Ticket type ID must be positive")
-        private Long ticketTypeId;
+        private String ticketTypeId;
         
         @NotNull(message = "Unit price is required")
         @PositiveOrZero(message = "Unit price must be positive or zero")
@@ -126,17 +123,17 @@ public class CreateOrderRequest {
         public OrderItemRequest() {}
         
         // Getters and Setters
-        public Long getEventId() { return eventId; }
-        public void setEventId(Long eventId) { this.eventId = eventId; }
+        public String getEventId() { return eventId; }
+        public void setEventId(String eventId) { this.eventId = eventId; }
         
-        public Long getVenueAreaId() { return venueAreaId; }
-        public void setVenueAreaId(Long venueAreaId) { this.venueAreaId = venueAreaId; }
+        public String getVenueAreaId() { return venueAreaId; }
+        public void setVenueAreaId(String venueAreaId) { this.venueAreaId = venueAreaId; }
         
-        public Long getVenueSeatId() { return venueSeatId; }
-        public void setVenueSeatId(Long venueSeatId) { this.venueSeatId = venueSeatId; }
+        public String getVenueSeatId() { return venueSeatId; }
+        public void setVenueSeatId(String venueSeatId) { this.venueSeatId = venueSeatId; }
         
-        public Long getTicketTypeId() { return ticketTypeId; }
-        public void setTicketTypeId(Long ticketTypeId) { this.ticketTypeId = ticketTypeId; }
+        public String getTicketTypeId() { return ticketTypeId; }
+        public void setTicketTypeId(String ticketTypeId) { this.ticketTypeId = ticketTypeId; }
         
         public Long getUnitPriceCents() { return unitPriceCents; }
         public void setUnitPriceCents(Long unitPriceCents) { this.unitPriceCents = unitPriceCents; }

@@ -18,7 +18,7 @@ public class Payment {
     private Long id;
     
     @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    private String orderId;
     
     @Column(name = "provider_id", nullable = false)
     private Long providerId;

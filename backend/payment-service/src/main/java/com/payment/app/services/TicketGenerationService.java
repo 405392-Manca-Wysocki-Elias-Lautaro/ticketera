@@ -76,8 +76,8 @@ public class TicketGenerationService {
                     // Por ahora, como no tenemos occurrence_id en el order_item,
                     // usamos el event_id. En el futuro, esto debería venir del order
                     GenerateTicketRequest ticketRequest = GenerateTicketRequest.builder()
-                            .orderItemId(String.valueOf(item.getId())) // TODO: Debería ser UUID
-                            .occurrenceId(String.valueOf(item.getEventId())) // TODO: Debería venir de la orden
+                            .orderItemId(item.getId()) // UUID como String
+                            .occurrenceId(item.getEventId()) // UUID como String (temporalmente usamos eventId)
                             .userId(userId)
                             .price(BigDecimal.valueOf(item.getUnitPriceCents()).divide(BigDecimal.valueOf(100)))
                             .currency(order.getCurrency())

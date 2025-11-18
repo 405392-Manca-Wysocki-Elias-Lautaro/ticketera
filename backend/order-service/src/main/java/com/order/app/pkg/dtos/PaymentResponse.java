@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class PaymentResponse {
     
     private Long id;
-    private Long orderId;
+    private String orderId;
     private Long providerId;
     private String providerRef;
     private PaymentStatus status;
