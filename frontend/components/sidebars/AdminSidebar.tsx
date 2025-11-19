@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Calendar, DollarSign, LayoutDashboard, Plus, Settings, Home, Tickets } from "lucide-react"
+import { Calendar, LayoutDashboard, Plus, Settings, Home, Tickets } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -26,11 +26,6 @@ export function AdminSidebar() {
             title: "Crear Evento",
             href: "/admin/events/create",
             icon: Plus,
-        },
-        {
-            title: "Pagos",
-            href: "/admin/payments",
-            icon: DollarSign,
         },
         {
             title: "Validar Tickets",
