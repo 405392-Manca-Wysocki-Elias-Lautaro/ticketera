@@ -19,5 +19,9 @@ public class OrganizerMetricsDTO {
     private Double totalRevenue;
     private Long activeEventsCount;
     private Long ticketsSoldLastWeek;
+    private Long availableTickets;
+    private String mostPopularEventName;
+    private String mostProfitableEventName;
+    private String mostSoldTicketTypeName;
 }
 
