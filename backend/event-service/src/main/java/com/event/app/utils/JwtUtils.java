@@ -67,18 +67,39 @@ public class JwtUtils {
 
     /**
      * Extracts the organizerId if present in the JWT.
+     * For SUPER_ADMIN and ADMIN: if organizerId is not present, uses userId as fallback.
+     * For OWNER: organizerId is required in the JWT.
      */
     public UUID getOrganizerId() {
         Jwt jwt = getCurrentJwt();
+        String role = getRole();
         String organizerId = jwt.getClaimAsString("organizerId");
-        if (organizerId == null || organizerId.isBlank()) {
-            throw new JwtClaimNotFoundException("organizerId");
+        
+        // Si hay organizerId en el JWT, lo usamos
+        if (organizerId != null && !organizerId.isBlank()) {
+            try {
+                return UUID.fromString(organizerId);
+            } catch (IllegalArgumentException e) {
+                throw new InvalidJwtUserIdException();
+            }
         }
-        try {
-            return UUID.fromString(organizerId);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidJwtUserIdException();
+        
+        // Si no hay organizerId, verificamos el rol
+        if ("SUPER_ADMIN".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)) {
+            // Para SUPER_ADMIN y ADMIN, usamos el userId como organizerId
+            try {
+                return getUserId();
+            } catch (Exception e) {
+                throw new JwtClaimNotFoundException("No se pudo obtener organizerId ni userId del JWT");
+            }
         }
+        
+        // Para OWNER y otros roles, el organizerId es requerido
+        if ("OWNER".equalsIgnoreCase(role)) {
+            throw new JwtClaimNotFoundException("organizerId. El JWT debe incluir el claim 'organizerId' para el rol OWNER.");
+        }
+        
+        throw new JwtClaimNotFoundException("organizerId");
     }
 
     /**

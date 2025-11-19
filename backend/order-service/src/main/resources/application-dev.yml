@@ -39,7 +39,7 @@ spring:
     baseline-on-migrate: false
     locations:
       - classpath:db/migration
-      - classpath:db/r
+      - classpath:db/seeds
     clean-disabled: true
 
 logging.level:

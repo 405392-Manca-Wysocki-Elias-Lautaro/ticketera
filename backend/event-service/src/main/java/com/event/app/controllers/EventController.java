@@ -4,10 +4,12 @@ import com.event.app.dtos.CreateEventRequest;
 import com.event.app.dtos.EventDTO;
 import com.event.app.dtos.EventDetailDTO;
 import com.event.app.dtos.EventSummaryDTO;
+import com.event.app.dtos.OrganizerMetricsDTO;
 import com.event.app.dtos.response.ApiResponse;
 import com.event.app.exceptions.UnauthorizedException;
 import com.event.app.models.Event;
 import com.event.app.services.IEventService;
+import com.event.app.services.IMetricsService;
 import com.event.app.utils.ApiResponseFactory;
 import com.event.app.utils.JwtUtils;
 
@@ -25,11 +27,13 @@ import java.util.UUID;
 public class EventController {
 
     private final IEventService eventService;
+    private final IMetricsService metricsService;
     private final ModelMapper modelMapper;
     private final JwtUtils jwtUtils;
 
-    public EventController(IEventService eventService, ModelMapper modelMapper, JwtUtils jwtUtils) {
+    public EventController(IEventService eventService, IMetricsService metricsService, ModelMapper modelMapper, JwtUtils jwtUtils) {
         this.eventService = eventService;
+        this.metricsService = metricsService;
         this.modelMapper = modelMapper;
         this.jwtUtils = jwtUtils;
     }
@@ -113,6 +117,24 @@ public class EventController {
     public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable UUID id) {
         eventService.deleteEvent(id);
         return ApiResponseFactory.success("Event deleted successfully");
+    }
+
+    /**
+     * GET /events/metrics - Obtener métricas del organizador (OWNER, ADMIN o SUPER_ADMIN)
+     */
+    @GetMapping("/metrics")
+    public ResponseEntity<ApiResponse<OrganizerMetricsDTO>> getOrganizerMetrics() {
+        // Verificar que sea OWNER, ADMIN o SUPER_ADMIN
+        String role = jwtUtils.getRole();
+        if (!"OWNER".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role) && !"SUPER_ADMIN".equalsIgnoreCase(role)) {
+            throw new UnauthorizedException("Solo los OWNER, ADMIN o SUPER_ADMIN pueden acceder a esta funcionalidad");
+        }
+
+        UUID organizerId = jwtUtils.getOrganizerId();
+        
+        OrganizerMetricsDTO metrics = metricsService.getOrganizerMetrics(organizerId);
+        
+        return ApiResponseFactory.success("Métricas obtenidas exitosamente", metrics);
     }
 }
 

@@ -10,8 +10,16 @@ const api = axios.create({
 // 🔸 Interceptor de request — añade el token automáticamente
 api.interceptors.request.use((config) => {
     const token = useAuthStore.getState().token;
-    console.log("Attaching token to request:", token)
-    if (token) config.headers.Authorization = `Bearer ${token}`
+    console.log("Attaching token to request:", token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+    
+    // Solo agregar el token si existe y no está vacío
+    if (token && token.trim().length > 0) {
+        config.headers.Authorization = `Bearer ${token}`;
+    } else {
+        // Si no hay token, eliminar el header Authorization si existe
+        delete config.headers.Authorization;
+    }
+    
     return config
 })
 

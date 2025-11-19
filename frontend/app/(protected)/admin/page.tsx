@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/auth/useAuth'
 import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 import StarBorder from '@/components/StarBorder'
+import { eventService } from '@/services/eventService'
+import type { OrganizerMetrics } from '@/types/OrganizerMetrics'
 
 const salesData = [
     { month: "Ene", ventas: 12000, tickets: 240 },
@@ -31,13 +33,37 @@ const eventPerformance = [
 
 export default function AdminDashboardPage() {
     const router = useRouter()
-    const { user, isLoading } = useAuth()
+    const { user, isLoading, token } = useAuth()
+    const [metrics, setMetrics] = useState<OrganizerMetrics | null>(null)
+    const [isLoadingMetrics, setIsLoadingMetrics] = useState(true)
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
             router.push("/dashboard")
         }
     }, [user, isLoading, router])
+
+    useEffect(() => {
+        async function fetchMetrics() {
+            // Verificar que tenemos token y usuario antes de hacer la petición
+            if (!user || !RoleUtils.isAdmin(user) || !token) return;
+            
+            try {
+                setIsLoadingMetrics(true);
+                const data = await eventService.getOrganizerMetrics();
+                setMetrics(data);
+            } catch (error) {
+                console.error("Error loading metrics:", error);
+            } finally {
+                setIsLoadingMetrics(false);
+            }
+        }
+
+        // Solo hacer fetch cuando tengamos token, usuario y no esté cargando
+        if (!isLoading && user && token) {
+            fetchMetrics();
+        }
+    }, [user, isLoading, token])
 
     if (isLoading || !user || !RoleUtils.isAdmin(user)) {
         return (
@@ -76,11 +102,16 @@ export default function AdminDashboardPage() {
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">12</div>
-                                <p className="text-xs text-green-500 flex items-center gap-1">
-                                    <TrendingUp className="h-3 w-3" />
-                                    +2 este mes
-                                </p>
+                                {isLoadingMetrics ? (
+                                    <div className="h-8 w-16 animate-pulse bg-muted rounded" />
+                                ) : (
+                                    <>
+                                        <div className="text-2xl font-bold">
+                                            {metrics?.activeEventsCount?.toLocaleString() || 0}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Eventos activos</p>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -90,11 +121,21 @@ export default function AdminDashboardPage() {
                                 <Ticket className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">1,234</div>
-                                <p className="text-xs text-green-500 flex items-center gap-1">
-                                    <TrendingUp className="h-3 w-3" />
-                                    +180 esta semana
-                                </p>
+                                {isLoadingMetrics ? (
+                                    <div className="h-8 w-16 animate-pulse bg-muted rounded" />
+                                ) : (
+                                    <>
+                                        <div className="text-2xl font-bold">
+                                            {metrics?.totalTicketsSold?.toLocaleString() || 0}
+                                        </div>
+                                        {metrics && metrics.ticketsSoldLastWeek > 0 && (
+                                            <p className="text-xs text-green-500 flex items-center gap-1">
+                                                <TrendingUp className="h-3 w-3" />
+                                                +{metrics.ticketsSoldLastWeek.toLocaleString()} esta semana
+                                            </p>
+                                        )}
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -104,22 +145,38 @@ export default function AdminDashboardPage() {
                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">$456,789</div>
-                                <p className="text-xs text-green-500 flex items-center gap-1">
-                                    <TrendingUp className="h-3 w-3" />
-                                    +12% vs mes anterior
-                                </p>
+                                {isLoadingMetrics ? (
+                                    <div className="h-8 w-24 animate-pulse bg-muted rounded" />
+                                ) : (
+                                    <>
+                                        <div className="text-2xl font-bold">
+                                            ${metrics?.totalRevenue?.toLocaleString('es-AR', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0
+                                            }) || 0}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Total acumulado</p>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Asistentes</CardTitle>
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Ventas por semana</CardTitle>
                                 <Users className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">892</div>
-                                <p className="text-xs text-muted-foreground">En eventos activos</p>
+                                {isLoadingMetrics ? (
+                                    <div className="h-8 w-16 animate-pulse bg-muted rounded" />
+                                ) : (
+                                    <>
+                                        <div className="text-2xl font-bold">
+                                            {metrics?.ticketsSoldLastWeek?.toLocaleString() || 0}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Tickets últimos 7 días</p>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
                     </div>

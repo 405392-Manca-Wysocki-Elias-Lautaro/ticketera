@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import type { ApiResponse } from "@/types/Response/ApiResponse";
+import type { OrganizerMetrics } from "@/types/OrganizerMetrics";
 
 // Interface básica del evento (puedes expandirla según necesites)
 export interface EventInfo {
@@ -47,6 +48,19 @@ export const eventService = {
         });
         
         return eventsMap;
+    },
+
+    /**
+     * Obtiene las métricas del organizador
+     */
+    async getOrganizerMetrics(): Promise<OrganizerMetrics | null> {
+        try {
+            const response = await api.get<ApiResponse<OrganizerMetrics>>("/events/metrics");
+            return response.data.data;
+        } catch (error) {
+            console.error("Error fetching organizer metrics:", error);
+            return null;
+        }
     }
 };
 
