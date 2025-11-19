@@ -1,3 +1,10 @@
+# [1.0.0-next.11](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.10...auth-v1.0.0-next.11) (2025-11-19)
+
+
+### Features
+
+* add metrics ([1a8aea5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/1a8aea5f4313e81b36329e701993a8ae890f3282))
+
 # [1.0.0-next.10](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.9...auth-v1.0.0-next.10) (2025-11-19)
 
 
