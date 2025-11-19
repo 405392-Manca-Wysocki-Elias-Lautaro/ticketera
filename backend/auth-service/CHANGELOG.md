@@ -1,3 +1,10 @@
+# [1.0.0-next.10](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.9...auth-v1.0.0-next.10) (2025-11-19)
+
+
+### Features
+
+* delete pagos front ([782d219](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/782d219be524cbb1161dfeda31b42c44167f3d5e))
+
 # [1.0.0-next.9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.8...auth-v1.0.0-next.9) (2025-11-19)
 
 
