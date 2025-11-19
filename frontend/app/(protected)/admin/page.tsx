@@ -114,12 +114,6 @@ export default function AdminDashboardPage() {
                                                 <div className="text-2xl font-bold">
                                                     {metrics?.totalTicketsSold?.toLocaleString() || 0}
                                                 </div>
-                                                {metrics && metrics.ticketsSoldLastWeek > 0 && (
-                                                    <p className="text-xs text-green-500 flex items-center gap-1">
-                                                        <TrendingUp className="h-3 w-3" />
-                                                        +{metrics.ticketsSoldLastWeek.toLocaleString()} esta semana
-                                                    </p>
-                                                )}
                                                 <p className="text-xs text-muted-foreground">Total de tickets vendidos</p>
                                             </>
                                         )}
