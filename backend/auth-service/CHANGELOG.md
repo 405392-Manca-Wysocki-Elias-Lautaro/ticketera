@@ -1,3 +1,10 @@
+# [1.0.0-next.12](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.11...auth-v1.0.0-next.12) (2025-11-19)
+
+
+### Features
+
+* delete green text ([17498f6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/17498f6d5d2780fd49e558b447f10f8e80032383))
+
 # [1.0.0-next.11](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.10...auth-v1.0.0-next.11) (2025-11-19)
 
 
