@@ -1,8 +1,12 @@
 package com.auth.app.domain.model;
 
 import java.time.OffsetDateTime;
-import lombok.*;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -15,6 +19,7 @@ public class UserModel {
     private String email;
     private boolean emailVerified;
     private String password;
+    private String passwordHash;
     private RoleModel role;
     private boolean mfaEnabled;
     private boolean isActive;

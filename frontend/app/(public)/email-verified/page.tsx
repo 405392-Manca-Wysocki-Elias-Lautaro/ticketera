@@ -37,7 +37,7 @@ export default function EmailVerifiedPage() {
                 <CardHeader className="space-y-4">
                     <div className="flex justify-center">
                         <div className="relative h-16 w-16">
-                            <Image src="/logo.png" alt="Ticketera" fill className="object-contain" />
+                            <Image src="/logo.png" alt="Ticketly" fill className="object-contain" />
                         </div>
                     </div>
 
@@ -102,7 +102,7 @@ export default function EmailVerifiedPage() {
                                     Tu cuenta está lista para usar. Inicia sesión para acceder a la plataforma.
                                 </p>
                                 <Button asChild className="w-full gradient-brand text-white cursor-pointer">
-                                    <Link href="/login">
+                                    <Link href="/app/login">
                                         Ir al Login
                                         <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>
@@ -114,13 +114,13 @@ export default function EmailVerifiedPage() {
                                     El enlace de verificación puede haber expirado o ser inválido.
                                 </p>
                                 <Button asChild className="w-full gradient-brand text-white cursor-pointer">
-                                    <Link href="/verify-email">
+                                    <Link href="/app/verify-email">
                                         Solicitar nuevo correo
                                         <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>
                                 </Button>
                                 <Button asChild variant="outline" className="w-full cursor-pointer bg-transparent">
-                                    <Link href="/login">Ir al Login</Link>
+                                    <Link href="/app/login">Ir al Login</Link>
                                 </Button>
                             </>
                         )}

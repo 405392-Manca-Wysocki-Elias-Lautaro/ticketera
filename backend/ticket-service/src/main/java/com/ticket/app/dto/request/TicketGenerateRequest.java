@@ -2,6 +2,7 @@ package com.ticket.app.dto.request;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -13,17 +14,15 @@ import lombok.Data;
 public class TicketGenerateRequest {
 
     @NotBlank(message = "The field 'orderItemId' is required.")
-    private String orderItemId;
+    private UUID orderItemId;
 
-    @NotBlank(message = "The field 'occurrenceId' is required.")
-    private String occurrenceId;
+    @NotNull(message = "The field 'eventId' is required.")
+    private UUID eventId;
 
-    @NotBlank(message = "The field 'userId' is required.")
-    private String userId;
-    
-    // 📝 Event information (optional for display purposes)
-    private String eventTitle;
-    private String eventLocation;
+    @NotNull(message = "The field 'eventVenueAreaId' is required.")
+    private UUID eventVenueAreaId;
+
+    private UUID eventVenueSeatId;
 
     // 💰 Pricing fields
     @NotNull(message = "The field 'price' is required.")

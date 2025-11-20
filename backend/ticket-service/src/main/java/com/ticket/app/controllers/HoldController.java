@@ -30,7 +30,7 @@ public class HoldController {
     public ResponseEntity<?> createHold(@RequestBody HoldCreateRequest request) {
         Hold hold = holdService.createHold(
                 request.getCustomerId(),
-                request.getOccurrenceId(),
+                request.getEventId(),
                 request.getEventVenueAreaId(),
                 request.getEventVenueSeatId(),
                 request.getQuantity()
@@ -41,9 +41,9 @@ public class HoldController {
     }
 
     // 🔁 Convertir hold a CONVERTED (al generar ticket)
-    @PutMapping("/convert/{occurrenceId}")
-    public ResponseEntity<?> convertHold(@PathVariable UUID occurrenceId) {
-        holdService.convertHold(occurrenceId);
+    @PutMapping("/convert/{eventId}")
+    public ResponseEntity<?> convertHold(@PathVariable UUID eventId) {
+        holdService.convertHold(eventId);
         return ApiResponseFactory.success("Hold successfully converted to ticket.", null);
     }
 

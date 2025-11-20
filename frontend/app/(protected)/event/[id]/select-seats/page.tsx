@@ -66,7 +66,7 @@ export default function SelectSeatsPage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/login")
+            router.push("/app/login")
         }
     }, [user, isLoading, router])
 
@@ -124,7 +124,7 @@ export default function SelectSeatsPage() {
 
             <main className="container mx-auto px-4 py-8">
                 <Button variant="ghost" asChild className="mb-6">
-                    <Link href={`/event/${event.id}`}>
+                    <Link href={`/app/event/${event.id}`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Volver al evento
                     </Link>

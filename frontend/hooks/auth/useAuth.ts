@@ -13,16 +13,23 @@ export function useAuth() {
     async function logout() {
         toast.loading("Cerrando sesión...");
         try {
-            await serverLogout();
+            await serverLogout(); // Logout al backend real
             toast.dismiss();
             toast.success("Sesión cerrada correctamente");
         } catch {
             setSessionFlag(false);
+
+            try {
+                await fetch("/api/auth/local-logout", { method: "POST" });
+            } catch {
+                console.warn("No se pudo limpiar la cookie refreshToken");
+            }
+
             toast.dismiss();
             toast.warning("Sesión cerrada localmente");
         } finally {
             localLogout();
-            router.push("/login");
+            router.push("/app/dashboard");
         }
     }
 

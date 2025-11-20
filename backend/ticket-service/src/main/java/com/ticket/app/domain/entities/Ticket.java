@@ -38,8 +38,8 @@ public class Ticket {
     @Column(name = "order_item_id", nullable = false)
     private UUID orderItemId;
 
-    @Column(name = "occurrence_id", nullable = false)
-    private UUID occurrenceId;
+    @Column(name = "event_id", nullable = false)
+    private UUID eventId;
 
     @Column(name = "event_venue_area_id")
     private UUID eventVenueAreaId;

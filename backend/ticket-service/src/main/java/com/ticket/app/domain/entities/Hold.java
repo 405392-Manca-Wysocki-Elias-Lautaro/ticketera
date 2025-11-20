@@ -23,8 +23,8 @@ public class Hold {
     @Column(name = "customer_id")
     private UUID customerId;
 
-    @Column(name = "occurrence_id", nullable = false)
-    private UUID occurrenceId;
+    @Column(name = "event_id", nullable = false)
+    private UUID eventId;
 
     @Column(name = "event_venue_area_id")
     private UUID eventVenueAreaId;

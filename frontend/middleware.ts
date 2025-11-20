@@ -24,14 +24,14 @@ export function middleware(req: NextRequest) {
 
     // No autenticado → ruta protegida
     if (!isAuthenticated && isProtected) {
-        const loginUrl = new URL("/login", req.url)
+        const loginUrl = new URL("/app/login", req.url)
         loginUrl.searchParams.set("from", pathname)
         return NextResponse.redirect(loginUrl)
     }
 
     // Autenticado → no dejar entrar a login/register
     if (isAuthenticated && isPublicOnly) {
-        return NextResponse.redirect(new URL("/dashboard", req.url))
+        return NextResponse.redirect(new URL("/app/dashboard", req.url))
     }
 
     return NextResponse.next()
