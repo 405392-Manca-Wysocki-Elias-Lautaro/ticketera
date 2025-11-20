@@ -28,7 +28,7 @@ export function useLogin() {
             setSessionFlag(true);
 
             toast.success(`Bienvenido ${authResponse.user.firstName || ""}`);
-            router.push("/dashboard");
+            router.push("/app/dashboard");
         },
         onError: (error: AxiosError<any>) => {
             const code = error.response?.data?.data?.code;
@@ -44,7 +44,7 @@ export function useLogin() {
                 );
 
                 if (email) resend(email);
-                router.push("/verify-email");
+                router.push("/app/verify-email");
                 return;
             }
 

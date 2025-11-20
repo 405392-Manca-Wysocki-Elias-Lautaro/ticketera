@@ -250,7 +250,7 @@ public class AuthServiceImpl implements AuthService {
             throw new SamePasswordException();
         }
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         userService.update(user.getId(), user);
 
@@ -308,7 +308,7 @@ public class AuthServiceImpl implements AuthService {
             throw new SamePasswordException();
         }
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         userService.update(user.getId(), user);
 

@@ -15,7 +15,22 @@ spring:
         locator:
           enabled: false
       routes:
-        # Rutas de API - orden negativo para máxima prioridad
+
+        - id: static-next
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/favicon.ico, /manifest.webmanifest, /_next/**, /assets/**, /__nextjs_original-stack-frames, /__nextjs_font/**, /textures/**
+          filters:
+            - PreserveHostHeader
+
+        - id: frontend
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/app/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/app/?(?<segment>.*), /${segment}
+
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
@@ -31,7 +46,6 @@ spring:
             - Path=/api/events/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/events/?(?<segment>.*), /${segment}
           order: -100
 
@@ -41,7 +55,6 @@ spring:
             - Path=/api/tickets/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/tickets/?(?<segment>.*), /${segment}
           order: -100
 
@@ -51,7 +64,6 @@ spring:
             - Path=/api/payments/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/payments/?(?<segment>.*), /${segment}
           order: -100
 
@@ -70,7 +82,6 @@ spring:
             - Path=/api/notifications/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/notifications/?(?<segment>.*), /${segment}
           order: -100
 
@@ -80,7 +91,6 @@ spring:
             - Path=/api/orders/**
           filters:
             - PreserveHostHeader
-            - RemoveRequestHeader=Cookie
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
           order: -100
 
@@ -140,7 +150,7 @@ spring:
           "[/**]":
             allowedOrigins:
               - "http://localhost:3000"
-              - "https://windy-nydia-noncoincident.ngrok-free.dev"
+              - "https://accepts-legislative-sara-pressed.trycloudflare.com"
             allowedMethods: "*"
             allowedHeaders: "*"
             exposedHeaders:

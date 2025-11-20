@@ -16,7 +16,7 @@ export function useRegister() {
         },
         onSuccess: (response: ApiResponse<AuthResponse>) => {
             const authResponse: AuthResponse = response.data;
-            router.push(`/verify-email?email=${encodeURIComponent(authResponse.user.email)}`)
+            router.push(`/app/verify-email?email=${encodeURIComponent(authResponse.user.email)}`)
         }
     });
 }

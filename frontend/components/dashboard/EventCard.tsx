@@ -4,22 +4,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import TiltedCard from "@/components/TiltedCard"
-import GradientText from '../GradientText'
 import StarBorder from '../StarBorder'
-
-//TODO: Borrar
-export interface Event {
-    id: string
-    title: string
-    description: string
-    category: string
-    date: string
-    time: string
-    location: string
-    availableTickets: number
-    price: number
-    image?: string
-}
+import { Event } from '@/types/Event'
+import GradientText from '../GradientText'
 
 interface EventCardProps {
     event: Event
@@ -27,18 +14,23 @@ interface EventCardProps {
 
 
 export function EventCard({ event }: EventCardProps) {
-    const formattedDate = new Date(event.date).toLocaleDateString("es-ES", {
+    const formattedDate = new Date(event.startsAt).toLocaleDateString("es-ES", {
         day: "numeric",
         month: "long",
-        year: "numeric",
+        // year: "numeric",
+    })
+
+    const formattedTime = new Date(event.startsAt).toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
     })
 
     return (
         <Card className="overflow-hidden hover:shadow-lg transition-shadow pt-0">
-            <Link href={`/event/${event.id}`}>
+            <Link href={`/app/event/${event.id}`}>
                 <div className="relative h-48 w-full">
                     <TiltedCard
-                        imageSrc={event.image || "/placeholder.svg"}
+                        imageSrc={"/app" + event.coverUrl || "/placeholder.svg"}
                         altText={event.title}
                         captionText={event.title}
                         containerHeight="12rem"
@@ -51,7 +43,7 @@ export function EventCard({ event }: EventCardProps) {
                         displayOverlayContent
                         overlayContent={
                             <Badge className="absolute top-5 right-8 gradient-brand  text-white border-0">
-                                {event.category}
+                                {event?.categoryName}
                             </Badge>
                         }
                     />
@@ -59,7 +51,7 @@ export function EventCard({ event }: EventCardProps) {
             </Link>
 
             <CardContent className="p-4 space-y-3">
-                <Link href={`/event/${event.id}`}>
+                <Link href={`/app/event/${event.id}`}>
                     <h3 className="font-bold text-lg line-clamp-1 hover:text-primary transition-colors">
                         {event.title}
                     </h3>
@@ -71,16 +63,16 @@ export function EventCard({ event }: EventCardProps) {
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4 shrink-0" />
                         <span className="line-clamp-1">
-                            {formattedDate} - {event.time}
+                            {formattedDate} - {formattedTime}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="h-4 w-4 shrink-0" />
-                        <span className="line-clamp-1">{event.location}</span>
+                        <span className="line-clamp-1">{event.venueName}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Ticket className="h-4 w-4 shrink-0" />
-                        <span>{event.availableTickets} entradas disponibles</span>
+                        <span>{event.totalAvailableTickets} entradas disponibles</span>
                     </div>
                 </div>
             </CardContent>
@@ -90,14 +82,13 @@ export function EventCard({ event }: EventCardProps) {
                 <div>
                     <p className="text-xs text-muted-foreground">Desde</p>
                     <GradientText>
-                        <p className="text-xl font-bold">${event.price.toLocaleString()}</p>
+                        <p className="text-xl font-bold">{event.currency}${event.minPriceCents}</p>
                     </GradientText>
-
                 </div>
 
                 <StarBorder>
                     <Button asChild className="gradient-brand text-white">
-                        <Link href={`/event/${event.id}`}>Ver Detalles</Link>
+                        <Link href={`/app/event/${event.id}`}>Ver Detalles</Link>
                     </Button>
                 </StarBorder>
 

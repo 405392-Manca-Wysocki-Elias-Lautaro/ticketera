@@ -21,7 +21,7 @@ public class TicketModel {
     private UUID id;
 
     private UUID orderItemId;
-    private UUID occurrenceId;
+    private UUID eventId;
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;
     private UUID userId;
@@ -46,4 +46,6 @@ public class TicketModel {
     private OffsetDateTime updatedAt;
 
     private List<TicketStatusHistoryModel> history;
+
+    private EventModel event;
 }

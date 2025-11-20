@@ -106,7 +106,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
-                .domain(cookieProps.getDomain())
+                .domain(null)
                 .path(cookieProps.getPath())
                 .maxAge(refreshDuration)
                 .build();
@@ -115,7 +115,7 @@ public class AuthController {
                 .httpOnly(false)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
-                .domain(cookieProps.getDomain())
+                .domain(null)
                 .path(cookieProps.getPath())
                 .maxAge(refreshDuration)
                 .build();
@@ -163,7 +163,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
-                .domain(cookieProps.getDomain())
+                .domain(null)
                 .path(cookieProps.getPath())
                 .maxAge(Duration.between(OffsetDateTime.now(), rotatedRefresh.getExpiresAt()))
                 .build();
@@ -191,7 +191,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
-                .domain(cookieProps.getDomain())
+                .domain(null)
                 .path(cookieProps.getPath())
                 .maxAge(0)
                 .build();
@@ -200,7 +200,7 @@ public class AuthController {
                 .httpOnly(false)
                 .secure(cookieProps.isSecure())
                 .sameSite(cookieProps.getSameSite())
-                .domain(cookieProps.getDomain())
+                .domain(null)
                 .path(cookieProps.getPath())
                 .maxAge(0)
                 .build();

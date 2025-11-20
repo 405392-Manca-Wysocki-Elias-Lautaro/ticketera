@@ -11,6 +11,6 @@ public interface TicketService {
     TicketModel validateByQrToken(String qrToken);
     TicketModel validateByCode(String code);
     TicketModel getById(UUID id);
-    List<TicketModel> getByUserId(UUID userId);
+    List<TicketModel> getByUserId();
 }
 

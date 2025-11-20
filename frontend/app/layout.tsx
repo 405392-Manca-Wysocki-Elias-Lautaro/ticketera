@@ -6,12 +6,13 @@ import ReactQueryProvider from '@/components/providers/QueryClientProvider';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { showBrandConsoleMessage } from '@/utils/showBrandConsoleMessage';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Ticketera - Plataforma de Eventos",
+    title: "Ticketly - Plataforma de Eventos",
     description: "Compra y vende entradas de forma segura y rápida",
     manifest: "/manifest.json",
 };
@@ -37,9 +38,13 @@ export default function RootLayout({
             >
                 <Toaster position="top-center" richColors />
                 <ReactQueryProvider>
-                    <TooltipProvider>
-                        {children}
-                    </TooltipProvider>
+                    <SidebarProvider>
+                        <TooltipProvider>
+                            <div className='h-screen w-screen'>
+                                {children}
+                            </div>
+                        </TooltipProvider>
+                    </SidebarProvider>
                 </ReactQueryProvider>
                 
                 {/* Mercado Pago SDK - Al final del body */}

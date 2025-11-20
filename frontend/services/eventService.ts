@@ -1,6 +1,7 @@
 import api from "@/lib/api";
 import type { ApiResponse } from "@/types/Response/ApiResponse";
 import type { OrganizerMetrics } from "@/types/OrganizerMetrics";
+import { CreateEvent } from '@/types/Request/CreateEvent';
 
 // Interface básica del evento (puedes expandirla según necesites)
 export interface EventInfo {
@@ -16,6 +17,8 @@ export interface EventInfo {
     startsAt?: string;
     endsAt?: string;
 }
+
+const BASE_URL = "/events";
 
 export const eventService = {
     /**
@@ -36,17 +39,17 @@ export const eventService = {
      */
     async getEventsByIds(eventIds: string[]): Promise<Map<string, EventInfo>> {
         const eventsMap = new Map<string, EventInfo>();
-        
+
         // Fetch all events in parallel
         const promises = eventIds.map(id => this.getEventById(id));
         const results = await Promise.all(promises);
-        
+
         results.forEach((event, index) => {
             if (event) {
                 eventsMap.set(eventIds[index], event);
             }
         });
-        
+
         return eventsMap;
     },
 
@@ -61,6 +64,11 @@ export const eventService = {
             console.error("Error fetching organizer metrics:", error);
             return null;
         }
-    }
+    },
+
+    create: (data: CreateEvent) => api.post(`${BASE_URL}`, data),
+
+    getAllCategories: () => api.get(`${BASE_URL}/categories`)
+
 };
 

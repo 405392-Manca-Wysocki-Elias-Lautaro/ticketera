@@ -10,8 +10,8 @@ public class HoldCreateRequest {
     @NotNull(message = "El campo customerId es obligatorio.")
     private UUID customerId;
 
-    @NotNull(message = "El campo occurrenceId es obligatorio.")
-    private UUID occurrenceId;
+    @NotNull(message = "El campo eventId es obligatorio.")
+    private UUID eventId;
 
     private UUID eventVenueAreaId;
     private UUID eventVenueSeatId;

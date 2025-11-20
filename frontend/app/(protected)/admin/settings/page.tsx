@@ -23,7 +23,7 @@ export default function AdminSettingsPage() {
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/dashboard")
+            router.push("/app/dashboard")
         }
     }, [user, isLoading, router])
 

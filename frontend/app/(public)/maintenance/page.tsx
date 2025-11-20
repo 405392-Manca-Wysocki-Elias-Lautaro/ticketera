@@ -12,7 +12,7 @@ export default function MaintenancePage() {
                 <CardHeader className="space-y-4">
                     <div className="flex justify-center">
                         <div className="relative h-16 w-16">
-                            <Image src="/logo.png" alt="Ticketera" fill className="object-contain" />
+                            <Image src="/logo.png" alt="Ticketly" fill className="object-contain" />
                         </div>
                     </div>
                     <div className="flex justify-center">

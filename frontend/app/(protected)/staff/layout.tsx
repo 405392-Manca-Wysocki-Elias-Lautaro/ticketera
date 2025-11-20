@@ -1,13 +1,38 @@
-import { StaffSidebar } from '@/components/sidebars/StaffSidebar';
+'use client'
 
-export default function StaffLayout({ children }: { children: React.ReactNode; }) {
+import { Navbar } from '@/components/Navbar';
+import { AdminStaffSidebar } from '@/components/sidebars/AdminStaffSidebar';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { useAuthStore } from '@/lib/store';
+
+export default function StaffLayout({ children }: { children: React.ReactNode }) {
+
+    const {user} = useAuthStore();
+
     return (
-
         <div className="flex h-screen w-screen overflow-hidden">
-            <StaffSidebar />
-            <div className="flex w-full h-screen justify-center items-start pb-5">
-                {children}
-            </div>
+            <AdminStaffSidebar user={user} />
+
+            <SidebarInset className="flex flex-col w-full min-h-screen">
+
+                <Navbar
+                    leftSlot={
+                        <div className="md:hidden">
+                            <SidebarTrigger />
+                        </div>
+                    }
+                    hideSearchOn={[
+                        "/staff",
+                        "/staff/events",
+                    ]}
+
+                />
+
+                <div className="flex-1 w-full flex flex-col items-center justify-start px-4">
+                    {children}
+                </div>
+
+            </SidebarInset>
         </div>
     )
 }

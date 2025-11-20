@@ -4,8 +4,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,6 +34,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ApiResponse<ApiError>> handleMissingRequestCookie(
+            MissingRequestCookieException ex,
+            HttpServletRequest request) {
+
+        String cookieName = ex.getCookieName();
+
+        if ("refreshToken".equals(cookieName)) {
+            log.warn("Missing refreshToken cookie at {}: {}", request.getRequestURI(), ex.getMessage());
+            return ApiErrorFactory.error(ErrorCatalog.MISSING_REFRESH_TOKEN, null);
+        }
+
+        log.warn("Missing required cookie '{}' at {}: {}", cookieName, request.getRequestURI(), ex.getMessage());
+
+        Map<String, String> details = Map.of(
+                "cookie", cookieName
+        );
+
+        return ApiErrorFactory.error(ErrorCatalog.MISSING_REQUIRED_COOKIE, details);
+    }
 
     // ⚠️ Validaciones fallidas (@Valid en DTOs)
     @ExceptionHandler(MethodArgumentNotValidException.class)

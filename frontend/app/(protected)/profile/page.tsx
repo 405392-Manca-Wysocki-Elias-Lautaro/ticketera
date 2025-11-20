@@ -15,7 +15,7 @@ import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 import StarBorder from '@/components/StarBorder'
 import Link from 'next/link'
-import { StaffSidebar } from '@/components/sidebars/StaffSidebar'
+import { AdminStaffSidebar } from '@/components/sidebars/AdminStaffSidebar'
 
 export default function ProfilePage() {
     const router = useRouter()
@@ -24,7 +24,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/login")
+            router.push("/app/login")
         }
     }, [user, isLoading, router])
 
@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
             {RoleUtils.isStaff(user) && (
                 <div className="fixed left-0 h-full">
-                    <StaffSidebar />
+                    <AdminStaffSidebar user={user} />
                 </div>
             )}
 
@@ -62,7 +62,7 @@ export default function ProfilePage() {
                     {RoleUtils.isCustomer(user) && (
                         <div className="absolute left-0">
                             <Button variant="ghost" asChild className="cursor-pointer">
-                                <Link href="/dashboard">
+                                <Link href="/app/dashboard">
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Volver al inicio
                                 </Link>
