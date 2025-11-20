@@ -107,7 +107,7 @@ public class TicketServiceImpl implements TicketService {
             // 5️⃣ Persist ticket
             Ticket saved = ticketRepository.save(modelMapper.map(model, Ticket.class));
 
-            logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued", userId);
+            logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued");
 
             return this.getById(saved.getId());
 
@@ -178,23 +178,11 @@ public class TicketServiceImpl implements TicketService {
     // 🧾 Register status change history
     // ------------------------------------------------------------
     private void logTicketStatusChange(Ticket ticket, TicketStatus from, TicketStatus to, String note) {
-        logTicketStatusChange(ticket, from, to, note, null);
-    }
-    
-    private void logTicketStatusChange(Ticket ticket, TicketStatus from, TicketStatus to, String note, UUID userId) {
         TicketStatusHistory history = new TicketStatusHistory();
         history.setTicket(ticket);
         history.setFromStatus(from != null ? from.name().toLowerCase() : null);
         history.setToStatus(to.name().toLowerCase());
-        
-        // Use provided userId or get from JWT
-        try {
-            history.setUpdatedUser(userId != null ? userId : jwtUtils.getUserId());
-        } catch (Exception e) {
-            // If no JWT and no userId provided, use the ticket's userId
-            history.setUpdatedUser(ticket.getUserId());
-        }
-        
+        history.setUpdatedUser(jwtUtils.getUserId());
         history.setUpdatedAt(OffsetDateTime.now());
         history.setNote(note);
 
