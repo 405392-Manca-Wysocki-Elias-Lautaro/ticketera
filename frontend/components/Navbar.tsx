@@ -45,7 +45,7 @@ interface NavbarProps {
 
 export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) {
     const { user, logout } = useAuth()
-    const router = useRouter()
+    const router = useRouter();
     const pathname = usePathname()
 
     const [searchQuery, setSearchQuery] = useState("")
@@ -94,10 +94,10 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                     <div className="flex items-center gap-2 shrink-0">
                         {leftSlot}
 
-                        <Link href={logoHref} className="flex items-center gap-2 shrink-0">
+                        <Link href={"/app" + logoHref} className="flex items-center gap-2 shrink-0">
                             <Image
                                 src="/logo.png"
-                                alt="Ticketera"
+                                alt="Ticketly"
                                 width={32}
                                 height={32}
                                 className="h-8 w-8 rounded-full"
@@ -133,7 +133,7 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button variant="ghost" size="icon" asChild className="shrink-0">
-                                        <Link href="/my-tickets">
+                                        <Link href="/app/my-tickets">
                                             <Ticket className="h-5 w-5" />
                                             <span className="sr-only">Mis Tickets</span>
                                         </Link>
@@ -175,7 +175,7 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                                         {(RoleUtils.canManageEvents(user)) && (
                                             <>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href="/dashboard">
+                                                    <Link href="/app/dashboard">
                                                         <Home className="mr-2 h-4 w-4" />
                                                         Ver Eventos Públicos
                                                     </Link>
@@ -187,13 +187,13 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                                         {RoleUtils.isAdmin(user) && (
                                             <>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href="/admin">
+                                                    <Link href="/app/admin">
                                                         <LayoutDashboard className="mr-2 h-4 w-4" />
                                                         Panel Admin
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href="/admin/events">
+                                                    <Link href="/app/admin/events">
                                                         <Calendar className="mr-2 h-4 w-4" />
                                                         Mis Eventos
                                                     </Link>
@@ -205,7 +205,7 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                                         {RoleUtils.isStaff(user) && (
                                             <>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href="/staff">
+                                                    <Link href="/app/staff">
                                                         <LayoutDashboard className="mr-2 h-4 w-4" />
                                                         Panel Staff
                                                     </Link>
@@ -215,7 +215,7 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                                         )}
 
                                         <DropdownMenuItem asChild>
-                                            <Link href="/profile">
+                                            <Link href="/app/profile">
                                                 <Settings className="mr-2 h-4 w-4" />
                                                 Configuración
                                             </Link>
@@ -231,7 +231,7 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                                     </>
                                 ) : (
                                     <DropdownMenuItem
-                                        onClick={() => router.push("/login")}
+                                        onClick={() => router.push("/app/login")}
                                         className="text-info"
                                     >
                                         <LogIn className="mr-2 h-4 w-4" />

@@ -5,7 +5,6 @@ import {
     LayoutDashboard,
     Plus,
     Settings,
-    Home,
     TicketIcon,
     QrCode,
 } from "lucide-react"

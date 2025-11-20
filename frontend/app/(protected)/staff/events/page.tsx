@@ -19,7 +19,7 @@ export default function StaffEventsPage() {
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isStaff(user))) {
-            router.push("/dashboard")
+            router.push("/app/dashboard")
         }
     }, [user, isLoading, router])
 

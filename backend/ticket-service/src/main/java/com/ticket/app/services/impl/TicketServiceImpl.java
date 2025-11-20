@@ -196,11 +196,6 @@ public class TicketServiceImpl implements TicketService {
     @Transactional(readOnly = true)
     public TicketModel getById(UUID id) {
 
-        UserRole role = jwtUtils.getRole();
-        if (!RoleUtil.hasAnyRole(role, UserRole.SUPER_ADMIN)) {
-            throw new UnauthorizedTicketAccessException();
-        }
-
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(TicketNotFoundException::new);
 

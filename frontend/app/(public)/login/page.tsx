@@ -48,12 +48,12 @@ export default function LoginPage() {
                 <CardHeader className="space-y-4 text-center">
                     <div className="flex justify-center">
                         <div className="relative h-16 w-16">
-                            <Image src="/logo.png" alt="Ticketera" fill className="object-contain" />
+                            <Image src="/logo.png" alt="Ticketly" fill className="object-contain" />
                         </div>
                     </div>
                     <div>
                         <GradientText>
-                            <CardTitle className="text-2xl">Bienvenido a Ticketera</CardTitle>
+                            <CardTitle className="text-2xl">Bienvenido a Ticketly</CardTitle>
                         </GradientText>
                         <CardDescription>Ingresa tus credenciales para continuar</CardDescription>
                     </div>
@@ -77,7 +77,7 @@ export default function LoginPage() {
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Contraseña</Label>
                                 <Link
-                                    href="/forgot-password"
+                                    href="/app/forgot-password"
                                     className="text-xs text-primary hover:underline cursor-pointer"
                                 >
                                     ¿Olvidaste tu contraseña?
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
                     <div className="mt-4 text-center text-sm text-muted-foreground">
                         ¿No tienes cuenta?{" "}
-                        <Link href="/signup" className="text-primary hover:underline cursor-pointer">
+                        <Link href="/app/signup" className="text-primary hover:underline cursor-pointer">
                             Regístrate
                         </Link>
                     </div>

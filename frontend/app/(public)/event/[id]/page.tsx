@@ -61,7 +61,7 @@ export default function EventDetailPage() {
                         {/* Event Image */}
                         <div className="relative h-64 md:h-96 w-full rounded-xl overflow-hidden">
                             <TiltedCard
-                                imageSrc={event?.coverUrl || "/placeholder.svg"}
+                                imageSrc={"/app" + event?.coverUrl || "/placeholder.svg"}
                                 altText={event?.title}
                                 captionText={event?.title}
                                 containerHeight="100%"
@@ -174,8 +174,7 @@ export default function EventDetailPage() {
                                     <Button
                                         className="w-full gradient-brand text-white"
                                         size="lg"
-                                        // onClick={() => router.push(`/event/${event?.id}/select-seats`)}
-                                        onClick={() => router.push(`/event/1/select-seats`)}
+                                        onClick={() => router.push(`/app/event/${event?.id}/select-seats`)}
                                     >
                                         Comprar Entradas
                                     </Button>

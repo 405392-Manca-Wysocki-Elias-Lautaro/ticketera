@@ -13,7 +13,6 @@ import {
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
-    SidebarSeparator,
     SidebarMenuItem,
     SidebarRail,
 } from "@/components/ui/sidebar"
@@ -24,15 +23,21 @@ import { RoleUtils } from "@/utils/roleUtils"
 export function AdminStaffSidebar({ user }: { user: any }) {
     const pathname = usePathname()
 
-    const isAdmin = RoleUtils.isAdmin(user) || RoleUtils.isSuperAdmin(user)
-    const isStaff = RoleUtils.isStaff(user)
+    const isSuper = RoleUtils.isSuperAdmin(user)
+    const isAdmin = isSuper || RoleUtils.isAdmin(user)
+    const isStaff = isSuper || RoleUtils.isStaff(user)
 
-    const menu = [
-        ...(isAdmin ? SidebarConfig.admin : []),
-        ...(isStaff && !isAdmin ? SidebarConfig.staff : []),
-    ]
+    let menu: any[] = []
 
-    const panelTitle = isAdmin ? "Panel Admin" : "Panel Staff"
+    if (RoleUtils.isSuperAdmin(user)) {
+        menu = [...SidebarConfig.admin, ...SidebarConfig.staff]
+    } else if (RoleUtils.isAdmin(user)) {
+        menu = [...SidebarConfig.admin]
+    } else if (RoleUtils.isStaff(user)) {
+        menu = [...SidebarConfig.staff]
+    }
+
+    const panelTitle = (isAdmin || isSuper) ? "Panel Admin" : "Panel Staff"
 
     return (
         <Sidebar collapsible="icon" variant="sidebar" className="border-r">
@@ -47,20 +52,21 @@ export function AdminStaffSidebar({ user }: { user: any }) {
                     <SidebarGroupLabel>Menú</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {menu.map((link) => (
-                                <SidebarMenuItem key={link.href}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={pathname === link.href}
-                                        tooltip={link.title}
-                                    >
-                                        <Link href={link.href}>
-                                            <link.icon className="mr-2 h-4 w-4" />
-                                            <span>{link.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {menu.map((link) =>  (
+                                    <SidebarMenuItem key={link.href}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={pathname === link.href}
+                                            tooltip={link.title}
+                                        >
+                                            <Link href={"/app" + link.href}>
+                                                <link.icon className="mr-2 h-4 w-4" />
+                                                <span>{link.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                )
+                            )}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

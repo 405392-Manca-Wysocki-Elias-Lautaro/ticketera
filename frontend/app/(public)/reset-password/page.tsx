@@ -23,7 +23,7 @@ import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicat
 
 
 export default function ResetPasswordPage() {
-    const router = useRouter()
+    const router = useRouter();
     const searchParams = useSearchParams()
     const token = searchParams.get("token")
     const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
         if (!success) return
 
         if (countdown === 0) {
-            router.push("/login?reset=true")
+            router.push("/app/login?reset=true")
             return
         }
 
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
                     <CardContent className="space-y-4 text-center">
                         <StarBorder className="w-full">
                             <Button
-                                onClick={() => router.push("/login")}
+                                onClick={() => router.push("/app/login")}
                                 className="w-full gradient-brand text-white cursor-pointer"
                             >
                                 Ir al Login Ahora
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
                 <Card className="w-full max-w-md">
                     <CardHeader className="space-y-4">
                         <Button variant="ghost" asChild className="w-fit cursor-pointer">
-                            <Link href="/login">
+                            <Link href="/app/login">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Volver al login
                             </Link>
@@ -119,7 +119,7 @@ export default function ResetPasswordPage() {
 
                         <div className="flex justify-center">
                             <div className="relative h-16 w-16">
-                                <Image src="/logo.png" alt="Ticketera" fill className="object-contain" />
+                                <Image src="/logo.png" alt="Ticketly" fill className="object-contain" />
                             </div>
                         </div>
 

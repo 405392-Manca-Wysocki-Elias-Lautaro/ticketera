@@ -27,7 +27,7 @@ export default function MyTicketsPage() {
 
     useEffect(() => {
         if (!isLoadingAuth && !user) {
-            router.push("/login")
+            router.push("/app/login")
         }
     }, [user, isLoadingAuth, router])
 
@@ -76,7 +76,7 @@ export default function MyTicketsPage() {
                                     <p className="text-muted-foreground">No tienes tickets activos</p>
                                     <StarBorder>
                                         <Button asChild className="mt-4 gradient-brand text-white">
-                                            <a href="/dashboard">Explorar Eventos</a>
+                                            <a href="/app/dashboard">Explorar Eventos</a>
                                         </Button>
                                     </StarBorder>
                                 </CardContent>

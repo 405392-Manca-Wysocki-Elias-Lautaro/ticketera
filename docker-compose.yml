@@ -112,13 +112,13 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD:
-    # depends_on:
-    #   - auth-dev
-    #   - event-dev
-    #   - ticket-dev
-    #   - payment-dev
-    #   - notification-dev
-    #   - order-dev
+    depends_on:
+      - auth-dev
+      - event-dev
+      - ticket-dev
+      - payment-dev
+      - notification-dev
+      - order-dev
     networks: [backend_net]
     ports:
       - "8080:8080"

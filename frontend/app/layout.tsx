@@ -11,7 +11,7 @@ const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Ticketera - Plataforma de Eventos",
+    title: "Ticketly - Plataforma de Eventos",
     description: "Compra y vende entradas de forma segura y rápida",
     manifest: "/manifest.json",
 };

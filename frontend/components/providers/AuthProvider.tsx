@@ -1,10 +1,11 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { useRouter } from "next/navigation";
+
 import { useAuthStore } from "@/lib/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (token && user === null) {
             toast.error("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
             logout();
-            router.push("/login");
+            router.push("/app/login");
         }
     }, [user, token, logout, router]);
 

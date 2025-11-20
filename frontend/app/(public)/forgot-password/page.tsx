@@ -12,8 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, CheckCircle } from "lucide-react"
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
-import { useRouter } from 'next/navigation'
 import { useForgotPassword } from '@/hooks/auth/useForgotPassword'
+import { useRouter } from 'next/navigation'
 
 export default function ForgotPasswordPage() {
     const navigate = useRouter();
@@ -73,14 +73,14 @@ export default function ForgotPasswordPage() {
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-4">
                     <Button variant="ghost" asChild className="w-fit cursor-pointer">
-                        <Link href="/login">
+                        <Link href="/app/login">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver al login
                         </Link>
                     </Button>
                     <div className="flex justify-center">
                         <div className="relative h-16 w-16">
-                            <Image src="/logo.png" alt="Ticketera" fill className="object-contain" />
+                            <Image src="/logo.png" alt="Ticketly" fill className="object-contain" />
                         </div>
                     </div>
                     <div className="text-center">

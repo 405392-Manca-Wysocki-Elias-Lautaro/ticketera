@@ -15,6 +15,22 @@ spring:
         locator:
           enabled: false
       routes:
+
+        - id: static-next
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/favicon.ico, /manifest.webmanifest, /_next/**, /assets/**, /__nextjs_original-stack-frames, /__nextjs_font/**, /textures/**
+          filters:
+            - PreserveHostHeader
+
+        - id: frontend
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/app/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/app/?(?<segment>.*), /${segment}
+
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
@@ -107,6 +123,7 @@ spring:
           "[/**]":
             allowedOrigins:
               - "http://localhost:3000"
+              - "https://accepts-legislative-sara-pressed.trycloudflare.com"
             allowedMethods: "*"
             allowedHeaders: "*"
             exposedHeaders:

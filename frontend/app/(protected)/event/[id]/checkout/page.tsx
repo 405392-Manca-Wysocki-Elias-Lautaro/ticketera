@@ -50,7 +50,7 @@ export default function CheckoutPage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/login")
+            router.push("/app/login")
         }
     }, [user, isLoading, router])
 
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         // Redirect to success page
-        router.push(`/event/${event?.id}/success`)
+        router.push(`/app/event/${event?.id}/success`)
     }
 
     if (isLoading || !user || !event || !selectedArea) {
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
 
             <main className="container mx-auto px-4 py-8 max-w-4xl">
                 <Button variant="ghost" asChild className="mb-6">
-                    <Link href={`/event/${event.id}/select-seats`}>
+                    <Link href={`/app/event/${event.id}/select-seats`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Volver a selección
                     </Link>

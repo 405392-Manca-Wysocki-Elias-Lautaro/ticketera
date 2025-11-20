@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/store';
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
 
-    const user = useAuthStore();
+    const {user} = useAuthStore();
 
     return (
         <div className="flex h-screen w-screen overflow-hidden">

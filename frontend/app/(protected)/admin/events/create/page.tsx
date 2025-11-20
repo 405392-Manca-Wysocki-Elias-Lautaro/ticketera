@@ -84,7 +84,7 @@ export default function CreateEventPage() {
     // redirect si no es admin
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/dashboard")
+            router.push("/app/dashboard")
         }
     }, [user, isLoading, router])
 
@@ -123,7 +123,7 @@ export default function CreateEventPage() {
     const onSubmit = async (data: EventForm) => {
         console.log("✅ Form data:", data)
         await new Promise((r) => setTimeout(r, 1500))
-        router.push("/admin/events")
+        router.push("/app/admin/events")
     }
 
     if (isLoading || !user || !RoleUtils.isAdmin(user)) {
@@ -140,7 +140,7 @@ export default function CreateEventPage() {
                 <div className="relative flex items-center justify-center mb-8">
                     <div className="absolute left-0">
                         <Button variant="ghost" asChild className="mb-6 cursor-pointer">
-                            <Link href="/admin/events">
+                            <Link href="/app/admin/events">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Volver a eventos
                             </Link>
@@ -406,7 +406,7 @@ export default function CreateEventPage() {
                     {/* === Footer === */}
                     <div className="flex gap-4">
                         <Button type="button" variant="outline" size="lg" asChild>
-                            <Link href="/admin/events">Cancelar</Link>
+                            <Link href="/app/admin/events">Cancelar</Link>
                         </Button>
 
                         <StarBorder className="flex-1">

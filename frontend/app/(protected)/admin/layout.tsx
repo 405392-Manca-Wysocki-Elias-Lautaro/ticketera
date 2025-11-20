@@ -7,17 +7,14 @@ import { useAuthStore } from '@/lib/store';
 
 export default function AdminLayout({ children }: { children: React.ReactNode; }) {
 
-    const user = useAuthStore();
+    const {user} = useAuthStore();
 
     return (
 
         <div className="flex w-screen h-screen overflow-hidden">
             <AdminStaffSidebar user={user} />
             <SidebarInset>
-                <div className="p-2 md:hidden">
-                    <SidebarTrigger />
-                </div>
-
+                
                 <Navbar
                     leftSlot={
                         <div className="md:hidden">

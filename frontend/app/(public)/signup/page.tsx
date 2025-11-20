@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
+
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react"
@@ -48,7 +48,7 @@ export default function SignUpPage() {
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-4">
                     <Button variant="ghost" asChild className="w-fit cursor-pointer mb-0">
-                        <Link href="/login">
+                        <Link href="/app/login">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver al login
                         </Link>
@@ -56,7 +56,7 @@ export default function SignUpPage() {
 
                     <div className="flex justify-center mb-0">
                         <div className="relative h-16 w-16">
-                            <Image src="/logo.png" alt="Ticketera" fill className="object-contain" />
+                            <Image src="/logo.png" alt="Ticketly" fill className="object-contain" />
                         </div>
                     </div>
 
@@ -163,7 +163,7 @@ export default function SignUpPage() {
 
                     <div className="mt-4 text-center text-sm text-muted-foreground">
                         ¿Ya tienes cuenta?{" "}
-                        <Link href="/login" className="text-primary hover:underline cursor-pointer">
+                        <Link href="/app/login" className="text-primary hover:underline cursor-pointer">
                             Inicia sesión
                         </Link>
                     </div>
