@@ -15,7 +15,7 @@ import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
 import StarBorder from '@/components/StarBorder'
 import Link from 'next/link'
-import { StaffSidebar } from '@/components/sidebars/StaffSidebar'
+import { AdminStaffSidebar } from '@/components/sidebars/AdminStaffSidebar'
 
 export default function ProfilePage() {
     const router = useRouter()
@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
             {RoleUtils.isStaff(user) && (
                 <div className="fixed left-0 h-full">
-                    <StaffSidebar />
+                    <AdminStaffSidebar user={user} />
                 </div>
             )}
 
