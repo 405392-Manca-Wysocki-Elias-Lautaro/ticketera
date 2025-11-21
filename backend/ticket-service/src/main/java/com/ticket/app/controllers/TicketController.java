@@ -48,7 +48,9 @@ public class TicketController {
             throw new InvalidTicketValidationTypeException(request.getType());
         }
 
-        return ApiResponseFactory.success("Ticket validated successfully.", ticket);
+        TicketResponse ticketResponse = modelMapper.map(ticket, TicketResponse.class);
+
+        return ApiResponseFactory.success("Ticket validated successfully.", ticketResponse);
     }
 
     // 🔍 Get ticket by ID

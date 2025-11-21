@@ -7,8 +7,6 @@
 // });
 
 const nextConfig = {
-
-    basePath: "/app",
     
     reactStrictMode: true,
 

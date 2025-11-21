@@ -1,26 +1,5 @@
 package com.event.app.services.impl;
 
-import com.event.app.dtos.CreateEventRequest;
-import com.event.app.dtos.EventDTO;
-import com.event.app.dtos.EventDetailDTO;
-import com.event.app.dtos.EventSummaryDTO;
-import com.event.app.entities.AreaEntity;
-import com.event.app.entities.AreaPricingEntity;
-import com.event.app.entities.SeatEntity;
-import com.event.app.models.Event;
-import com.event.app.entities.EventEntity;
-import com.event.app.exceptions.EventNotFoundException;
-import com.event.app.repositories.AreaPricingRepository;
-import com.event.app.repositories.AreaRepository;
-import com.event.app.repositories.CategoryRepository;
-import com.event.app.repositories.EventRepository;
-import com.event.app.repositories.SeatRepository;
-import com.event.app.services.IAvailabilityService;
-import com.event.app.services.IEventService;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,6 +7,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.event.app.dtos.CreateEventRequest;
+import com.event.app.dtos.EventDTO;
+import com.event.app.dtos.EventDetailDTO;
+import com.event.app.dtos.EventSummaryDTO;
+import com.event.app.entities.AreaEntity;
+import com.event.app.entities.AreaPricingEntity;
+import com.event.app.entities.EventEntity;
+import com.event.app.entities.SeatEntity;
+import com.event.app.exceptions.EventNotFoundException;
+import com.event.app.models.Event;
+import com.event.app.repositories.AreaPricingRepository;
+import com.event.app.repositories.AreaRepository;
+import com.event.app.repositories.CategoryRepository;
+import com.event.app.repositories.EventRepository;
+import com.event.app.repositories.SeatRepository;
+import com.event.app.services.IAvailabilityService;
+import com.event.app.services.IEventService;
 
 @Service
 public class EventServiceImpl implements IEventService {

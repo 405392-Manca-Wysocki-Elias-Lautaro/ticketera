@@ -12,7 +12,7 @@ export function handleApiError(error: any) {
   const message = response.data?.message
   const status = response.status ?? error?.response?.status
 
-  let userMessage = "Ocurrió un error inesperado. Intenta nuevamente."
+  let userMessage: string | null = "Ocurrió un error inesperado. Intenta nuevamente."
 
   switch (code) {
     // 🔐 AUTENTICACIÓN / TOKEN
@@ -131,6 +131,25 @@ export function handleApiError(error: any) {
       userMessage = "Los datos enviados entran en conflicto con registros existentes."
       break
 
+    case "TICKET_NOT_FOUND":
+      userMessage = null;
+      break;
+    case "TICKET_ALREADY_CHECKED_IN":
+      userMessage = null;
+      break
+    case "INVALID_TICKET_STATUS":
+      userMessage = null;
+      break;
+    case "INVALID_QR_TOKEN":
+      userMessage = null;
+      break;
+    case "EXPIRED_TICKET":
+      userMessage = null;
+      break;
+    case "INVALID_TICKET_VALIDATION_TYPE":
+      userMessage = null;
+      break;
+
     // ☁️ INFRAESTRUCTURA / SERVICIOS
     case "DATABASE_UNAVAILABLE":
       userMessage = "No se pudo conectar con la base de datos. Intenta nuevamente más tarde."
@@ -160,8 +179,9 @@ export function handleApiError(error: any) {
         userMessage = "No se encontró el recurso solicitado."
       else if (status === 500)
         userMessage = "Error interno del servidor. Intenta nuevamente."
+
   }
 
-  toast.error(userMessage)
+  if(userMessage) toast.error(userMessage)
   console.error("API Error:", { code, details, status, message })
 }

@@ -1,5 +1,20 @@
 package com.event.app.controllers;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.event.app.dtos.CreateEventRequest;
 import com.event.app.dtos.EventDTO;
 import com.event.app.dtos.EventDetailDTO;
@@ -14,13 +29,6 @@ import com.event.app.utils.ApiResponseFactory;
 import com.event.app.utils.JwtUtils;
 
 import jakarta.validation.Valid;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/")

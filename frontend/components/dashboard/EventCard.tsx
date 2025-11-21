@@ -87,7 +87,7 @@ export function EventCard({ event }: EventCardProps) {
                 </div>
 
                 <StarBorder>
-                    <Button asChild className="gradient-brand text-white">
+                    <Button asChild className="gradient-brand text-white z-50">
                         <Link href={`/event/${event.id}`}>Ver Detalles</Link>
                     </Button>
                 </StarBorder>
