@@ -102,6 +102,12 @@ export default function CheckoutPage() {
                 throw new Error("Información incompleta");
             }
 
+            // Validar teléfono
+            if (!phone || phone.trim().length < 8) {
+                toast.error("Por favor, ingresa un número de teléfono válido.");
+                return;
+            }
+
             // Construir los items de la orden con datos reales
             // Convertir IDs de string a number para el backend
             const eventIdNum = parseInt(String(event.id)) || 1;
@@ -119,7 +125,7 @@ export default function CheckoutPage() {
                         venueAreaId: areaIdNum,
                         venueSeatId: seatId,
                         ticketTypeId: 1, // 1 = adulto estándar
-                        unitPriceCents: selectedArea.priceCents,
+                        unitPriceCents: selectedArea.priceCents + Math.round(selectedArea.priceCents * 0.1),
                         quantity: 1,
                     };
                 })
@@ -129,7 +135,7 @@ export default function CheckoutPage() {
                     venueAreaId: areaIdNum,
                     venueSeatId: undefined,
                     ticketTypeId: 1, // 1 = adulto estándar
-                    unitPriceCents: selectedArea.price * 100,
+                    unitPriceCents: selectedArea.priceCents,
                     quantity: parseInt(quantity || "1"),
                 }];
 
@@ -149,12 +155,8 @@ export default function CheckoutPage() {
                 notes: `Compra de ${items.length} entrada(s) para ${event.title} - ${selectedArea.name}`,
             };
 
-            console.log("Creando orden:", orderRequest);
-
             // Crear la orden y obtener la URL de pago
             const orderResponse = await orderService.createOrder(orderRequest);
-
-            console.log("Orden creada:", orderResponse);
 
             if (orderResponse.paymentUrl) {
                 // Si el backend devuelve una URL directa, redirigir
@@ -166,12 +168,28 @@ export default function CheckoutPage() {
 
         } catch (error: any) {
             console.error("Error creando orden:", error);
-            toast.error(error.response?.data?.message || "Error al procesar el pago");
+            
+            if (error.response?.status === 401) {
+                toast.error("Error de autenticación. Por favor, inicia sesión nuevamente.");
+            } else if (error.response?.status === 409) {
+                // Error de conflicto - asiento ya reservado
+                toast.error("Lo sentimos, el asiento seleccionado ya no está disponible. Por favor, selecciona otro asiento.");
+            } else if (error.response?.status === 400) {
+                // Error de validación
+                const errorMessage = error.response?.data?.message || "";
+                if (errorMessage.toLowerCase().includes("seat") || errorMessage.toLowerCase().includes("reserved")) {
+                    toast.error("El asiento seleccionado ya está reservado. Por favor, elige otro asiento.");
+                } else if (errorMessage.toLowerCase().includes("sold out") || errorMessage.toLowerCase().includes("capacity")) {
+                    toast.error("No hay más entradas disponibles para este evento.");
+                } else {
+                    toast.error("Hay un problema con los datos ingresados. Por favor, verifica la información.");
+                }
+            } else {
+                toast.error("Error al procesar el pago. Por favor, inténtalo nuevamente.");
+            }
         } finally {
             setIsProcessing(false);
         }
-        // Redirect to success page
-        router.push(`/event/${event?.id}/success`)
     }
 
     if (isLoading || isLoadingEvent || !user || !event || !selectedArea) {
