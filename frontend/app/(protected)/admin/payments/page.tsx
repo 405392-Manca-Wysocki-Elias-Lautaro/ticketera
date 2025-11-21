@@ -53,7 +53,7 @@ export default function AdminPaymentsPage() {
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/app/dashboard")
+            router.push("/dashboard")
         }
     }, [user, isLoading, router])
 

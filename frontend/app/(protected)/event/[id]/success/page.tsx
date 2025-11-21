@@ -20,7 +20,7 @@ export default function SuccessPage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/app/login")
+            router.push("/login")
         }
     }, [user, isLoading, router])
 
@@ -61,14 +61,14 @@ export default function SuccessPage() {
                         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
                             <StarBorder>
                                 <Button asChild size="lg" className="gradient-brand text-white">
-                                    <Link href="/app/my-tickets">
+                                    <Link href="/my-tickets">
                                         <Ticket />
                                         Ver Mis Tickets
                                     </Link>
                                 </Button>
                             </StarBorder>
                             <Button asChild variant="outline" size="lg">
-                                <Link href="/app/dashboard">
+                                <Link href="/dashboard">
                                     <Home />
                                     Volver al Inicio
                                 </Link>

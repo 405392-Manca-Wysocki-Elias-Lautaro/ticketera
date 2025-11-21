@@ -1,24 +1,37 @@
 /** @type {import('next').NextConfig} */
+import withPWA from "next-pwa";
+
+const withPWAConfig = withPWA({
+    dest: "public",
+    disable: process.env.NODE_ENV === "development",
+});
+
 const nextConfig = {
 
+    basePath: "/app",
+    
     reactStrictMode: true,
+
     images: {
-        domains: ["cdn.ticketera.ar", "localhost"], // permití URLs externas
+        domains: ["cdn.ticketera.ar", "localhost"],
     },
+
     eslint: {
-        // ✅ No detiene la build si hay errores de Lint
         ignoreDuringBuilds: true,
     },
+
     typescript: {
-        // ✅ No detiene la build si hay errores de TypeScript
         ignoreBuildErrors: true,
     },
 
-    devIndicators: {
-        buildActivityPosition: 'bottom-right'
+    devtools: {
+        enabled: false,
     },
 
-    // 👇 entero para reescrituras / proxies
+    devIndicators: {
+        position: "bottom-left",
+    },
+
     async rewrites() {
         return [
             {
@@ -27,7 +40,6 @@ const nextConfig = {
             },
         ];
     },
-
 };
 
-export default nextConfig;
+export default withPWAConfig(nextConfig);

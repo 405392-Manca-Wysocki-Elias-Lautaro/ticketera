@@ -46,7 +46,7 @@ export default function AdminEventsPage() {
 
     useEffect(() => {
         if (!isLoadingAuth && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/app/dashboard")
+            router.push("/dashboard")
         }
     }, [user, isLoadingAuth, router])
 
@@ -89,7 +89,7 @@ export default function AdminEventsPage() {
                     </div>
                     <StarBorder>
                         <Button asChild className="gradient-brand text-white cursor-pointer">
-                            <Link href="/app/admin/events/create">
+                            <Link href="/admin/events/create">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Crear Evento
                             </Link>
@@ -169,7 +169,7 @@ export default function AdminEventsPage() {
                                                             className="flex-1 md:flex-none bg-transparent cursor-pointer"
                                                             asChild
                                                         >
-                                                            <Link href={`/app/admin/events/edit/${event.id}`}>
+                                                            <Link href={`/admin/events/edit/${event.id}`}>
                                                                 <Edit className="h-4 w-4" />
                                                             </Link>
                                                         </Button>

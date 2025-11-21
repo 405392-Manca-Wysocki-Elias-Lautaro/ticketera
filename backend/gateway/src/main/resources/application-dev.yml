@@ -16,12 +16,21 @@ spring:
           enabled: false
       routes:
 
-        - id: static-next
+        - id: next-static
           uri: http://frontend-dev:3000
           predicates:
-            - Path=/favicon.ico, /manifest.webmanifest, /_next/**, /assets/**, /__nextjs_original-stack-frames, /__nextjs_font/**, /textures/**
+            - Path=/app/_next/**
           filters:
             - PreserveHostHeader
+          order: -200
+
+        - id: next-public
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/app/favicon.ico, /app/manifest.webmanifest, /app/assets/**, /app/textures/**, /app/__nextjs_font/**
+          filters:
+            - PreserveHostHeader
+          order: -150
 
         - id: frontend
           uri: http://frontend-dev:3000
@@ -29,7 +38,7 @@ spring:
             - Path=/app/**
           filters:
             - PreserveHostHeader
-            - RewritePath=/app/?(?<segment>.*), /${segment}
+          order: -100
 
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
@@ -94,18 +103,6 @@ spring:
             - RewritePath=/api/orders/?(?<segment>.*), /${segment}
           order: -100
 
-        # Frontend proxy - redirige todo lo que no sea API o webhook al frontend local
-        # Usa host.docker.internal para acceder al localhost desde Docker
-        # Orden alto (0 por defecto) para que se evalúe después de las rutas de API
-        - id: frontend
-          uri: "http://host.docker.internal:3000"
-          predicates:
-            - Path=/**
-            - Method=GET,POST,PUT,DELETE,OPTIONS,PATCH
-          filters:
-            - PreserveHostHeader
-          order: 0
-
         # --- OpenAPI aggregation ---
         - id: openapi-auth
           uri: http://auth-dev:8080
@@ -150,7 +147,7 @@ spring:
           "[/**]":
             allowedOrigins:
               - "http://localhost:3000"
-              - "https://accepts-legislative-sara-pressed.trycloudflare.com"
+              - ${FRONTEND_URL}
             allowedMethods: "*"
             allowedHeaders: "*"
             exposedHeaders:

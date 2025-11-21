@@ -35,7 +35,7 @@ export default function StaffDashboardPage() {
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isStaff(user))) {
-            router.push("/app/login")
+            router.push("/login")
         }
     }, [user, isLoading, router])
 

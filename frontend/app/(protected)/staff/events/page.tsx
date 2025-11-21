@@ -9,21 +9,22 @@ import { useAuth } from '@/hooks/auth/useAuth'
 import { mockEvents } from '@/mocks/mockEvents'
 import GradientText from '@/components/GradientText'
 import { RoleUtils } from '@/utils/roleUtils'
+import { useEvents } from '@/hooks/event/useEvents'
+import { Event } from '@/types/Event'
 
 export default function StaffEventsPage() {
     const router = useRouter()
-    const { user, isLoading } = useAuth()
+    const { user, isLoading: isLoadingAuth } = useAuth()
 
-    // Mock assigned events
-    const assignedEvents = mockEvents.slice(0, 3)
+    const { data: events, isLoading: isLoadingEvents} = useEvents();
 
     useEffect(() => {
-        if (!isLoading && (!user || !RoleUtils.isStaff(user))) {
-            router.push("/app/dashboard")
+        if (!isLoadingAuth && (!user || !RoleUtils.isStaff(user))) {
+            router.push("/dashboard")
         }
-    }, [user, isLoading, router])
+    }, [user, isLoadingAuth, router]);
 
-    if (isLoading || !user || !RoleUtils.isStaff(user)) {
+    if (isLoadingAuth || !user || !RoleUtils.isStaff(user) || isLoadingEvents || !events) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -41,7 +42,7 @@ export default function StaffEventsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {assignedEvents.map((event) => (
+                {events.map((event: Event) => (
                     <Card key={event.id} className="hover:shadow-lg transition-shadow">
                         <CardHeader>
                             <div className="aspect-video relative overflow-hidden rounded-lg mb-4">

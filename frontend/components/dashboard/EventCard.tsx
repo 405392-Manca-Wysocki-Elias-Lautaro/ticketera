@@ -27,10 +27,10 @@ export function EventCard({ event }: EventCardProps) {
 
     return (
         <Card className="overflow-hidden hover:shadow-lg transition-shadow pt-0">
-            <Link href={`/app/event/${event.id}`}>
+            <Link href={`/event/${event.id}`}>
                 <div className="relative h-48 w-full">
                     <TiltedCard
-                        imageSrc={"/app" + event.coverUrl || "/placeholder.svg"}
+                        imageSrc={event.coverUrl || "/placeholder.svg"}
                         altText={event.title}
                         captionText={event.title}
                         containerHeight="12rem"
@@ -51,7 +51,7 @@ export function EventCard({ event }: EventCardProps) {
             </Link>
 
             <CardContent className="p-4 space-y-3">
-                <Link href={`/app/event/${event.id}`}>
+                <Link href={`/event/${event.id}`}>
                     <h3 className="font-bold text-lg line-clamp-1 hover:text-primary transition-colors">
                         {event.title}
                     </h3>
@@ -88,7 +88,7 @@ export function EventCard({ event }: EventCardProps) {
 
                 <StarBorder>
                     <Button asChild className="gradient-brand text-white">
-                        <Link href={`/app/event/${event.id}`}>Ver Detalles</Link>
+                        <Link href={`/event/${event.id}`}>Ver Detalles</Link>
                     </Button>
                 </StarBorder>
 

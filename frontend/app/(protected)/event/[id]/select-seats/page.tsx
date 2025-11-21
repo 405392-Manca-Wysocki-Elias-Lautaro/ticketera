@@ -13,20 +13,23 @@ import { mockEvents } from '@/mocks/mockEvents'
 import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
+import { useEvent } from '@/hooks/event/useEvent'
+import { EventArea } from '@/types/EventArea'
 
 export default function SelectSeatsPage() {
-    const router = useRouter()
-    const params = useParams()
+    const router = useRouter();
+    const params = useParams();
+    const id = params.id;
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
-    const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
+
+    const {data: event, isLoading: isLoadingEvent} = useEvent(id);
 
     const urlAreaId = searchParams.get("area")
     const urlSeats = searchParams.get("seats")
     const urlQuantity = searchParams.get("quantity")
 
-    //TODO: Usar type Area
-    const [selectedArea, setSelectedArea] = useState<any | null>(() => {
+    const [selectedArea, setSelectedArea] = useState<EventArea | null>(() => {
         if (urlAreaId && event) {
             return event.areas.find((a) => a.id === urlAreaId) || null
         }
@@ -48,7 +51,7 @@ export default function SelectSeatsPage() {
     })
 
     const occupiedSeats = useMemo(() => {
-        if (!selectedArea || selectedArea.type === "general") return new Set<string>()
+        if (!selectedArea || selectedArea.isGeneralAdmission) return new Set<string>()
 
         const occupied = new Set<string>()
         selectedArea.rows?.forEach((row: any) => {
@@ -66,9 +69,10 @@ export default function SelectSeatsPage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/app/login")
+            router.push("/login")
         }
     }, [user, isLoading, router])
+
 
     if (isLoading || !user || !event) {
         return (
@@ -78,8 +82,7 @@ export default function SelectSeatsPage() {
         )
     }
 
-    //TODO: Usar type Area
-    const handleAreaSelect = (area: any) => {
+    const handleAreaSelect = (area: EventArea) => {
         setSelectedArea(area)
         setSelectedSeats([])
     }
@@ -124,7 +127,7 @@ export default function SelectSeatsPage() {
 
             <main className="container mx-auto px-4 py-8">
                 <Button variant="ghost" asChild className="mb-6">
-                    <Link href={`/app/event/${event.id}`}>
+                    <Link href={`/event/${event.id}`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Volver al evento
                     </Link>

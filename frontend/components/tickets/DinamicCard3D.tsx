@@ -107,7 +107,7 @@ export default function DynamicCard3D({
 
         // 🧩 Cargar el logo asincrónicamente
         const logo = new Image()
-        logo.src = '/app/logo.png'
+        logo.src = '/logo.png'
         logo.onload = () => {
             const size = 1600
             const x = canvas.width / 2 - size / 2

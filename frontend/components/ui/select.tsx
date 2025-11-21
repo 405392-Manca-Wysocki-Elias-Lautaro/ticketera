@@ -2,15 +2,20 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
+import { CheckIcon, ChevronDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// -------------------- ROOT --------------------
 const Select = SelectPrimitive.Root
 const SelectGroup = SelectPrimitive.Group
 const SelectValue = SelectPrimitive.Value
+
+// -------------------- TRIGGER --------------------
+type TriggerProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+
 const SelectTrigger = React.forwardRef<
     React.ElementRef<typeof SelectPrimitive.Trigger>,
-    React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+    TriggerProps
 >(({ className, children, ...props }, ref) => (
     <SelectPrimitive.Trigger
         ref={ref}
@@ -28,9 +33,12 @@ const SelectTrigger = React.forwardRef<
 ))
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
+// -------------------- CONTENT --------------------
+type ContentProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+
 const SelectContent = React.forwardRef<
     React.ElementRef<typeof SelectPrimitive.Content>,
-    React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+    ContentProps
 >(({ className, children, position = "popper", ...props }, ref) => (
     <SelectPrimitive.Portal>
         <SelectPrimitive.Content
@@ -58,9 +66,12 @@ const SelectContent = React.forwardRef<
 ))
 SelectContent.displayName = SelectPrimitive.Content.displayName
 
+// -------------------- ITEM --------------------
+type ItemProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+
 const SelectItem = React.forwardRef<
     React.ElementRef<typeof SelectPrimitive.Item>,
-    React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+    ItemProps
 >(({ className, children, ...props }, ref) => (
     <SelectPrimitive.Item
         ref={ref}
@@ -80,6 +91,7 @@ const SelectItem = React.forwardRef<
 ))
 SelectItem.displayName = SelectPrimitive.Item.displayName
 
+// -------------------- EXPORTS --------------------
 export {
     Select,
     SelectGroup,

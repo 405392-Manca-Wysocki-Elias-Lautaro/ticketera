@@ -7,34 +7,36 @@ import { useAuthStore } from '@/lib/store';
 
 export default function AdminLayout({ children }: { children: React.ReactNode; }) {
 
-    const {user} = useAuthStore();
+    const { user } = useAuthStore();
 
     return (
 
-        <div className="flex w-screen h-screen overflow-hidden">
+        <div className="flex w-screen h-[100dvh] overflow-hidden">
             <AdminStaffSidebar user={user} />
             <SidebarInset>
-                
-                <Navbar
-                    leftSlot={
-                        <div className="md:hidden">
-                            <SidebarTrigger />
-                        </div>
-                    }
-                    hideSearchOn={[
-                        "/admin",
-                        "/admin/events",
-                        "/admin/events/create",
-                        "/admin/events/edit",
-                        "/admin/payments",
-                        "/admin/settings",
-                        "/admin/validate",
-                    ]}
 
-                />
+                <div className='flex flex-col h-full'>
+                    <Navbar
+                        leftSlot={
+                            <div className="md:hidden">
+                                <SidebarTrigger />
+                            </div>
+                        }
+                        hideSearchOn={[
+                            "/admin",
+                            "/admin/events",
+                            "/admin/events/create",
+                            "/admin/events/edit",
+                            "/admin/payments",
+                            "/admin/settings",
+                            "/admin/validate",
+                        ]}
 
-                <div className="flex flex-col w-full h-screen pb-5">
-                    {children}
+                    />
+
+                    <div className="flex flex-col w-full h-full pb-5 overflow-y-auto">
+                        {children}
+                    </div>
                 </div>
             </SidebarInset>
 

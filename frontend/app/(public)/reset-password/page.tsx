@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
         if (!success) return
 
         if (countdown === 0) {
-            router.push("/app/login?reset=true")
+            router.push("/login?reset=true")
             return
         }
 
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
                     <CardContent className="space-y-4 text-center">
                         <StarBorder className="w-full">
                             <Button
-                                onClick={() => router.push("/app/login")}
+                                onClick={() => router.push("/login")}
                                 className="w-full gradient-brand text-white cursor-pointer"
                             >
                                 Ir al Login Ahora
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
                 <Card className="w-full max-w-md">
                     <CardHeader className="space-y-4">
                         <Button variant="ghost" asChild className="w-fit cursor-pointer">
-                            <Link href="/app/login">
+                            <Link href="/login">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Volver al login
                             </Link>

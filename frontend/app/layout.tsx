@@ -28,7 +28,7 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    if (process.env.NODE_ENV !== "production") showBrandConsoleMessage();
+    if (process.env.NODE_ENV == "production") showBrandConsoleMessage();
 
     return (
         <html lang="es" suppressHydrationWarning>

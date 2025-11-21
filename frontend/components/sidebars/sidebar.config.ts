@@ -1,7 +1,6 @@
 // sidebar.config.ts
 import {
     Calendar,
-    DollarSign,
     LayoutDashboard,
     Plus,
     Settings,
@@ -14,7 +13,6 @@ export const SidebarConfig = {
         { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
         { title: "Mis Eventos", href: "/admin/events", icon: Calendar },
         { title: "Crear Evento", href: "/admin/events/create", icon: Plus },
-        { title: "Pagos", href: "/admin/payments", icon: DollarSign },
         { title: "Validar Tickets", href: "/admin/validate", icon: TicketIcon },
         { title: "Configuración", href: "/admin/settings", icon: Settings },
     ],

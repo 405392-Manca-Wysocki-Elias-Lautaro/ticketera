@@ -69,6 +69,8 @@ gateway:
     - /forgot-password
     - /reset-password
     - /refresh
+    - /events
+    - /categories
     - /_next/**
     - /__nextjs_original-stack-frames
     - /__nextjs_font/**

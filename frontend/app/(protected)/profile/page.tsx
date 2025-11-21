@@ -24,7 +24,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/app/login")
+            router.push("/login")
         }
     }, [user, isLoading, router])
 
@@ -62,7 +62,7 @@ export default function ProfilePage() {
                     {RoleUtils.isCustomer(user) && (
                         <div className="absolute left-0">
                             <Button variant="ghost" asChild className="cursor-pointer">
-                                <Link href="/app/dashboard">
+                                <Link href="/dashboard">
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Volver al inicio
                                 </Link>
