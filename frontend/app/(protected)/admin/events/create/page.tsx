@@ -361,7 +361,11 @@ export default function CreateEventPage() {
                         <CardHeader>
                             <div className="flex justify-between items-center">
                                 <CardTitle>Áreas y Precios</CardTitle>
-                                <Button type="button" variant="outline" size="sm" onClick={handleAddArea}>
+                                <Button 
+                                    type="button" 
+                                    size="sm" 
+                                    onClick={handleAddArea}
+                                >
                                     <Plus className="mr-2 h-4 w-4" /> Agregar Área
                                 </Button>
                             </div>
@@ -478,7 +482,6 @@ export default function CreateEventPage() {
                                                     {/* Botón para agregar fila */}
                                                     <Button
                                                         type="button"
-                                                        variant="outline"
                                                         size="sm"
                                                         onClick={() => {
                                                             setValue(`areas.${i}.rows`, [

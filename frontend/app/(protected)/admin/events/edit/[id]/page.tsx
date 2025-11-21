@@ -1,170 +1,170 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { useForm, Controller, useFieldArray } from "react-hook-form"
 import { cn } from "@/lib/utils"
+
 import { useAuth } from "@/hooks/auth/useAuth"
-import { mockEvents } from "@/mocks/mockEvents"
 import { RoleUtils } from "@/utils/roleUtils"
+
 import GradientText from "@/components/GradientText"
 import StarBorder from "@/components/StarBorder"
 
-// UI Components
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-    ArrowLeft,
-    Plus,
-    Trash2,
-    CalendarIcon,
-    Clock,
-    Upload,
-    LinkIcon,
-    MapPin,
-    Loader2
-} from "lucide-react"
 
-interface AreaForm {
-    id: string
-    name: string
-    type: "general" | "numbered"
-    price: number
-    capacity: number
-    rows: RowForm[]
-}
+import { ArrowLeft, Plus, Trash2, CalendarIcon, Loader2 } from "lucide-react"
 
-interface RowForm {
-    id: string
-    name: string
-    startSeat: number
-    endSeat: number
-}
+import type { CreateEvent, CreateSeat } from "@/types/Request/CreateEvent"
+import { useCategories } from "@/hooks/event/useCategories"
+import { toast } from "sonner"
+import { useEvent } from '@/hooks/event/useEvent'
 
 export default function EditEventPage() {
-    const router = useRouter()
-    const params = useParams()
-    const { user, isLoading } = useAuth()
-    const [areas, setAreas] = useState<AreaForm[]>([])
-    const [isSaving, setIsSaving] = useState(false)
-    const [startDate, setStartDate] = useState<Date>()
-    const [endDate, setEndDate] = useState<Date>()
-    const [startTime, setStartTime] = useState("")
-    const [endTime, setEndTime] = useState("")
-    const [imageType, setImageType] = useState<"url" | "upload">("url")
-    const [imageUrl, setImageUrl] = useState("")
-    const [imageFile, setImageFile] = useState<File | null>(null)
-    const [useGoogleMaps, setUseGoogleMaps] = useState(false)
-    const [mapLocation, setMapLocation] = useState("")
-    const [eventTitle, setEventTitle] = useState("")
-    const [eventDescription, setEventDescription] = useState("")
-    const [eventCategory, setEventCategory] = useState("")
-    const [eventLocation, setEventLocation] = useState("")
-    const [eventAddress, setEventAddress] = useState("")
+    const router = useRouter();
+    const { id } = useParams();
+    const { user, isLoading: isLoadingAuth } = useAuth();
 
+    const { data: event, isLoading: isLoadingEvent } = useEvent(id);
+    const { data: categories, isLoading: isLoadingCategories } = useCategories()
+
+    const {
+        control,
+        handleSubmit,
+        register,
+        watch,
+        setValue,
+        reset,
+        formState: { isSubmitting }
+    } = useForm<CreateEvent & {
+        startDate: Date
+        endDate?: Date
+        startTime: string
+        endTime?: string
+        areas: any[]
+    }>({
+        defaultValues: {
+            title: "",
+            description: "",
+            categoryId: "",
+            coverUrl: "",
+            venueName: "",
+            venueDescription: "",
+            addressLine: "",
+            city: "",
+            state: "",
+            country: "",
+            startDate: undefined,
+            startTime: "",
+            endDate: undefined,
+            endTime: "",
+            areas: []
+        }
+    })
+
+    const { fields: areas, append, remove } = useFieldArray({
+        control,
+        name: "areas"
+    })
+
+    // 🟦 PROTEGER PÁGINA
     useEffect(() => {
-        if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
+        if (!isLoadingAuth && (!user || !RoleUtils.isAdmin(user))) {
             router.push("/dashboard")
         }
-    }, [user, isLoading, router])
+    }, [user, isLoadingAuth, router]);
 
+    // 🟦 CARGAR EVENTO
     useEffect(() => {
-        // Load event data
-        const event = mockEvents.find((e) => e.id === params.id)
-        if (event) {
-            setEventTitle(event.title)
-            setEventDescription(event.description)
-            setEventCategory(event.category)
-            setEventLocation(event.location)
-            setImageUrl(event.image)
-            setStartDate(new Date(event.date))
-            setStartTime(event.time)
-            setAreas(
-                event.areas.map((area) => ({
-                    ...area,
-                    type: area.type as "general" | "numbered",
-                    rows: area.rows || [],
-                }))
-            )
+        async function load() {
+
+            if (!event) return;
+
+            const start = new Date(event.startsAt)
+            const end = new Date(event.endsAt)
+
+            reset({
+                ...event,
+                startDate: start,
+                startTime: format(start, "HH:mm"),
+                endDate: end,
+                endTime: format(end, "HH:mm"),
+                areas: event.areas
+            })
+
+            setTimeout(() => {
+                setValue("areas", event.areas || []);
+            });
         }
-    }, [params.id])
 
-    const addArea = () => {
-        setAreas([
-            ...areas,
-            {
-                id: Math.random().toString(36).substr(2, 9),
-                name: "",
-                type: "general",
-                price: 0,
-                capacity: 0,
-                rows: [],
-            },
-        ])
-    }
+        load()
+    }, [id, reset, event])
 
-    const removeArea = (id: string) => setAreas(areas.filter((a) => a.id !== id))
-    const updateArea = (id: string, updates: Partial<AreaForm>) =>
-        setAreas(areas.map((a) => (a.id === id ? { ...a, ...updates } : a)))
+    const onSubmit = async (data: any) => {
+        const startsAt = new Date(
+            `${format(data.startDate, "yyyy-MM-dd")}T${data.startTime}`
+        ).toISOString()
 
-    const addRow = (areaId: string) => {
-        setAreas(
-            areas.map((a) =>
-                a.id === areaId
-                    ? {
-                        ...a,
-                        rows: [
-                            ...a.rows,
-                            {
-                                id: Math.random().toString(36).substr(2, 9),
-                                name: "",
-                                startSeat: 1,
-                                endSeat: 10,
-                            },
-                        ],
+        const endsAt = data.endDate
+            ? new Date(`${format(data.endDate, "yyyy-MM-dd")}T${data.endTime}`).toISOString()
+            : startsAt
+
+        const payload = {
+            ...data,
+            startsAt,
+            endsAt,
+            areas: data.areas.map((area: any, index: number) => {
+                if (area.isGeneralAdmission) {
+                    return {
+                        ...area,
+                        capacity: Number(area.capacity),
+                        position: index + 1,
+                        priceCents: Number(area.priceCents),
+                        seats: []
                     }
-                    : a
-            )
-        )
-    }
+                }
 
-    const removeRow = (areaId: string, rowId: string) => {
-        setAreas(areas.map((a) => (a.id === areaId ? { ...a, rows: a.rows.filter((r) => r.id !== rowId) } : a)))
-    }
+                // Generar asientos
+                const seats: CreateSeat[] = []
 
-    const updateRow = (areaId: string, rowId: string, updates: Partial<RowForm>) => {
-        setAreas(
-            areas.map((a) =>
-                a.id === areaId
-                    ? {
-                        ...a,
-                        rows: a.rows.map((r) => (r.id === rowId ? { ...r, ...updates } : r)),
+                area.rows.forEach((row: any, rowIndex: number) => {
+                    for (let seat = row.startSeat; seat <= row.endSeat; seat++) {
+                        seats.push({
+                            seatNumber: seat,
+                            rowNumber: rowIndex + 1,
+                            label: `${row.name}-${seat}`
+                        })
                     }
-                    : a
-            )
-        )
-    }
+                })
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsSaving(true)
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+                return {
+                    ...area,
+                    capacity: Number(area.capacity),
+                    position: index + 1,
+                    priceCents: Number(area.priceCents),
+                    seats
+                }
+            })
+        }
+
+        console.log("EDIT PAYLOAD:", payload)
+
+        toast.success("Evento actualizado")
         router.push("/admin/events")
     }
 
-    if (isLoading || !user || !RoleUtils.isAdmin(user)) {
+    if (isLoadingAuth || isLoadingCategories || isLoadingEvent || !event) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -175,398 +175,306 @@ export default function EditEventPage() {
     return (
         <div className="flex h-screen overflow-auto">
             <div className="container mx-auto px-4 py-8 max-w-4xl">
-                <Button variant="ghost" asChild className="mb-6 cursor-pointer">
-                    <Link href="/admin/events">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Volver a eventos
-                    </Link>
-                </Button>
+                <div className="relative flex items-center justify-center mb-8">
+                    <div className="absolute left-0">
+                        <Button variant="ghost" asChild>
+                            <Link href="/admin/events">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Volver a eventos
+                            </Link>
+                        </Button>
+                    </div>
 
-                <GradientText>
-                    <h1 className="text-3xl font-bold mb-8">Editar Evento</h1>
-                </GradientText>
+                    <GradientText>
+                        <h1 className="text-3xl font-bold mb-8">Editar Evento</h1>
+                    </GradientText>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Información básica */}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    {/* === Información Básica === */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Información Básica</CardTitle>
                         </CardHeader>
+
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="title">Nombre del Evento</Label>
-                                <Input
-                                    id="title"
-                                    placeholder="Festival de Rock 2025"
-                                    value={eventTitle}
-                                    onChange={(e) => setEventTitle(e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <Input {...register("title", { required: true })} placeholder="Título" />
+                            <Textarea {...register("description", { required: true })} rows={4} />
 
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Descripción</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Describe tu evento..."
-                                    rows={4}
-                                    value={eventDescription}
-                                    onChange={(e) => setEventDescription(e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <Controller
+                                control={control}
+                                name="categoryId"
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Categoría" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {categories?.map((c: any) => (
+                                                <SelectItem key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
 
-                            <div className="space-y-2">
-                                <Label htmlFor="category">Categoría</Label>
-                                <Select value={eventCategory} onValueChange={setEventCategory} required>
-                                    <SelectTrigger className="cursor-pointer">
-                                        <SelectValue placeholder="Selecciona una categoría" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Música">Música</SelectItem>
-                                        <SelectItem value="Comedia">Comedia</SelectItem>
-                                        <SelectItem value="Tecnología">Tecnología</SelectItem>
-                                        <SelectItem value="Deportes">Deportes</SelectItem>
-                                        <SelectItem value="Teatro">Teatro</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Imagen del Evento</Label>
-                                <Tabs value={imageType} onValueChange={(v) => setImageType(v as "url" | "upload")}>
-                                    <TabsList className="grid w-full grid-cols-2">
-                                        <TabsTrigger value="url" className="cursor-pointer">
-                                            <LinkIcon className="mr-2 h-4 w-4" />
-                                            URL
-                                        </TabsTrigger>
-                                        <TabsTrigger value="upload" className="cursor-pointer">
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            Subir Archivo
-                                        </TabsTrigger>
-                                    </TabsList>
-                                    <TabsContent value="url" className="space-y-2">
-                                        <Input
-                                            type="url"
-                                            placeholder="https://ejemplo.com/imagen.jpg"
-                                            value={imageUrl}
-                                            onChange={(e) => setImageUrl(e.target.value)}
-                                        />
-                                    </TabsContent>
-                                    <TabsContent value="upload" className="space-y-2">
-                                        <Input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                                            className="cursor-pointer"
-                                        />
-                                        {imageFile && (
-                                            <p className="text-sm text-muted-foreground">Archivo seleccionado: {imageFile.name}</p>
-                                        )}
-                                    </TabsContent>
-                                </Tabs>
-                            </div>
+                            <Input {...register("coverUrl")} placeholder="URL de imagen" />
                         </CardContent>
                     </Card>
 
-                    {/* Fecha y ubicación */}
+                    {/* === Fecha === */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Fecha y Ubicación</CardTitle>
                         </CardHeader>
+
                         <CardContent className="space-y-4">
+                            {/* START */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Fecha de Inicio</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal cursor-pointer",
-                                                    !startDate && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {startDate ? format(startDate, "PPP", { locale: es }) : "Selecciona una fecha"}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                            <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="startTime">Hora de Inicio</Label>
-                                    <div className="relative">
-                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            id="startTime"
-                                            type="time"
-                                            value={startTime}
-                                            onChange={(e) => setStartTime(e.target.value)}
-                                            className="pl-9 cursor-pointer"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="location">Lugar</Label>
-                                <Input
-                                    id="location"
-                                    placeholder="Estadio Nacional"
-                                    value={eventLocation}
-                                    onChange={(e) => setEventLocation(e.target.value)}
-                                    required
+                                <Controller
+                                    control={control}
+                                    name="startDate"
+                                    render={({ field }) => (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="justify-start w-full">
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.value
+                                                        ? format(field.value, "PPP", { locale: es })
+                                                        : "Fecha inicio"}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent>
+                                                <Calendar selected={field.value} onSelect={field.onChange} />
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
                                 />
+
+                                <Input type="time" {...register("startTime", { required: true })} />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="address">Dirección Completa</Label>
-                                <Input
-                                    id="address"
-                                    placeholder="Av. Principal 1234, Ciudad"
-                                    value={eventAddress}
-                                    onChange={(e) => setEventAddress(e.target.value)}
-                                    required
+                            {/* END */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Controller
+                                    control={control}
+                                    name="endDate"
+                                    render={({ field }) => (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="justify-start w-full">
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.value
+                                                        ? format(field.value, "PPP", { locale: es })
+                                                        : "Fecha fin"}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent>
+                                                <Calendar selected={field.value} onSelect={field.onChange} />
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
                                 />
+
+                                <Input type="time" {...register("endTime")} />
                             </div>
 
-                            <div className="flex items-center justify-between p-4 border rounded-lg">
-                                <div className="space-y-0.5">
-                                    <Label htmlFor="google-maps" className="cursor-pointer">
-                                        Usar Google Maps
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        Permite seleccionar ubicación en el mapa (función experimental)
-                                    </p>
-                                </div>
-                                <Switch id="google-maps" checked={useGoogleMaps} onCheckedChange={setUseGoogleMaps} />
+                            {/* Ubicación */}
+                            <Input {...register("venueName", { required: true })} placeholder="Lugar" />
+                            <Textarea {...register("venueDescription")} placeholder="Descripción lugar" />
+                            <Input {...register("addressLine")} placeholder="Dirección" />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <Input {...register("city")} placeholder="Ciudad" />
+                                <Input {...register("state")} placeholder="Provincia" />
+                                <Input {...register("country")} placeholder="País" />
                             </div>
-
-                            {useGoogleMaps && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="map-location">Coordenadas o Link de Google Maps</Label>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            id="map-location"
-                                            placeholder="https://maps.google.com/... o lat,lng"
-                                            value={mapLocation}
-                                            onChange={(e) => setMapLocation(e.target.value)}
-                                            className="pl-9"
-                                        />
-                                    </div>
-                                </div>
-                            )}
                         </CardContent>
                     </Card>
 
-                    {/* Áreas */}
+                    {/* === Áreas === */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
+                            <div className="flex justify-between items-center">
                                 <CardTitle>Áreas y Precios</CardTitle>
                                 <Button
                                     type="button"
-                                    onClick={addArea}
-                                    variant="outline"
-                                    size="sm"
-                                    className="cursor-pointer bg-transparent"
+                                    onClick={() => append({
+                                        id: crypto.randomUUID(),
+                                        name: "",
+                                        isGeneralAdmission: true,
+                                        capacity: 0,
+                                        priceCents: 0,
+                                        position: areas.length + 1,
+                                        rows: []
+                                    })}
                                 >
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Agregar Área
+                                    <Plus className="mr-2 h-4 w-4" /> Agregar Área
                                 </Button>
                             </div>
                         </CardHeader>
+
                         <CardContent className="space-y-6">
-                            {areas.length === 0 ? (
-                                <p className="text-center text-muted-foreground py-8">
-                                    No hay áreas configuradas. Agrega al menos una área para tu evento.
-                                </p>
-                            ) : (
-                                areas.map((area, areaIndex) => (
-                                    <Card key={area.id} className="border-2">
-                                        <CardContent className="pt-6 space-y-4">
-                                            <div className="flex items-start justify-between gap-4">
-                                                <h4 className="font-semibold">Área {areaIndex + 1}</h4>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => removeArea(area.id)}
-                                                            className="text-destructive hover:text-destructive cursor-pointer"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Eliminar área</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
+                            {(areas ?? []).map((area, i) => {
+                                const rows = watch(`areas.${i}.rows`) ?? [];
+
+                                return (
+                                    <Card key={area.id} className="border">
+                                        <CardContent className="space-y-4 pt-6">
+
+                                            <div className="flex justify-between">
+                                                <h4 className="font-semibold">Área {i + 1}</h4>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => remove(i)}
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>Nombre del Área</Label>
-                                                    <Input
-                                                        placeholder="Campo, Platea, VIP..."
-                                                        value={area.name}
-                                                        onChange={(e) => updateArea(area.id, { name: e.target.value })}
-                                                        required
-                                                    />
-                                                </div>
+                                            {/* nombre + tipo */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input {...register(`areas.${i}.name`)} placeholder="Nombre" />
 
-                                                <div className="space-y-2">
-                                                    <Label>Tipo</Label>
-                                                    <Select
-                                                        value={area.type}
-                                                        onValueChange={(value: "general" | "numbered") =>
-                                                            updateArea(area.id, {
-                                                                type: value,
-                                                                rows: value === "general" ? [] : area.rows,
-                                                            })
+                                                <Controller
+                                                    control={control}
+                                                    name={`areas.${i}.isGeneralAdmission`}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            onValueChange={(v) => {
+                                                                const val = v === "true"
+                                                                field.onChange(val)
+
+                                                                if (!val && rows.length === 0) {
+                                                                    setValue(`areas.${i}.rows`, [
+                                                                        {
+                                                                            id: crypto.randomUUID(),
+                                                                            name: "Fila 1",
+                                                                            startSeat: 1,
+                                                                            endSeat: 10
+                                                                        }
+                                                                    ])
+                                                                }
+
+                                                                if (val) {
+                                                                    setValue(`areas.${i}.rows`, [])
+                                                                }
+                                                            }}
+                                                            value={String(field.value)}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Tipo" />
+                                                            </SelectTrigger>
+
+                                                            <SelectContent>
+                                                                <SelectItem value="true">General</SelectItem>
+                                                                <SelectItem value="false">Numerada</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            {/* precio + capacidad */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input
+                                                    type="number"
+                                                    {...register(`areas.${i}.priceCents`)}
+                                                    placeholder="Precio"
+                                                />
+
+                                                {watch(`areas.${i}.isGeneralAdmission`) && (
+                                                    <Input
+                                                        type="number"
+                                                        {...register(`areas.${i}.capacity`)}
+                                                        placeholder="Capacidad"
+                                                    />
+                                                )}
+                                            </div>
+
+                                            {/* filas */}
+                                            {!watch(`areas.${i}.isGeneralAdmission`) && (
+                                                <div className="space-y-4 mt-4">
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            setValue(`areas.${i}.rows`, [
+                                                                ...rows,
+                                                                {
+                                                                    id: crypto.randomUUID(),
+                                                                    name: `Fila ${rows.length + 1}`,
+                                                                    startSeat: 1,
+                                                                    endSeat: 10
+                                                                }
+                                                            ])
                                                         }
                                                     >
-                                                        <SelectTrigger className="cursor-pointer">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="general">Admisión General</SelectItem>
-                                                            <SelectItem value="numbered">Asientos Numerados</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
+                                                        <Plus className="mr-2 h-4 w-4" /> Agregar fila
+                                                    </Button>
 
-                                                <div className="space-y-2">
-                                                    <Label>Precio</Label>
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="5000"
-                                                        value={area.price || ""}
-                                                        onChange={(e) => updateArea(area.id, { price: Number(e.target.value) })}
-                                                        required
-                                                    />
-                                                </div>
+                                                    {(rows ?? []).map((row, rowIndex) => (
 
-                                                <div className="space-y-2">
-                                                    <Label>Capacidad</Label>
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="500"
-                                                        value={area.capacity || ""}
-                                                        onChange={(e) => updateArea(area.id, { capacity: Number(e.target.value) })}
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
+                                                        <div key={row.id} className="grid grid-cols-12 gap-2 items-center">
 
-                                            {area.type === "numbered" && (
-                                                <div className="space-y-4 pt-4 border-t">
-                                                    <div className="flex items-center justify-between">
-                                                        <Label>Filas</Label>
-                                                        <Button
-                                                            type="button"
-                                                            onClick={() => addRow(area.id)}
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="cursor-pointer"
-                                                        >
-                                                            <Plus className="mr-2 h-3 w-3" />
-                                                            Agregar Fila
-                                                        </Button>
-                                                    </div>
+                                                            <Input
+                                                                {...register(`areas.${i}.rows.${rowIndex}.name`)}
+                                                                className="col-span-3"
+                                                                placeholder="Fila"
+                                                            />
 
-                                                    {area.rows.map((row) => (
-                                                        <div key={row.id} className="grid grid-cols-12 gap-2 items-end">
-                                                            <div className="col-span-3 space-y-2">
-                                                                <Label className="text-xs">Nombre</Label>
-                                                                <Input
-                                                                    placeholder="A"
-                                                                    value={row.name}
-                                                                    onChange={(e) => updateRow(area.id, row.id, { name: e.target.value })}
-                                                                    required
-                                                                />
-                                                            </div>
-                                                            <div className="col-span-4 space-y-2">
-                                                                <Label className="text-xs">Asiento Inicio</Label>
-                                                                <Input
-                                                                    type="number"
-                                                                    placeholder="1"
-                                                                    value={row.startSeat || ""}
-                                                                    onChange={(e) =>
-                                                                        updateRow(area.id, row.id, { startSeat: Number(e.target.value) })
-                                                                    }
-                                                                    required
-                                                                />
-                                                            </div>
-                                                            <div className="col-span-4 space-y-2">
-                                                                <Label className="text-xs">Asiento Fin</Label>
-                                                                <Input
-                                                                    type="number"
-                                                                    placeholder="50"
-                                                                    value={row.endSeat || ""}
-                                                                    onChange={(e) =>
-                                                                        updateRow(area.id, row.id, { endSeat: Number(e.target.value) })
-                                                                    }
-                                                                    required
-                                                                />
-                                                            </div>
-                                                            <div className="col-span-1">
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            onClick={() => removeRow(area.id, row.id)}
-                                                                            className="text-destructive hover:text-destructive cursor-pointer"
-                                                                        >
-                                                                            <Trash2 className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Eliminar fila</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </div>
+                                                            <Input
+                                                                type="number"
+                                                                {...register(`areas.${i}.rows.${rowIndex}.startSeat`)}
+                                                                className="col-span-4"
+                                                            />
+
+                                                            <Input
+                                                                type="number"
+                                                                {...register(`areas.${i}.rows.${rowIndex}.endSeat`)}
+                                                                className="col-span-4"
+                                                            />
+
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => {
+                                                                    const newRows = rows.filter(r => r.id !== row.id)
+                                                                    setValue(`areas.${i}.rows`, newRows)
+                                                                }}
+                                                            >
+                                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                                            </Button>
+
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
                                         </CardContent>
                                     </Card>
-                                ))
-                            )}
+                                )
+                            })}
                         </CardContent>
                     </Card>
 
-                    {/* Botones finales */}
+                    {/* === FOOTER === */}
                     <div className="flex gap-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="lg"
-                            asChild
-                            className="cursor-pointer bg-transparent"
-                        >
+                        <Button asChild variant="outline">
                             <Link href="/admin/events">Cancelar</Link>
                         </Button>
 
                         <StarBorder className="flex-1">
                             <Button
                                 type="submit"
-                                className="w-full gradient-brand text-white cursor-pointer"
-                                size="lg"
-                                disabled={isSaving || areas.length === 0}
+                                className="w-full gradient-brand text-white"
+                                disabled={isSubmitting}
                             >
-                                {isSaving ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {isSubmitting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                 ) : (
                                     "Guardar Cambios"
                                 )}
