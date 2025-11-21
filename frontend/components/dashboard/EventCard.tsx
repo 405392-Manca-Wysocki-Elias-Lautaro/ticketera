@@ -82,7 +82,7 @@ export function EventCard({ event }: EventCardProps) {
                 <div>
                     <p className="text-xs text-muted-foreground">Desde</p>
                     <GradientText>
-                        <p className="text-xl font-bold">{event.currency}${event.minPriceCents}</p>
+                        <p className="text-xl font-bold">{event.currency}${(event.minPriceCents / 100).toLocaleString()}</p>
                     </GradientText>
                 </div>
 
