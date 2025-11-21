@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from '@/hooks/auth/useAuth'
@@ -10,6 +10,7 @@ import { EventCard } from '@/components/dashboard/EventCard'
 import { useEvents } from '@/hooks/event/useEvents'
 import { useCategories } from '@/hooks/event/useCategories'
 import { Category } from '@/types/Category'
+import { InstallPWAButton } from '@/components/pwa/InstallPwaButton'
 
 export default function DashboardPage() {
 
@@ -35,7 +36,7 @@ export default function DashboardPage() {
         });
     }, [events, selectedCategory, searchQuery]);
 
-    if (loadingAuth || isLoadingEvent || isLoadingCategories) {
+    if (loadingAuth || isLoadingEvent || isLoadingCategories || !categories) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -46,6 +47,8 @@ export default function DashboardPage() {
     return (
         <div className="h-screen bg-background overflow-auto">
             <Navbar />
+
+            <InstallPWAButton />
 
             <div className="h-auto w-full mx-auto px-6 py-8">
                 {/* Header */}

@@ -9,25 +9,27 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ArrowLeft, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { useEvent } from '@/hooks/event/useEvent'
 import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
+import { EventArea } from '@/types/EventArea'
+import { useEvent } from '@/hooks/event/useEvent'
 
 export default function SelectSeatsPage() {
-    const router = useRouter()
-    const params = useParams()
+    const router = useRouter();
+    const params = useParams();
+    const id = params.id;
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
-    const { data: event, isLoading: isLoadingEvent } = useEvent(params.id as string)
+
+    const {data: event, isLoading: isLoadingEvent} = useEvent(id);
 
     const urlAreaId = searchParams.get("area")
     const urlSeats = searchParams.get("seats")
     const urlQuantity = searchParams.get("quantity")
 
-    //TODO: Usar type Area
-    const [selectedArea, setSelectedArea] = useState<any | null>(() => {
-        if (urlAreaId && event && event.areas) {
+    const [selectedArea, setSelectedArea] = useState<EventArea | null>(() => {
+        if (urlAreaId && event) {
             return event.areas.find((a) => a.id === urlAreaId) || null
         }
         return null
@@ -73,7 +75,7 @@ export default function SelectSeatsPage() {
         }
     }, [user, isLoading, router])
 
-    if (isLoading || isLoadingEvent || !user) {
+    if (isLoading || !user || !event || isLoadingEvent) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -81,22 +83,7 @@ export default function SelectSeatsPage() {
         )
     }
 
-    if (!event) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Evento no encontrado</h1>
-                    <p className="text-muted-foreground mb-4">El evento que buscas no existe o ha sido eliminado.</p>
-                    <Button asChild>
-                        <Link href="/dashboard">Volver al inicio</Link>
-                    </Button>
-                </div>
-            </div>
-        )
-    }
-
-    //TODO: Usar type Area
-    const handleAreaSelect = (area: any) => {
+    const handleAreaSelect = (area: EventArea) => {
         setSelectedArea(area)
         setSelectedSeats([])
     }

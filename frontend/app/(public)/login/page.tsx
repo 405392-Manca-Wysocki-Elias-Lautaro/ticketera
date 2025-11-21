@@ -14,12 +14,20 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Checkbox } from '@/components/ui/checkbox'
 import { loginSchema, type LoginSchema } from '@/schemas/auth/LoginSchema'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import GradientText from '@/components/GradientText'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/auth/useAuth'
 
 export default function LoginPage() {
 
+    const { user, logout } = useAuth();
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+
+    // useEffect(() => {
+    //     logout();
+    // }, [user])
 
     const { mutate: login, isPending } = useLogin()
 
@@ -43,7 +51,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 gradient-brand">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 gradient-brand space-y-4">
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-4 text-center">
                     <div className="flex justify-center">
@@ -59,7 +67,7 @@ export default function LoginPage() {
                     </div>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className='space-y-4 flex flex-col justify-center'>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {/* Email */}
                         <div className="space-y-2">
@@ -133,11 +141,22 @@ export default function LoginPage() {
                         </StarBorder>
                     </form>
 
-                    <div className="mt-4 text-center text-sm text-muted-foreground">
+                    <div className="text-center text-sm text-muted-foreground">
                         ¿No tienes cuenta?{" "}
                         <Link href="/signup" className="text-primary hover:underline cursor-pointer">
                             Regístrate
                         </Link>
+                    </div>
+
+                    <div className='flex w-full justify-center'>
+                        <StarBorder className='w-1/2'>
+                            <Button
+                                className='gradient-brand w-full max-w-md'
+                                onClick={() => router.push("/dashboard")}
+                            >
+                                Ingresar como invitado
+                            </Button>
+                        </StarBorder>
                     </div>
                 </CardContent>
             </Card>

@@ -1,10 +1,12 @@
 package com.auth.app.exception;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
@@ -50,8 +52,7 @@ public class GlobalExceptionHandler {
         log.warn("Missing required cookie '{}' at {}: {}", cookieName, request.getRequestURI(), ex.getMessage());
 
         Map<String, String> details = Map.of(
-                "cookie", cookieName
-        );
+                "cookie", cookieName);
 
         return ApiErrorFactory.error(ErrorCatalog.MISSING_REQUIRED_COOKIE, details);
     }
@@ -65,8 +66,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(
                         f -> f.getField(),
                         f -> f.getDefaultMessage(),
-                        (a, b) -> b
-                ));
+                        (a, b) -> b));
 
         log.warn("Validation failed at {}: {}", request.getRequestURI(), errors);
 
@@ -111,8 +111,7 @@ public class GlobalExceptionHandler {
         Map<String, String> details = Map.of(
                 "entity", ex.getEntityName(),
                 "field", ex.getField(),
-                "value", String.valueOf(ex.getValue())
-        );
+                "value", String.valueOf(ex.getValue()));
 
         return ApiErrorFactory.error(ex.getError(), details);
     }
@@ -160,10 +159,41 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<ApiResponse<ApiError>> handleInvalidRefreshToken(InvalidRefreshTokenException ex,
+    public ResponseEntity<ApiResponse<ApiError>> handleInvalidRefreshToken(
+            InvalidRefreshTokenException ex,
             HttpServletRequest request) {
         log.warn("Invalid refresh token at {}: {}", request.getRequestURI(), ex.getMessage());
-        return ApiErrorFactory.error(ErrorCatalog.INVALID_REFRESH_TOKEN, null);
+
+        ResponseCookie deletedCookie = ResponseCookie.from("refreshToken", "")
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie deleteSessionFlag = ResponseCookie.from("sessionFlag", "")
+                .path("/")
+                .httpOnly(false)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity
+                .status(ErrorCatalog.INVALID_REFRESH_TOKEN.getStatus())
+                .header(HttpHeaders.SET_COOKIE, deletedCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, deleteSessionFlag.toString())
+                .body(ApiResponse.<ApiError>builder()
+                        .success(false)
+                        .message("Refresh token inválido")
+                        .data(ApiError.builder()
+                                .status(ErrorCatalog.INVALID_REFRESH_TOKEN.getStatus().value())
+                                .code(ErrorCatalog.INVALID_REFRESH_TOKEN.getCode())
+                                .message(ErrorCatalog.INVALID_REFRESH_TOKEN.getMessage())
+                                .build())
+                        .timestamp(OffsetDateTime.now())
+                        .build());
     }
 
     @ExceptionHandler(TooManyAttemptsException.class)

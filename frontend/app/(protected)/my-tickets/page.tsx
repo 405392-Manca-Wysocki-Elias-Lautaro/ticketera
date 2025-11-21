@@ -41,8 +41,7 @@ export default function MyTicketsPage() {
 
     const validTickets = tickets.filter((t: Ticket) => t.status === TicketStatus.ISSUED);
     const usedTickets = tickets.filter((t: Ticket) => t.status === TicketStatus.CHECKED_IN);
-
-    console.log("valid tickets", validTickets);
+    
     const handleViewQR = (ticket: Ticket) => {
         setSelectedTicket(ticket)
     }
@@ -72,10 +71,10 @@ export default function MyTicketsPage() {
                             </div>
                         ) : (
                             <Card>
-                                <CardContent className="py-12 text-center">
+                                <CardContent className="py-12 text-center space-y-4">
                                     <p className="text-muted-foreground">No tienes tickets activos</p>
                                     <StarBorder>
-                                        <Button asChild className="mt-4 gradient-brand text-white">
+                                        <Button asChild className="gradient-brand text-white">
                                             <a href="/dashboard">Explorar Eventos</a>
                                         </Button>
                                     </StarBorder>
