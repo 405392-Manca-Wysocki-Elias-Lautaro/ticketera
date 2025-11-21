@@ -185,7 +185,7 @@ export default function CheckoutPage() {
                     toast.error("Hay un problema con los datos ingresados. Por favor, verifica la información.");
                 }
             } else {
-                toast.error("Error al procesar el pago. Por favor, inténtalo nuevamente.");
+                toast.error("Error al procesar el pago. Asiento ya reservado por otro usuario.");
             }
         } finally {
             setIsProcessing(false);

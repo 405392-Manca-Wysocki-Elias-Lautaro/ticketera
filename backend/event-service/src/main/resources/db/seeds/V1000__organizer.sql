@@ -34,8 +34,8 @@ VALUES
 -- Area Pricing (precios por área)
 INSERT INTO events.area_pricing (area_id, price_cents, currency)
 VALUES
-  ('11111111-1111-1111-1111-111111111111', 5000, 'ARS'),  -- Campo: $50.00 ARS
-  ('22222222-2222-2222-2222-222222222222', 15000, 'ARS'); -- Zona VIP: $150.00 ARS
+  ('11111111-1111-1111-1111-111111111111', 500000, 'ARS'),  -- Campo: $50000.00 ARS
+  ('22222222-2222-2222-2222-222222222222', 15000000, 'ARS'); -- Zona VIP: $150000.00 ARS
 
 -- Seats (antes venue_seats)
 INSERT INTO events.seats (area_id, seat_number, row_number, label)
