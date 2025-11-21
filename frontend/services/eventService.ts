@@ -2,6 +2,7 @@ import api from "@/lib/api";
 import type { ApiResponse } from "@/types/Response/ApiResponse";
 import type { OrganizerMetrics } from "@/types/OrganizerMetrics";
 import { CreateEvent } from '@/types/Request/CreateEvent';
+import { createCrudService } from "./createCrud";
 
 // Interface básica del evento (puedes expandirla según necesites)
 export interface EventInfo {
@@ -21,6 +22,8 @@ export interface EventInfo {
 const BASE_URL = "/events";
 
 export const eventService = {
+
+    ...createCrudService<Event>(BASE_URL),
     /**
      * Obtiene información básica de un evento por su ID
      */

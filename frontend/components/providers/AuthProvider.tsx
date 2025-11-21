@@ -36,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (token && user === null) {
             toast.error("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
             logout();
-            router.push("/app/login");
+            router.push("/login");
         }
     }, [user, token, logout, router]);
 

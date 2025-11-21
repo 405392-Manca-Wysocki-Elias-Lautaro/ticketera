@@ -28,7 +28,7 @@ export default function NotFound() {
     }, [user, isLoading])
 
     const handleGoHome = () => {
-        router.push("/app" + redirectPath)
+        router.push(redirectPath)
     }
 
     return (

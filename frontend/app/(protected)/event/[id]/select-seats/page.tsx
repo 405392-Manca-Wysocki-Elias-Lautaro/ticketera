@@ -19,7 +19,10 @@ export default function SelectSeatsPage() {
     const params = useParams()
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
-    const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
+    const [event, setEvent] = useState(() => {
+        const foundEvent = mockEvents.find((e) => e.id === params.id)
+        return foundEvent || null
+    })
 
     const urlAreaId = searchParams.get("area")
     const urlSeats = searchParams.get("seats")
@@ -27,7 +30,7 @@ export default function SelectSeatsPage() {
 
     //TODO: Usar type Area
     const [selectedArea, setSelectedArea] = useState<any | null>(() => {
-        if (urlAreaId && event) {
+        if (urlAreaId && event && event.areas) {
             return event.areas.find((a) => a.id === urlAreaId) || null
         }
         return null
@@ -35,7 +38,7 @@ export default function SelectSeatsPage() {
 
     const [selectedSeats, setSelectedSeats] = useState<{ row: string; seat: number }[]>(() => {
         if (urlSeats) {
-            return urlSeats.split(",").map((seat) => {
+            return urlSeats.split(",").map((seat: string) => {
                 const [row, seatNum] = seat.split("-")
                 return { row, seat: Number.parseInt(seatNum) }
             })
@@ -52,12 +55,14 @@ export default function SelectSeatsPage() {
 
         const occupied = new Set<string>()
         selectedArea.rows?.forEach((row: any) => {
-            const totalSeats = row.endSeat - row.startSeat + 1
-            const occupiedCount = Math.floor(totalSeats * 0.3)
+            if (row && typeof row.endSeat === 'number' && typeof row.startSeat === 'number' && row.name) {
+                const totalSeats = row.endSeat - row.startSeat + 1
+                const occupiedCount = Math.floor(totalSeats * 0.3)
 
-            for (let i = 0; i < occupiedCount; i++) {
-                const randomSeat = row.startSeat + Math.floor(Math.random() * totalSeats)
-                occupied.add(`${row.name}-${randomSeat}`)
+                for (let i = 0; i < occupiedCount; i++) {
+                    const randomSeat = row.startSeat + Math.floor(Math.random() * totalSeats)
+                    occupied.add(`${row.name}-${randomSeat}`)
+                }
             }
         })
 
@@ -66,14 +71,28 @@ export default function SelectSeatsPage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/app/login")
+            router.push("/login")
         }
     }, [user, isLoading, router])
 
-    if (isLoading || !user || !event) {
+    if (isLoading || !user) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+        )
+    }
+
+    if (!event) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Evento no encontrado</h1>
+                    <p className="text-muted-foreground mb-4">El evento que buscas no existe o ha sido eliminado.</p>
+                    <Button asChild>
+                        <Link href="/dashboard">Volver al inicio</Link>
+                    </Button>
+                </div>
             </div>
         )
     }
@@ -124,7 +143,7 @@ export default function SelectSeatsPage() {
 
             <main className="container mx-auto px-4 py-8">
                 <Button variant="ghost" asChild className="mb-6">
-                    <Link href={`/app/event/${event.id}`}>
+                    <Link href={`/event/${event.id}`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Volver al evento
                     </Link>
@@ -142,7 +161,7 @@ export default function SelectSeatsPage() {
                                 <CardTitle>1. Selecciona un Área</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
-                                {event.areas.map((area) => (
+                                {event.areas?.map((area) => (
                                     <button
                                         key={area.id}
                                         onClick={() => handleAreaSelect(area)}
@@ -197,6 +216,7 @@ export default function SelectSeatsPage() {
                                     ) : (
                                         <div className="space-y-4">
                                             {selectedArea.rows?.map((row: any) => (
+                                                row && row.name && typeof row.startSeat === 'number' && typeof row.endSeat === 'number' ? (
                                                 <div key={row.id} className="space-y-2">
                                                     <h4 className="font-medium">Fila {row.name}</h4>
                                                     <div className="grid grid-cols-10 gap-2">
@@ -227,6 +247,7 @@ export default function SelectSeatsPage() {
                                                         )}
                                                     </div>
                                                 </div>
+                                                ) : null
                                             ))}
 
                                             <div className="flex items-center gap-4 pt-4 text-sm">

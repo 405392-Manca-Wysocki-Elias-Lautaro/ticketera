@@ -34,7 +34,7 @@ api.interceptors.response.use(
 
         if (originalRequest.url.includes("/auth/refresh")) {
             useAuthStore.getState().logout();
-            if (typeof window !== "undefined") window.location.href = "/app/login";
+            if (typeof window !== "undefined") window.location.href = "/login";
             return Promise.reject(error);
         }
 
@@ -59,7 +59,7 @@ api.interceptors.response.use(
 
             } catch (err) {
                 useAuthStore.getState().logout();
-                if (typeof window !== "undefined") window.location.href = "/app/login";
+                if (typeof window !== "undefined") window.location.href = "/login";
                 return Promise.reject(err);
             }
         }

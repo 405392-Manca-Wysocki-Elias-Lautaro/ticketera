@@ -100,7 +100,7 @@ export default function VerifyEmailPage() {
                     </div>
 
                     <Button asChild className="w-full gradient-brand text-white cursor-pointer">
-                        <Link href="/app/login">
+                        <Link href="/login">
                             Ir al Login
                             <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>

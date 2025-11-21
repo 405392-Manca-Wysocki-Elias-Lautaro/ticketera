@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/app/dashboard")
+            router.push("/dashboard")
         }
     }, [user, isLoading, router])
 
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
                         </div>
                         <StarBorder>
                             <Button asChild className="gradient-brand text-white cursor-pointer">
-                                <Link href="/app/admin/events/create">
+                                <Link href="/admin/events/create">
                                     <Plus className="mr-2 h-4 w-4" />
                                     Crear Evento
                                 </Link>
@@ -249,7 +249,7 @@ export default function AdminDashboardPage() {
                     {/* Quick Actions */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
                         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                            <Link href="/app/admin/events">
+                            <Link href="/admin/events">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Calendar className="h-5 w-5 text-primary" />
@@ -263,7 +263,7 @@ export default function AdminDashboardPage() {
                         </Card>
 
                         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                            <Link href="/app/admin/payments">
+                            <Link href="/admin/payments">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <DollarSign className="h-5 w-5 text-primary" />
@@ -277,7 +277,7 @@ export default function AdminDashboardPage() {
                         </Card>
 
                         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                            <Link href="/app/profile">
+                            <Link href="/profile">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Users className="h-5 w-5 text-primary" />

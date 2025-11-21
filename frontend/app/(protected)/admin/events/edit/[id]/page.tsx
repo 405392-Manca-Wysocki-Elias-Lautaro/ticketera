@@ -76,7 +76,7 @@ export default function EditEventPage() {
 
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/app/dashboard")
+            router.push("/dashboard")
         }
     }, [user, isLoading, router])
 
@@ -161,7 +161,7 @@ export default function EditEventPage() {
         e.preventDefault()
         setIsSaving(true)
         await new Promise((resolve) => setTimeout(resolve, 1500))
-        router.push("/app/admin/events")
+        router.push("/admin/events")
     }
 
     if (isLoading || !user || !RoleUtils.isAdmin(user)) {
@@ -176,7 +176,7 @@ export default function EditEventPage() {
         <div className="flex h-screen overflow-auto">
             <div className="container mx-auto px-4 py-8 max-w-4xl">
                 <Button variant="ghost" asChild className="mb-6 cursor-pointer">
-                    <Link href="/app/admin/events">
+                    <Link href="/admin/events">
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Volver a eventos
                     </Link>
@@ -555,7 +555,7 @@ export default function EditEventPage() {
                             asChild
                             className="cursor-pointer bg-transparent"
                         >
-                            <Link href="/app/admin/events">Cancelar</Link>
+                            <Link href="/admin/events">Cancelar</Link>
                         </Button>
 
                         <StarBorder className="flex-1">

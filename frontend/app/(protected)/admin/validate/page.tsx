@@ -35,7 +35,7 @@ export default function AdminValidatePage() {
     // redirect if not admin
     useEffect(() => {
         if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/app/dashboard")
+            router.push("/dashboard")
         }
     }, [user, isLoading, router]);
 

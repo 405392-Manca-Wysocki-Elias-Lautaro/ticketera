@@ -48,7 +48,7 @@ export default function SignUpPage() {
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-4">
                     <Button variant="ghost" asChild className="w-fit cursor-pointer mb-0">
-                        <Link href="/app/login">
+                        <Link href="/login">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver al login
                         </Link>
@@ -163,7 +163,7 @@ export default function SignUpPage() {
 
                     <div className="mt-4 text-center text-sm text-muted-foreground">
                         ¿Ya tienes cuenta?{" "}
-                        <Link href="/app/login" className="text-primary hover:underline cursor-pointer">
+                        <Link href="/login" className="text-primary hover:underline cursor-pointer">
                             Inicia sesión
                         </Link>
                     </div>

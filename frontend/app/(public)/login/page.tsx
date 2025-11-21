@@ -77,7 +77,7 @@ export default function LoginPage() {
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Contraseña</Label>
                                 <Link
-                                    href="/app/forgot-password"
+                                    href="/forgot-password"
                                     className="text-xs text-primary hover:underline cursor-pointer"
                                 >
                                     ¿Olvidaste tu contraseña?
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
                     <div className="mt-4 text-center text-sm text-muted-foreground">
                         ¿No tienes cuenta?{" "}
-                        <Link href="/app/signup" className="text-primary hover:underline cursor-pointer">
+                        <Link href="/signup" className="text-primary hover:underline cursor-pointer">
                             Regístrate
                         </Link>
                     </div>

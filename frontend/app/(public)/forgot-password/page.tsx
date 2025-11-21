@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-4">
                     <Button variant="ghost" asChild className="w-fit cursor-pointer">
-                        <Link href="/app/login">
+                        <Link href="/login">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver al login
                         </Link>

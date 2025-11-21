@@ -59,7 +59,7 @@ export function AdminStaffSidebar({ user }: { user: any }) {
                                             isActive={pathname === link.href}
                                             tooltip={link.title}
                                         >
-                                            <Link href={"/app" + link.href}>
+                                            <Link href={link.href}>
                                                 <link.icon className="mr-2 h-4 w-4" />
                                                 <span>{link.title}</span>
                                             </Link>

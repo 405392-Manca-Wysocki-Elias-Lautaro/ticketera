@@ -94,7 +94,7 @@ export default function CreateEventPage() {
 
     useEffect(() => {
         if (!isLoadingAuth && (!user || !RoleUtils.isAdmin(user))) {
-            router.push("/app/dashboard")
+            router.push("/dashboard")
         }
     }, [user, isLoadingAuth, router]);
 
@@ -215,7 +215,7 @@ export default function CreateEventPage() {
 
         mutate(payload, {
             onSuccess: () => {
-                router.push("/app/admin/events");
+                router.push("/admin/events");
             }
         });
     };
@@ -234,7 +234,7 @@ export default function CreateEventPage() {
                 <div className="relative flex items-center justify-center mb-8">
                     <div className="absolute left-0">
                         <Button variant="ghost" asChild className="mb-6 cursor-pointer">
-                            <Link href="/app/admin/events">
+                            <Link href="/admin/events">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Volver a eventos
                             </Link>
@@ -501,7 +501,7 @@ export default function CreateEventPage() {
                     {/* === Footer === */}
                     <div className="flex gap-4">
                         <Button type="button" variant="outline" size="lg" asChild>
-                            <Link href="/app/admin/events">Cancelar</Link>
+                            <Link href="/admin/events">Cancelar</Link>
                         </Button>
 
                         <StarBorder className="flex-1">
