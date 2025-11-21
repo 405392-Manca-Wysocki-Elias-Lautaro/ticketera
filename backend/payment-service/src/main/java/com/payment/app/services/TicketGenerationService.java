@@ -87,6 +87,9 @@ public class TicketGenerationService {
                             .eventEnd(null) // TODO: Debería venir del evento
                             .build();
                     
+                    // Agregar venueAreaId al request
+                    ticketRequest.setVenueAreaId(item.getVenueAreaId());
+                    
                     boolean success = ticketServiceClient.generateTicket(ticketRequest);
                     
                     if (success) {

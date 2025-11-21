@@ -20,6 +20,7 @@ public class GenerateTicketRequest {
     private String orderItemId;  // UUID como String
     private String occurrenceId; // UUID como String  
     private String userId;       // UUID como String
+    private String venueAreaId;  // UUID como String
     
     // Pricing
     private BigDecimal price;

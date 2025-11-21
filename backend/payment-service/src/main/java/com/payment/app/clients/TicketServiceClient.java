@@ -8,6 +8,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Cliente para comunicarse con el Ticket Service
  */
@@ -35,9 +39,23 @@ public class TicketServiceClient {
         logger.info("Generating ticket at: {} for orderItem: {}", url, request.getOrderItemId());
         
         try {
+            // Mapear GenerateTicketRequest a TicketGenerateRequest (formato esperado por ticket-service)
+            Map<String, Object> ticketRequest = new HashMap<>();
+            ticketRequest.put("orderItemId", UUID.fromString(request.getOrderItemId()));
+            ticketRequest.put("eventId", UUID.fromString(request.getOccurrenceId())); // occurrenceId -> eventId
+            ticketRequest.put("eventVenueAreaId", UUID.fromString(request.getVenueAreaId()));
+            ticketRequest.put("eventVenueSeatId", null); // Para general admission
+            ticketRequest.put("userId", UUID.fromString(request.getUserId()));
+            ticketRequest.put("price", request.getPrice());
+            ticketRequest.put("currency", request.getCurrency());
+            ticketRequest.put("discount", request.getDiscount());
+            ticketRequest.put("finalPrice", request.getFinalPrice());
+            ticketRequest.put("eventStart", request.getEventStart());
+            ticketRequest.put("eventEnd", request.getEventEnd());
+            
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<GenerateTicketRequest> entity = new HttpEntity<>(request, headers);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ticketRequest, headers);
             
             ResponseEntity<String> response = restTemplate.exchange(
                     url,

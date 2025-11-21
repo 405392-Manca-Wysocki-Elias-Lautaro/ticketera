@@ -89,7 +89,7 @@ public class TicketServiceImpl implements TicketService {
             model.setEventId(request.getEventId());
             model.setEventVenueAreaId(request.getEventVenueAreaId());
             model.setEventVenueSeatId(request.getEventVenueSeatId());
-            model.setUserId(jwtUtils.getUserId());
+            model.setUserId(request.getUserId());
             model.setCode("TCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             model.setQrToken(UUID.randomUUID().toString());
             model.setStatus(TicketStatus.ISSUED);
@@ -109,7 +109,8 @@ public class TicketServiceImpl implements TicketService {
 
             logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued", model.getUserId());
 
-            return this.getById(saved.getId());
+            // Return basic ticket model without enrichment (no JWT required)
+            return modelMapper.map(saved, TicketModel.class);
 
         } catch (Exception e) {
             throw new RuntimeException("Error generating ticket: " + e.getMessage(), e);
@@ -243,15 +244,16 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private TicketModel enrichTicket(Ticket ticket) {
-
         TicketModel ticketModel = modelMapper.map(ticket, TicketModel.class);
 
-        JsonNode eventJson = eventClient.getEventById(ticket.getEventId());
-        JsonNode eventData = eventJson.get("data");
+        try {
+            JsonNode eventJson = eventClient.getEventById(ticket.getEventId());
+            JsonNode eventData = eventJson.get("data");
 
-        if (eventData == null) {
-            throw new RuntimeException("Event service returned null data");
-        }
+            if (eventData == null) {
+                // Return basic ticket without event data if service is unavailable
+                return ticketModel;
+            }
 
         // Build areas
         List<AreaModel> areas = new ArrayList<>();
@@ -317,6 +319,62 @@ public class TicketServiceImpl implements TicketService {
                 .refundedAt(ticketModel.getRefundedAt())
                 .event(eventModel)
                 .build();
+
+        } catch (Exception e) {
+            // If event enrichment fails, return ticket with basic fallback data
+            log.warn("Failed to enrich ticket {}: {} - {}", ticket.getId(), e.getClass().getSimpleName(), e.getMessage());
+            log.debug("Full stack trace for ticket enrichment failure:", e);
+            
+            // Create basic event model with fallback data
+            EventModel basicEventModel = EventModel.builder()
+                    .eventTitle("Evento") // Fallback title
+                    .eventDescription("Información del evento no disponible")
+                    .venueName("Ubicación por confirmar")
+                    .addressLine("Dirección no disponible")
+                    .city("Ciudad")
+                    .state("Estado")
+                    .country("País")
+                    .categoryName("Evento")
+                    .startsAt(ticketModel.getExpiresAt() != null ? ticketModel.getExpiresAt().toString() : "Fecha por confirmar")
+                    .endsAt(null)
+                    .area(AreaModel.builder()
+                            .id(ticket.getEventVenueAreaId() != null ? ticket.getEventVenueAreaId().toString() : "area-1")
+                            .name("Área General")
+                            .isGeneralAdmission(true)
+                            .capacity(100)
+                            .position(1)
+                            .priceCents(ticketModel.getPrice() != null ? ticketModel.getPrice() : BigDecimal.ZERO)
+                            .currency(ticketModel.getCurrency() != null ? ticketModel.getCurrency() : "ARS")
+                            .availableTickets(0)
+                            .totalSeats(100)
+                            .build())
+                    .build();
+            
+            return TicketModel.builder()
+                    .id(ticketModel.getId())
+                    .orderItemId(ticketModel.getOrderItemId())
+                    .eventId(ticketModel.getEventId())
+                    .eventVenueAreaId(ticketModel.getEventVenueAreaId())
+                    .eventVenueSeatId(ticketModel.getEventVenueSeatId())
+                    .userId(ticketModel.getUserId())
+                    .code(ticketModel.getCode())
+                    .qrToken(ticketModel.getQrToken())
+                    .qrBase64(generateQR(ticketModel.getQrToken()))
+                    .price(ticketModel.getPrice())
+                    .currency(ticketModel.getCurrency())
+                    .discount(ticketModel.getDiscount())
+                    .finalPrice(ticketModel.getFinalPrice())
+                    .status(ticketModel.getStatus())
+                    .issuedAt(ticketModel.getIssuedAt())
+                    .checkedInAt(ticketModel.getCheckedInAt())
+                    .canceledAt(ticketModel.getCanceledAt())
+                    .refundedAt(ticketModel.getRefundedAt())
+                    .expiresAt(ticketModel.getExpiresAt())
+                    .createdAt(ticketModel.getCreatedAt())
+                    .updatedAt(ticketModel.getUpdatedAt())
+                    .event(basicEventModel)
+                    .build();
+        }
     }
 
 }
