@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.event.app.dtos.CreateEventRequest;
+import com.event.app.dtos.EventDTO;
 import com.event.app.dtos.EventDetailDTO;
 import com.event.app.dtos.EventSummaryDTO;
-import com.event.app.dtos.EventDTO;
 import com.event.app.models.Event;
 
 public interface IEventService {
