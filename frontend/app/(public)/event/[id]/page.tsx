@@ -140,7 +140,7 @@ export default function EventDetailPage() {
                                                 </div>
                                                 <div className="text-right">
                                                     <GradientText>
-                                                        <p className="text-lg font-bold">{area.currency}${area.priceCents}</p>
+                                                        <p className="text-lg font-bold">{area.currency}${(area.priceCents / 100).toLocaleString()}</p>
                                                     </GradientText>
                                                     <p className="text-xs text-muted-foreground">{area.capacity} lugares</p>
                                                 </div>
@@ -159,7 +159,7 @@ export default function EventDetailPage() {
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Precio desde</p>
                                     <GradientText>
-                                        <p className="text-3xl font-bold">{event.currency}${event?.minPriceCents}</p>
+                                        <p className="text-3xl font-bold">{event.currency}${(event?.minPriceCents / 100).toLocaleString()}</p>
                                     </GradientText>
                                 </div>
 

@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ArrowLeft, Loader2, ChevronDown, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { mockEvents } from '@/mocks/mockEvents'
+import { useEvent } from '@/hooks/event/useEvent'
 import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
@@ -26,7 +26,7 @@ export default function CheckoutPage() {
     const params = useParams()
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
-    const [event, setEvent] = useState(mockEvents.find((e) => e.id === params.id))
+    const { data: event, isLoading: isLoadingEvent } = useEvent(params.id as string)
     const [isProcessing, setIsProcessing] = useState(false)
     const [preferenceId, setPreferenceId] = useState<string | undefined>()
     const [phone, setPhone] = useState("")
@@ -104,7 +104,7 @@ export default function CheckoutPage() {
 
             // Construir los items de la orden con datos reales
             // Convertir IDs de string a number para el backend
-            const eventIdNum = parseInt(event.id) || 1;
+            const eventIdNum = parseInt(String(event.id)) || 1;
             const areaIdNum = parseInt(areaId || "1");
             
             const items = parsedSeats.length > 0
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
                         venueAreaId: areaIdNum,
                         venueSeatId: seatId,
                         ticketTypeId: 1, // 1 = adulto estándar
-                        unitPriceCents: selectedArea.price * 100,
+                        unitPriceCents: selectedArea.priceCents,
                         quantity: 1,
                     };
                 })
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
                     phone: phone,
                     userId: user.id, // UUID del usuario desde auth-service
                 },
-                organizerId: parseInt(event.id) || 1, // Usar el mismo ID del evento como organizerId temporal
+                organizerId: parseInt(String(event.id)) || 1, // Usar el mismo ID del evento como organizerId temporal
                 items: items,
                 currency: "ARS",
                 paymentDescription: `Entradas para ${event.title}`,
@@ -174,7 +174,7 @@ export default function CheckoutPage() {
         router.push(`/event/${event?.id}/success`)
     }
 
-    if (isLoading || !user || !event || !selectedArea) {
+    if (isLoading || isLoadingEvent || !user || !event || !selectedArea) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -312,7 +312,7 @@ export default function CheckoutPage() {
                                 <div>
                                     <p className="font-semibold mb-1">{event.title}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        {new Date(event.date).toLocaleDateString("es-ES")} - {event.time}
+                                        {new Date(event.startsAt).toLocaleDateString("es-ES")} - {new Date(event.startsAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
                                     </p>
                                 </div>
 
@@ -322,7 +322,7 @@ export default function CheckoutPage() {
                                         <span className="font-medium">{selectedArea.name}</span>
                                     </div>
 
-                                    {selectedArea.type === "general" ? (
+                                    {selectedArea.isGeneralAdmission ? (
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Cantidad</span>
                                             <span className="font-medium">
@@ -372,7 +372,7 @@ export default function CheckoutPage() {
 
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Precio unitario</span>
-                                        <span className="font-medium">${selectedArea.price.toLocaleString()}</span>
+                                        <span className="font-medium">{selectedArea.currency}${(selectedArea.priceCents / 100).toLocaleString()}</span>
                                     </div>
                                 </div>
 

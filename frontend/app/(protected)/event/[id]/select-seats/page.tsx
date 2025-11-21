@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ArrowLeft, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
-import { mockEvents } from '@/mocks/mockEvents'
+import { useEvent } from '@/hooks/event/useEvent'
 import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
@@ -19,10 +19,7 @@ export default function SelectSeatsPage() {
     const params = useParams()
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
-    const [event, setEvent] = useState(() => {
-        const foundEvent = mockEvents.find((e) => e.id === params.id)
-        return foundEvent || null
-    })
+    const { data: event, isLoading: isLoadingEvent } = useEvent(params.id as string)
 
     const urlAreaId = searchParams.get("area")
     const urlSeats = searchParams.get("seats")
@@ -51,20 +48,21 @@ export default function SelectSeatsPage() {
     })
 
     const occupiedSeats = useMemo(() => {
-        if (!selectedArea || selectedArea.type === "general") return new Set<string>()
+        if (!selectedArea || selectedArea.isGeneralAdmission) return new Set<string>()
 
+        // Para áreas numeradas, simular asientos ocupados
+        // Nota: En el servicio real, esto debería venir del backend
         const occupied = new Set<string>()
-        selectedArea.rows?.forEach((row: any) => {
-            if (row && typeof row.endSeat === 'number' && typeof row.startSeat === 'number' && row.name) {
-                const totalSeats = row.endSeat - row.startSeat + 1
-                const occupiedCount = Math.floor(totalSeats * 0.3)
+        const totalSeats = selectedArea.totalSeats || 100
+        const occupiedCount = Math.floor(totalSeats * 0.3)
 
-                for (let i = 0; i < occupiedCount; i++) {
-                    const randomSeat = row.startSeat + Math.floor(Math.random() * totalSeats)
-                    occupied.add(`${row.name}-${randomSeat}`)
-                }
-            }
-        })
+        // Simular filas A, B, C con asientos del 1 al 20 cada una
+        const rows = ['A', 'B', 'C', 'D', 'E']
+        for (let i = 0; i < occupiedCount; i++) {
+            const randomRow = rows[Math.floor(Math.random() * rows.length)]
+            const randomSeat = Math.floor(Math.random() * 20) + 1
+            occupied.add(`${randomRow}-${randomSeat}`)
+        }
 
         return occupied
     }, [selectedArea]) // Only regenerate when area changes
@@ -75,7 +73,7 @@ export default function SelectSeatsPage() {
         }
     }, [user, isLoading, router])
 
-    if (isLoading || !user) {
+    if (isLoading || isLoadingEvent || !user) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -117,24 +115,24 @@ export default function SelectSeatsPage() {
 
     const handleContinue = () => {
         const total = selectedArea
-            ? selectedArea.type === "general"
-                ? selectedArea.price * quantity
-                : selectedArea.price * selectedSeats.length
+            ? selectedArea.isGeneralAdmission
+                ? (selectedArea.priceCents / 100) * quantity
+                : (selectedArea.priceCents / 100) * selectedSeats.length
             : 0
 
         const seatsParam = selectedSeats.map((s) => `${s.row}-${s.seat}`).join(",")
 
         router.push(
-            `/event/${event.id}/checkout?area=${selectedArea?.id}&seats=${seatsParam}&quantity=${quantity}&total=${total}`,
+            `/event/${event?.id}/checkout?area=${selectedArea?.id}&seats=${seatsParam}&quantity=${quantity}&total=${total}`,
         )
     }
 
-    const canContinue = selectedArea && (selectedArea.type === "general" ? quantity > 0 : selectedSeats.length > 0)
+    const canContinue = selectedArea && (selectedArea.isGeneralAdmission ? quantity > 0 : selectedSeats.length > 0)
 
     const total = selectedArea
-        ? selectedArea.type === "general"
-            ? selectedArea.price * quantity
-            : selectedArea.price * selectedSeats.length
+        ? selectedArea.isGeneralAdmission
+            ? (selectedArea.priceCents / 100) * quantity
+            : (selectedArea.priceCents / 100) * selectedSeats.length
         : 0
 
     return (
@@ -174,12 +172,12 @@ export default function SelectSeatsPage() {
                                             <div>
                                                 <h3 className="font-semibold">{area.name}</h3>
                                                 <p className="text-sm text-muted-foreground">
-                                                    {area.type === "general" ? "Admisión General" : "Asientos Numerados"}
+                                                    {area.isGeneralAdmission ? "Admisión General" : "Asientos Numerados"}
                                                 </p>
                                             </div>
                                             <div className="text-right">
                                                 <GradientText>
-                                                    <p className="text-lg font-bold">${area.price.toLocaleString()}</p>
+                                                    <p className="text-lg font-bold">{area.currency}${(area.priceCents / 100).toLocaleString()}</p>
                                                 </GradientText>
                                                 <p className="text-xs text-muted-foreground">{area.capacity} lugares</p>
                                             </div>
@@ -194,11 +192,11 @@ export default function SelectSeatsPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>
-                                        2. {selectedArea.type === "general" ? "Cantidad de Entradas" : "Selecciona tus Asientos"}
+                                        2. {selectedArea.isGeneralAdmission ? "Cantidad de Entradas" : "Selecciona tus Asientos"}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    {selectedArea.type === "general" ? (
+                                    {selectedArea.isGeneralAdmission ? (
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-4">
                                                 <Button variant="outline" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
@@ -215,23 +213,23 @@ export default function SelectSeatsPage() {
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {selectedArea.rows?.map((row: any) => (
-                                                row && row.name && typeof row.startSeat === 'number' && typeof row.endSeat === 'number' ? (
-                                                <div key={row.id} className="space-y-2">
-                                                    <h4 className="font-medium">Fila {row.name}</h4>
+                                            {/* Simular filas para áreas numeradas */}
+                                            {['A', 'B', 'C', 'D', 'E'].map((rowName) => (
+                                                <div key={rowName} className="space-y-2">
+                                                    <h4 className="font-medium">Fila {rowName}</h4>
                                                     <div className="grid grid-cols-10 gap-2">
-                                                        {Array.from({ length: row.endSeat - row.startSeat + 1 }, (_, i) => row.startSeat + i).map(
+                                                        {Array.from({ length: 20 }, (_, i) => i + 1).map(
                                                             (seatNumber) => {
-                                                                const seatKey = `${row.name}-${seatNumber}`
+                                                                const seatKey = `${rowName}-${seatNumber}`
                                                                 const isSelected = selectedSeats.some(
-                                                                    (s) => s.row === row.name && s.seat === seatNumber,
+                                                                    (s) => s.row === rowName && s.seat === seatNumber,
                                                                 )
                                                                 const isOccupied = occupiedSeats.has(seatKey)
 
                                                                 return (
                                                                     <button
                                                                         key={seatNumber}
-                                                                        onClick={() => !isOccupied && handleSeatToggle(row.name, seatNumber)}
+                                                                        onClick={() => !isOccupied && handleSeatToggle(rowName, seatNumber)}
                                                                         disabled={isOccupied}
                                                                         className={`aspect-square rounded text-xs font-medium transition-all ${isOccupied
                                                                             ? "bg-muted text-muted-foreground cursor-not-allowed"
@@ -247,7 +245,6 @@ export default function SelectSeatsPage() {
                                                         )}
                                                     </div>
                                                 </div>
-                                                ) : null
                                             ))}
 
                                             <div className="flex items-center gap-4 pt-4 text-sm">
@@ -284,11 +281,11 @@ export default function SelectSeatsPage() {
                                             <p className="text-sm text-muted-foreground mb-1">Área seleccionada</p>
                                             <p className="font-semibold">{selectedArea.name}</p>
                                             <Badge variant="secondary" className="mt-1">
-                                                {selectedArea.type === "general" ? "Admisión General" : "Numerado"}
+                                                {selectedArea.isGeneralAdmission ? "Admisión General" : "Numerado"}
                                             </Badge>
                                         </div>
 
-                                        {selectedArea.type === "general" ? (
+                                        {selectedArea.isGeneralAdmission ? (
                                             <div>
                                                 <p className="text-sm text-muted-foreground mb-1">Cantidad</p>
                                                 <p className="font-semibold">
