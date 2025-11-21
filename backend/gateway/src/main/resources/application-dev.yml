@@ -16,30 +16,6 @@ spring:
           enabled: false
       routes:
 
-        - id: next-static
-          uri: http://frontend-dev:3000
-          predicates:
-            - Path=/app/_next/**
-          filters:
-            - PreserveHostHeader
-          order: -200
-
-        - id: next-public
-          uri: http://frontend-dev:3000
-          predicates:
-            - Path=/app/favicon.ico, /app/manifest.webmanifest, /app/assets/**, /app/textures/**, /app/__nextjs_font/**
-          filters:
-            - PreserveHostHeader
-          order: -150
-
-        - id: frontend
-          uri: http://frontend-dev:3000
-          predicates:
-            - Path=/app/**
-          filters:
-            - PreserveHostHeader
-          order: -100
-
         - id: auth
           uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
           predicates:
@@ -141,13 +117,37 @@ spring:
           filters:
             - RewritePath=/v3/api-docs/orders, /v3/api-docs
 
+        - id: next-static
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/_next/**
+          filters:
+            - PreserveHostHeader
+          order: -200
+
+        - id: next-public
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/favicon.ico, /manifest.webmanifest, /assets/**, /textures/**, /__nextjs_font/**
+          filters:
+            - PreserveHostHeader
+          order: -150
+
+        - id: frontend
+          uri: http://frontend-dev:3000
+          predicates:
+            - Path=/**
+          filters:
+            - PreserveHostHeader
+          order: -100
+
       globalcors:
         add-to-simple-url-handler-mapping: true
         corsConfigurations:
           "[/**]":
             allowedOrigins:
               - "http://localhost:3000"
-              - ${FRONTEND_URL}
+              - "https://mini-fur-picture-merger.trycloudflare.com"
             allowedMethods: "*"
             allowedHeaders: "*"
             exposedHeaders:

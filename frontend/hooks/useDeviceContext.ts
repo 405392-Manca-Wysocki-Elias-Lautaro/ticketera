@@ -1,20 +1,19 @@
+// useDeviceContext.ts
 import { useEffect, useState } from "react";
 
 const MOBILE_BREAKPOINT = 768;
 
 interface DeviceContext {
-    // Base
-    isMobile: boolean;            // Pantalla chica (<768px)
-    isStandalone: boolean;        // PWA instalada (standalone)
-    isDesktop: boolean;           // Pantalla grande (>=768px)
+    isMobile: boolean;
+    isStandalone: boolean;
+    isDesktop: boolean;
 
-    // Combinaciones específicas
-    isMobilePWA: boolean;         // PWA instalada en un dispositivo móvil
-    isDesktopPWA: boolean;        // PWA instalada en escritorio
-    isAnyPWA: boolean;            // PWA instalada (mobile o desktop)
-    isMobileBrowser: boolean;     // Navegador en móvil (no PWA)
-    isDesktopBrowser: boolean;    // Navegador en escritorio (no PWA)
-    isAnyBrowser: boolean;        // Navegador (mobile o desktop)
+    isMobilePWA: boolean;
+    isDesktopPWA: boolean;
+    isAnyPWA: boolean;
+    isMobileBrowser: boolean;
+    isDesktopBrowser: boolean;
+    isAnyBrowser: boolean;
 }
 
 export function useDeviceContext(): DeviceContext {
@@ -31,42 +30,42 @@ export function useDeviceContext(): DeviceContext {
     });
 
     useEffect(() => {
+        let timeout: any;
+
         const check = () => {
-            // 🔹 Base
-            const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-            const isDesktop = !isMobile;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+                const isDesktop = !isMobile;
 
-            // 🔹 Detectar modo standalone (PWA instalada)
-            const isStandalone =
-                window.matchMedia("(display-mode: standalone)").matches ||
-                (window.navigator as any).standalone; // soporte iOS Safari
+                const isStandalone =
+                    window.matchMedia("(display-mode: standalone)").matches ||
+                    (window.navigator as any).standalone;
 
-            // 🔹 Combinaciones
-            const isMobilePWA = isMobile && isStandalone;
-            const isDesktopPWA = isDesktop && isStandalone;
-            const isAnyPWA = isStandalone;
+                const isMobilePWA = isMobile && isStandalone;
+                const isDesktopPWA = isDesktop && isStandalone;
+                const isAnyPWA = isStandalone;
 
-            const isMobileBrowser = isMobile && !isStandalone;
-            const isDesktopBrowser = isDesktop && !isStandalone;
-            const isAnyBrowser = !isStandalone;
+                const isMobileBrowser = isMobile && !isStandalone;
+                const isDesktopBrowser = isDesktop && !isStandalone;
+                const isAnyBrowser = !isStandalone;
 
-            setDevice({
-                isMobile,
-                isStandalone,
-                isDesktop,
-                isMobilePWA,
-                isDesktopPWA,
-                isAnyPWA,
-                isMobileBrowser,
-                isDesktopBrowser,
-                isAnyBrowser,
-            });
+                setDevice({
+                    isMobile,
+                    isStandalone,
+                    isDesktop,
+                    isMobilePWA,
+                    isDesktopPWA,
+                    isAnyPWA,
+                    isMobileBrowser,
+                    isDesktopBrowser,
+                    isAnyBrowser,
+                });
+            }, 80);
         };
 
-        // Ejecutar al montar
         check();
 
-        // Escuchar cambios de tamaño y modo standalone
         const mql = window.matchMedia("(display-mode: standalone)");
         window.addEventListener("resize", check);
         mql.addEventListener("change", check);
@@ -74,6 +73,7 @@ export function useDeviceContext(): DeviceContext {
         return () => {
             window.removeEventListener("resize", check);
             mql.removeEventListener("change", check);
+            clearTimeout(timeout);
         };
     }, []);
 

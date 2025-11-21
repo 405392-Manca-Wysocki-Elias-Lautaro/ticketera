@@ -7,8 +7,6 @@ const withPWAConfig = withPWA({
 });
 
 const nextConfig = {
-
-    basePath: "/app",
     
     reactStrictMode: true,
 

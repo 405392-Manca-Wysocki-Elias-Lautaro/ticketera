@@ -107,7 +107,7 @@ public class TicketServiceImpl implements TicketService {
             // 5️⃣ Persist ticket
             Ticket saved = ticketRepository.save(modelMapper.map(model, Ticket.class));
 
-            logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued", model.getUserId());
+            logTicketStatusChange(saved, null, TicketStatus.ISSUED, "Ticket issued");
 
             return this.getById(saved.getId());
 

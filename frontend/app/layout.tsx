@@ -32,6 +32,9 @@ export default function RootLayout({
 
     return (
         <html lang="es" suppressHydrationWarning>
+            <head>
+                <script src="/pwa-install.js" />
+            </head>
             <body 
                 className={`${geist.className} antialiased bg-background text-foreground overflow-hidden`}
                 suppressHydrationWarning

@@ -41,7 +41,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "**/*.d.ts"
-  ],
+, "public/pwa-install.js"  ],
   "exclude": [
     "node_modules"
   ]

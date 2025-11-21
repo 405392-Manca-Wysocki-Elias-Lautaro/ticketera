@@ -59,14 +59,14 @@ export default function AdminDashboardPage() {
         <div className="flex h-full">
             <div className="flex-1">
                 <main className="container mx-auto px-4 py-8">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+                        <div className='flex flex-col justify-center md:justify-start'>
                             <GradientText>
                                 <h1 className="text-3xl font-bold">Panel de Administración</h1>
                             </GradientText>
-                            <p className="text-muted-foreground">Métricas Generales</p>
+                            <p className="text-muted-foreground text-center md:text-start">Métricas Generales</p>
                         </div>
-                        <StarBorder>
+                        <StarBorder className='mt-4 md:mt-0'>
                             <Button asChild className="gradient-brand text-white cursor-pointer">
                                 <Link href="/admin/events/create">
                                     <Plus className="mr-2 h-4 w-4" />
@@ -197,7 +197,7 @@ export default function AdminDashboardPage() {
                                         <div className="h-8 w-full animate-pulse bg-muted rounded" />
                                     ) : (
                                         <>
-                                            <div className="text-xl font-bold break-words leading-tight">
+                                            <div className="w-full md:truncate text-xl font-bold leading-tight">
                                                 {metrics?.mostPopularEventName || "N/A"}
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-2">Mayor venta de entradas</p>
@@ -216,7 +216,7 @@ export default function AdminDashboardPage() {
                                         <div className="h-8 w-full animate-pulse bg-muted rounded" />
                                     ) : (
                                         <>
-                                            <div className="text-xl font-bold break-words leading-tight">
+                                            <div className="w-full md:truncate text-xl font-bold leading-tight">
                                                 {metrics?.mostProfitableEventName || "N/A"}
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-2">Evento con mayor recaudación</p>

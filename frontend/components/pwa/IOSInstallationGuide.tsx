@@ -35,7 +35,7 @@ export function IOSInstallGuide() {
                         <h3 className="text-sm font-semibold">Agregar a pantalla de inicio</h3>
                     </div>
 
-                    <p className="text-xs text-muted-foreground leading-snug">
+                    <p className="text-xs text-muted-white leading-snug">
                         1️⃣ Tocá el ícono <b>Compartir</b>{" "}
                         <Share className="inline w-4 h-4 mx-1 text-blue-500" />
                         <br />
@@ -46,7 +46,7 @@ export function IOSInstallGuide() {
 
                     <Button
                         size="sm"
-                        className="w-full text-muted-foreground"
+                        className="w-full text-muted-white"
                         onClick={() => {
                             setOpen(false)
                             toast.info("Seguí las instrucciones para completar la instalación")
