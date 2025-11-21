@@ -251,7 +251,6 @@ public class TicketServiceImpl implements TicketService {
             JsonNode eventData = eventJson.get("data");
 
             if (eventData == null) {
-                // Return basic ticket without event data if service is unavailable
                 return ticketModel;
             }
 

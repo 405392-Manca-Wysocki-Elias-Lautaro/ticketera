@@ -17,12 +17,13 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Calendar, MapPin, Ticket, Plus, Edit, Trash2 } from "lucide-react"
+import { Calendar, MapPin, Ticket, Plus, Edit, Trash2, Download } from "lucide-react"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { RoleUtils } from '@/utils/roleUtils'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
 import { useEvents } from '@/hooks/event/useEvents'
+import { downloadEventsCSV, generateCSVFilename } from '@/utils/csvExport'
 
 export default function AdminEventsPage() {
     const router = useRouter()
@@ -33,6 +34,13 @@ export default function AdminEventsPage() {
     const { data: events, isLoading: isLoadingEvents } = useEvents();
 
     const searchQuery = useMemo(() => searchParams.get("search")?.toLowerCase() || "", [searchParams])
+
+    const handleExportCSV = () => {
+        if (events && events.length > 0) {
+            const filename = generateCSVFilename('mis_eventos')
+            downloadEventsCSV(events, filename)
+        }
+    }
 
     // const filteredEvents = useMemo(() => {
     //     if (!searchQuery) return events
@@ -87,14 +95,33 @@ export default function AdminEventsPage() {
                             {searchQuery ? `Resultados para "${searchQuery}"` : "Gestiona todos tus eventos"}
                         </p>
                     </div>
-                    <StarBorder>
-                        <Button asChild className="gradient-brand text-white cursor-pointer">
-                            <Link href="/admin/events/create">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Crear Evento
-                            </Link>
-                        </Button>
-                    </StarBorder>
+                    <div className="flex gap-3">
+                        {events && events.length > 0 && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleExportCSV}
+                                        className="cursor-pointer"
+                                    >
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Exportar CSV
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Descargar todos los eventos en formato CSV</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                        <StarBorder>
+                            <Button asChild className="gradient-brand text-white cursor-pointer">
+                                <Link href="/admin/events/create">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Crear Evento
+                                </Link>
+                            </Button>
+                        </StarBorder>
+                    </div>
                 </div>
 
                 {/* Lista de eventos */}
