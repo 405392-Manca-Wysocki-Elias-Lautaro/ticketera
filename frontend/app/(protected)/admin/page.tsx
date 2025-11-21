@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
     }
 
     return (
-        <div className="flex h-screen overflow-auto">
+        <div className="flex h-full">
             <div className="flex-1">
                 <main className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-between mb-8">

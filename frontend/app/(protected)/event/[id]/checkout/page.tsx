@@ -190,6 +190,8 @@ export default function CheckoutPage() {
         } finally {
             setIsProcessing(false);
         }
+        // Redirect to success page
+        router.push(`/event/${event?.id}/success`)
     }
 
     if (isLoading || isLoadingEvent || !user || !event || !selectedArea) {

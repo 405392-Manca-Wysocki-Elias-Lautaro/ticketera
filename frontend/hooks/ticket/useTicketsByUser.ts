@@ -8,6 +8,7 @@ export function useTicketsByUser() {
         queryKey: ["tickets-user"],
         queryFn: async () => {
             const { data } = await ticketService.getByUserId();
+            console.log(data)
             return data.data;
         },
         placeholderData: (prev: any) => prev,
@@ -16,6 +17,5 @@ export function useTicketsByUser() {
         refetchOnReconnect: false,
         refetchOnMount: false,
         refetchInterval: false,
-
     })
 }

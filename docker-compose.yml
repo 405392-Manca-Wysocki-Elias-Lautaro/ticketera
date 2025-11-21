@@ -60,25 +60,25 @@ services:
       - "8025:8025" # Web UI
     networks: [ backend_net ]
 
-  frontend-dev:
-    container_name: frontend-dev
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: dev
-    working_dir: /app
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - frontend_node_modules_dev:/app/node_modules
-    environment:
-      NODE_ENV: development
-      NEXT_TELEMETRY_DISABLED: 1
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
-    networks:
-      - backend_net
+  # frontend-dev:
+  #   container_name: frontend-dev
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #     target: dev
+  #   working_dir: /app
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - frontend_node_modules_dev:/app/node_modules
+  #   environment:
+  #     NODE_ENV: development
+  #     NEXT_TELEMETRY_DISABLED: 1
+  #     CHOKIDAR_USEPOLLING: "true"
+  #     WATCHPACK_POLLING: "true"
+  #   networks:
+  #     - backend_net
 
   gateway-dev:
     container_name: gateway-dev
@@ -112,6 +112,7 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD:
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       - auth-dev
       - event-dev

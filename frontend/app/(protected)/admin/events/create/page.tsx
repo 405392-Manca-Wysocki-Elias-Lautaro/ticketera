@@ -32,6 +32,7 @@ import { ArrowLeft, Plus, Trash2, CalendarIcon, Loader2 } from "lucide-react"
 import type { CreateEvent, CreateSeat } from "@/types/Request/CreateEvent"
 import { useCategories } from '@/hooks/event/useCategories'
 import { Category } from '@/types/Category'
+import { toast } from 'sonner'
 
 export default function CreateEventPage() {
     const router = useRouter();
@@ -44,6 +45,7 @@ export default function CreateEventPage() {
         handleSubmit,
         register,
         watch,
+        setValue,
         formState: { isSubmitting },
     } = useForm<CreateEvent & {
         startDate: Date
@@ -111,30 +113,6 @@ export default function CreateEventPage() {
     };
 
     const handleRemoveArea = (index: number) => remove(index);
-
-    const handleAddRow = (areaIndex: number) => {
-        const area = areas[areaIndex]
-        update(areaIndex, {
-            ...area,
-            rows: [
-                ...area.rows,
-                {
-                    id: crypto.randomUUID(),
-                    name: "",
-                    startSeat: 1,
-                    endSeat: 10
-                },
-            ],
-        })
-    };
-
-    const handleRemoveRow = (areaIndex: number, rowId: string) => {
-        const area = areas[areaIndex]
-        update(areaIndex, {
-            ...area,
-            rows: area.rows.filter(r => r.id !== rowId)
-        })
-    };
 
     const { mutate, isPending } = useCreateEvent();
 
@@ -215,6 +193,7 @@ export default function CreateEventPage() {
 
         mutate(payload, {
             onSuccess: () => {
+                toast.success("Evento creado exitosamente")
                 router.push("/admin/events");
             }
         });
@@ -273,9 +252,9 @@ export default function CreateEventPage() {
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <SelectTrigger><SelectValue placeholder="Selecciona una categoría" /></SelectTrigger>
                                             <SelectContent>
-                                                {categories.map((category: Category) => {
+                                                {categories.map((category: Category) => (
                                                     <SelectItem value={category.id}>{category.name}</SelectItem>
-                                                })}
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     )}
@@ -327,7 +306,7 @@ export default function CreateEventPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Fecha de Fin</Label>
+                                    <Label>Fecha de Fin (opcional)</Label>
                                     <Controller
                                         control={control}
                                         name="endDate"
@@ -354,12 +333,12 @@ export default function CreateEventPage() {
                             </div>
 
                             <div>
-                                <Label>Nombre del Venue</Label>
+                                <Label>Nombre del Lugar</Label>
                                 <Input {...register("venueName", { required: true })} placeholder="Estadio Luna Park" />
                             </div>
 
                             <div>
-                                <Label>Descripción del Venue</Label>
+                                <Label>Descripción del Lugar</Label>
                                 <Textarea {...register("venueDescription")} rows={3} placeholder="Lugar emblemático..." />
                             </div>
 
@@ -382,7 +361,11 @@ export default function CreateEventPage() {
                         <CardHeader>
                             <div className="flex justify-between items-center">
                                 <CardTitle>Áreas y Precios</CardTitle>
-                                <Button type="button" variant="outline" size="sm" onClick={handleAddArea}>
+                                <Button 
+                                    type="button" 
+                                    size="sm" 
+                                    onClick={handleAddArea}
+                                >
                                     <Plus className="mr-2 h-4 w-4" /> Agregar Área
                                 </Button>
                             </div>
@@ -393,111 +376,179 @@ export default function CreateEventPage() {
                                 <p className="text-center text-muted-foreground py-8">No hay áreas agregadas.</p>
                             )}
 
-                            {areas.map((area, i) => (
-                                <Card key={area.id} className="border-2">
-                                    <CardContent className="pt-6 space-y-4">
+                            {areas.map((area, i) => {
+                                const rows = watch(`areas.${i}.rows`);
 
-                                        <div className="flex justify-between items-start">
-                                            <h4 className="font-semibold">Área {i + 1}</h4>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveArea(i)}>
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Eliminar área</TooltipContent>
-                                            </Tooltip>
-                                        </div>
+                                return (
+                                    <Card key={area.id} className="border-2">
+                                        <CardContent className="pt-6 space-y-4">
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input {...register(`areas.${i}.name` as const, { required: true })} placeholder="Campo, Platea Alta..." />
-
-                                            <Controller
-                                                control={control}
-                                                name={`areas.${i}.isGeneralAdmission` as const}
-                                                render={({ field }) => (
-                                                    <Select onValueChange={(v) => field.onChange(v === "true")} value={String(field.value)}>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Tipo" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="true">General</SelectItem>
-                                                            <SelectItem value="false">Numerada</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <Input type="number" {...register(`areas.${i}.priceCents` as const)} placeholder="Precio en centavos" />
-                                            <Input type="number" {...register(`areas.${i}.capacity` as const)} placeholder="Capacidad" />
-                                            <Input type="number" {...register(`areas.${i}.position` as const)} placeholder="Posición" />
-                                        </div>
-
-                                        {/* Filas solo si NO es general admission */}
-                                        {!watch(`areas.${i}.isGeneralAdmission`) && (
-                                            <div className="pt-4 border-t space-y-3">
-                                                <div className="flex justify-between">
-                                                    <Label>Filas (se convertirán en asientos)</Label>
-                                                    <Button type="button" size="sm" variant="outline" onClick={() => handleAddRow(i)}>
-                                                        <Plus className="mr-2 h-3 w-3" /> Agregar Fila
-                                                    </Button>
-                                                </div>
-
-                                                {area.rows.map((row) => (
-                                                    <div key={row.id} className="grid grid-cols-12 gap-2 items-end">
-                                                        <Input
-                                                            className="col-span-3"
-                                                            placeholder="Fila A"
-                                                            value={row.name}
-                                                            onChange={(e) => {
-                                                                const newRows = area.rows.map(r =>
-                                                                    r.id === row.id ? { ...r, name: e.target.value } : r
-                                                                )
-                                                                update(i, { ...area, rows: newRows })
-                                                            }}
-                                                        />
-
-                                                        <Input
-                                                            className="col-span-4"
-                                                            type="number"
-                                                            placeholder="Inicio"
-                                                            value={row.startSeat}
-                                                            onChange={(e) => {
-                                                                const newRows = area.rows.map(r =>
-                                                                    r.id === row.id ? { ...r, startSeat: Number(e.target.value) } : r
-                                                                )
-                                                                update(i, { ...area, rows: newRows })
-                                                            }}
-                                                        />
-
-                                                        <Input
-                                                            className="col-span-4"
-                                                            type="number"
-                                                            placeholder="Fin"
-                                                            value={row.endSeat}
-                                                            onChange={(e) => {
-                                                                const newRows = area.rows.map(r =>
-                                                                    r.id === row.id ? { ...r, endSeat: Number(e.target.value) } : r
-                                                                )
-                                                                update(i, { ...area, rows: newRows })
-                                                            }}
-                                                        />
-
-                                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveRow(i, row.id)}>
+                                            {/* Header del área */}
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="font-semibold">Área {i + 1}</h4>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveArea(i)}>
                                                             <Trash2 className="h-4 w-4 text-destructive" />
                                                         </Button>
-                                                    </div>
-                                                ))}
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Eliminar área</TooltipContent>
+                                                </Tooltip>
                                             </div>
-                                        )}
 
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                            {/* Nombre + tipo */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <Input
+                                                    {...register(`areas.${i}.name`)}
+                                                    placeholder="Campo, Platea Alta..."
+                                                />
+
+                                                <Controller
+                                                    control={control}
+                                                    name={`areas.${i}.isGeneralAdmission`}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            onValueChange={(v) => {
+                                                                const val = v === "true";
+                                                                field.onChange(val);
+
+                                                                // Si pasa a numerada
+                                                                if (!val) {
+                                                                    const current = watch(`areas.${i}.rows`);
+                                                                    if (!current || current.length === 0) {
+                                                                        setValue(`areas.${i}.rows`, [
+                                                                            {
+                                                                                id: crypto.randomUUID(),
+                                                                                name: "Fila 1",
+                                                                                startSeat: 1,
+                                                                                endSeat: 10,
+                                                                            },
+                                                                        ]);
+                                                                    }
+                                                                }
+
+                                                                // Si vuelve a general
+                                                                if (val) {
+                                                                    setValue(`areas.${i}.rows`, []);
+                                                                }
+                                                            }}
+                                                            value={String(field.value)}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Tipo" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="true">General</SelectItem>
+                                                                <SelectItem value="false">Numerada</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            {/* Precio + capacidad */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* Precio */}
+                                                <div>
+                                                    <Label>Precio</Label>
+                                                    <div className='flex'>
+                                                        <div className='border flex justify-center items-center rounded-l-lg px-2'>ARS$</div>
+                                                        <Input
+                                                            className='rounded-none rounded-r-lg'
+                                                            type="number"
+                                                            {...register(`areas.${i}.priceCents`)}
+                                                            placeholder="Precio en centavos"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Capacidad SOLO si es general */}
+                                                {watch(`areas.${i}.isGeneralAdmission`) && (
+                                                    <div>
+                                                        <Label>Capacidad</Label>
+                                                        <Input
+                                                            type="number"
+                                                            {...register(`areas.${i}.capacity`)}
+                                                            placeholder="Capacidad"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* FILAS (solo si numerada) */}
+                                            {!watch(`areas.${i}.isGeneralAdmission`) && (
+                                                <div className="space-y-4 mt-4">
+
+                                                    {/* Botón para agregar fila */}
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setValue(`areas.${i}.rows`, [
+                                                                ...rows,
+                                                                {
+                                                                    id: crypto.randomUUID(),
+                                                                    name: `Fila ${rows.length + 1}`,
+                                                                    startSeat: 0,
+                                                                    endSeat: 0,
+                                                                },
+                                                            ]);
+                                                        }}
+                                                    >
+                                                        <Plus className="mr-2 h-4 w-4" /> Agregar fila
+                                                    </Button>
+
+                                                    {/* Filas existentes */}
+                                                    {rows.map((row, rowIndex) => (
+                                                        <div key={row.id} className="grid grid-cols-12 gap-2 items-center">
+
+                                                            <div className='col-span-3'>
+                                                                <Label>Nombre de fila</Label>
+                                                                <Input
+                                                                    {...register(`areas.${i}.rows.${rowIndex}.name`)}
+                                                                    placeholder="Nombre de fila"
+                                                                />
+                                                            </div>
+
+                                                            <div className='col-span-4'>
+                                                                <Label>Número de inicio</Label>
+                                                                <Input
+                                                                    type="number"
+                                                                    {...register(`areas.${i}.rows.${rowIndex}.startSeat`)}
+                                                                    placeholder="Inicio"
+                                                                />
+                                                            </div>
+
+                                                            <div className='col-span-4'>
+                                                                <Label>Número de fin</Label>
+                                                                <Input
+                                                                    type="number"
+                                                                    {...register(`areas.${i}.rows.${rowIndex}.endSeat`)}
+                                                                    placeholder="Fin"
+                                                                />
+                                                            </div>
+
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => {
+                                                                    const newRows = rows.filter(r => r.id !== row.id);
+                                                                    setValue(`areas.${i}.rows`, newRows);
+                                                                }}
+                                                            >
+                                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
                         </CardContent>
                     </Card>
+
                     {/* === Footer === */}
                     <div className="flex gap-4">
                         <Button type="button" variant="outline" size="lg" asChild>
@@ -520,7 +571,7 @@ export default function CreateEventPage() {
                         </StarBorder>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }
