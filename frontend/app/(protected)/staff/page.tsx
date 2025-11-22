@@ -1,92 +1,102 @@
 "use client"
 
-import type React from "react"
-
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { QrCode, CheckCircle2, XCircle, Camera, Hash, ChevronDown, Calendar, MapPin, Users } from "lucide-react"
-import { useAuth } from '@/hooks/auth/useAuth'
-import { mockEvents } from '@/mocks/mockEvents'
-import { RoleCode } from '@/types/enums/RoleCode'
-import GradientText from '@/components/GradientText'
-import { RoleUtils } from '@/utils/roleUtils'
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import GradientText from "@/components/GradientText"
+import { RoleUtils } from "@/utils/roleUtils"
+import { useAuth } from "@/hooks/auth/useAuth"
+import { Button } from "@/components/ui/button"
+import { AlertCircle, Camera, CheckCircle2, Hash, QrCode } from "lucide-react"
+import { CameraScannerWrapper } from '@/components/camera/CameraScannerWrapper'
+import { useRouter } from 'next/navigation'
+import { BarcodeFormat } from '@zxing/library'
+import { useValidateTicket } from '@/hooks/ticket/useValidateTicket'
+import { SpinnerOverlay } from '@/components/SpinnerOverlay'
+import { useEvents } from '@/hooks/event/useEvents'
+import { Event } from '@/types/Event'
 
 export default function StaffDashboardPage() {
-    const router = useRouter()
+    const router = useRouter();
     const { user, isLoading } = useAuth()
-    const [manualCode, setManualCode] = useState("")
-    const [selectedEvent, setSelectedEvent] = useState("")
-    const [scanResult, setScanResult] = useState<{
-        success: boolean
-        message: string
-        ticket?: any
-    } | null>(null)
-    const [showScanner, setShowScanner] = useState(false)
-    const [eventDetailsOpen, setEventDetailsOpen] = useState(false)
 
-    const assignedEvents = mockEvents.slice(0, 3)
-    const currentEvent = assignedEvents.find((e) => e.id === selectedEvent) || assignedEvents[0]
+    const [selectedEventId, setSelectedEventId] = useState<string>("")
+    const [ticketCode, setTicketCode] = useState("")
+    const [scanning, setScanning] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
+    const { data: assignedEvents, isLoading: isLoadingEvents } = useEvents();
+
+    const selectedEvent = assignedEvents?.find((e: Event) => e.id === selectedEventId)
+
+    // redirect if not admin
     useEffect(() => {
-        if (!isLoading && (!user || !RoleUtils.isStaff(user))) {
-            router.push("/login")
+        if (!isLoading && (!user || !RoleUtils.isAdmin(user))) {
+            router.push("/dashboard")
         }
-    }, [user, isLoading, router])
+    }, [user, isLoading, router]);
 
-    useEffect(() => {
-        if (assignedEvents.length > 0 && !selectedEvent) {
-            setSelectedEvent(assignedEvents[0].id)
-        }
-    }, [assignedEvents, selectedEvent])
+    const { mutate: validate, isPending } = useValidateTicket();
 
-    const validateTicket = (code: string) => {
-        const isValid = Math.random() > 0.3
+    function handleValidate(type: "QR" | "CODE", value: string) {
 
-        if (isValid) {
-            setScanResult({
-                success: true,
-                message: "Ticket válido",
-                ticket: {
-                    eventTitle: currentEvent?.title || "Evento",
-                    area: "Campo",
-                    seat: "Admisión General",
-                    holder: "Juan Pérez",
+        setError(null);
+        setSuccess(null);
+
+        if (!value || isPending) return;
+
+        validate(
+            { type, value },
+            {
+                onSuccess: (res: any) => {
+                    setSuccess(res.data?.data?.code);
                 },
-            })
-        } else {
-            setScanResult({
-                success: false,
-                message: "Ticket inválido o ya utilizado",
-            })
-        }
+                onError: (err: any) => {
 
-        setTimeout(() => {
-            setScanResult(null)
-            setManualCode("")
-            setShowScanner(false)
-        }, 3000)
+                    const code = err?.response?.data?.data?.code;
+
+                    switch (code) {
+                        case "TICKET_NOT_FOUND":
+                            setError("El ticket no existe o ha sido eliminado.");
+                            break;
+
+                        case "TICKET_ALREADY_CHECKED_IN":
+                            setError("Este ticket ya fue registrado previamente.");
+                            break;
+
+                        case "INVALID_TICKET_STATUS":
+                            setError("El estado del ticket no permite el ingreso.");
+                            break;
+
+                        case "INVALID_QR_TOKEN":
+                            setError("El código QR es inválido o ha sido manipulado.");
+                            break;
+
+                        case "EXPIRED_TICKET":
+                            setError("El ticket ha expirado y no puede ser utilizado.");
+                            break;
+
+                        case "INVALID_TICKET_VALIDATION_TYPE":
+                            setError("Este ticket no puede validarse con el método actual.");
+                            break;
+
+                        default:
+                            setError("Error al validar el ticket.");
+                            break;
+                    }
+
+                    console.error(err?.response?.data?.message)
+                },
+            }
+        );
     }
 
-    const handleManualValidation = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (manualCode.trim()) {
-            validateTicket(manualCode)
-        }
-    }
-
-    const handleScan = (result: any) => {
-        if (result) {
-            validateTicket(result.text)
-        }
-    }
-
-    if (isLoading || !user || !RoleUtils.isStaff(user)) {
+    if (isLoading || !user || isLoadingEvents || !assignedEvents) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -95,181 +105,142 @@ export default function StaffDashboardPage() {
     }
 
     return (
-        <div className="flex flex-col justify-center content-start px-4 py-6 max-w-3xl">
+        <div className="flex flex-col w-full h-screen overflow-hidden">
 
-            <GradientText>
-                <h1 className="text-2xl md:text-3xl font-bold mb-6">Validación de Tickets</h1>
-            </GradientText>
-
-            <Collapsible open={eventDetailsOpen} onOpenChange={setEventDetailsOpen} className="mb-6">
-                <Card>
-                    <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                            <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                    <p className="text-sm text-muted-foreground mb-1">Validando evento:</p>
-                                    <CardTitle className="text-xl">{currentEvent?.title}</CardTitle>
-                                </div>
-                                <ChevronDown className={`h-5 w-5 transition-transform ${eventDetailsOpen ? "rotate-180" : ""}`} />
-                            </div>
-                        </CardHeader>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <CardContent className="pt-0 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pb-4 border-b">
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Calendar className="h-4 w-4 shrink-0" />
-                                    <span>
-                                        {new Date(currentEvent?.date || "").toLocaleDateString("es-ES")} - {currentEvent?.time}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <MapPin className="h-4 w-4 shrink-0" />
-                                    <span>{currentEvent?.location}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Users className="h-4 w-4 shrink-0" />
-                                    <span>Capacidad: {currentEvent?.areas.reduce((sum, a) => sum + a.capacity, 0)}</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="event-select" className="text-sm font-medium">
-                                    Cambiar evento
-                                </Label>
-                                <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                                    <SelectTrigger id="event-select" className="cursor-pointer">
-                                        <SelectValue placeholder="Selecciona un evento" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {assignedEvents.map((event) => (
-                                            <SelectItem key={event.id} value={event.id} className="cursor-pointer">
-                                                <div className="flex flex-col">
-                                                    <span className="font-medium">{event.title}</span>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {new Date(event.date).toLocaleDateString("es-ES")} - {event.time}
-                                                    </span>
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                    </CollapsibleContent>
-                </Card>
-            </Collapsible>
-
-            {scanResult && (
-                <Card
-                    className={`mb-6 border-2 ${scanResult.success
-                        ? "border-green-500 bg-green-50 dark:bg-green-950"
-                        : "border-red-500 bg-red-50 dark:bg-red-950"
-                        }`}
-                >
-                    <CardContent className="pt-6">
-                        <div className="flex items-start gap-4">
-                            {scanResult.success ? (
-                                <CheckCircle2 className="h-10 w-10 text-green-500 shrink-0" />
-                            ) : (
-                                <XCircle className="h-10 w-10 text-red-500 shrink-0" />
-                            )}
-                            <div className="flex-1">
-                                <h3
-                                    className={`font-bold text-xl mb-2 ${scanResult.success ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
-                                        }`}
-                                >
-                                    {scanResult.message}
-                                </h3>
-                                {scanResult.ticket && (
-                                    <div className="space-y-1 text-sm">
-                                        <p>
-                                            <span className="font-medium">Evento:</span> {scanResult.ticket.eventTitle}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Área:</span> {scanResult.ticket.area}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Asiento:</span> {scanResult.ticket.seat}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Titular:</span> {scanResult.ticket.holder}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* QR Scanner */}
-                <Card className="h-fit">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                            <Camera className="h-5 w-5" />
-                            Escanear QR
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {showScanner ? (
-                            <div className="space-y-4">
-                                <div className="aspect-square w-full overflow-hidden rounded-lg border-2 border-primary">
-                                    {/* <QrReader
-                                        constraints={{ facingMode: "environment" }}
-                                        onResult={handleScan}
-                                        className="w-full h-full"
-                                    /> */}
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    className="w-full cursor-pointer bg-transparent"
-                                    onClick={() => setShowScanner(false)}
-                                >
-                                    Cancelar
-                                </Button>
-                            </div>
-                        ) : (
-                            <Button
-                                className="w-full gradient-brand text-white cursor-pointer h-12"
-                                size="lg"
-                                onClick={() => setShowScanner(true)}
-                            >
-                                <QrCode className="mr-2 h-5 w-5" />
-                                Activar Cámara
-                            </Button>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Manual Entry */}
-                <Card className="h-fit">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                            <Hash className="h-5 w-5" />
-                            Código Manual
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleManualValidation} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="code">Código del Ticket</Label>
-                                <Input
-                                    id="code"
-                                    placeholder="QR-FEST-ROCK-001"
-                                    value={manualCode}
-                                    onChange={(e) => setManualCode(e.target.value)}
-                                    className="h-12"
-                                />
-                            </div>
-                            <Button type="submit" className="w-full cursor-pointer h-12 bg-transparent" variant="outline">
-                                Validar Código
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+            {/* TITLE */}
+            <div className="text-center py-3">
+                <GradientText>
+                    <h1 className="text-2xl font-bold">Validación de Tickets</h1>
+                </GradientText>
             </div>
+
+            {/* SMALL EVENT SELECT / INFO */}
+            <Card className="mx-4 mb-2 py-1">
+                <CardContent className="py-4 space-y-3">
+
+                    {/* Select */}
+                    <Label className="font-medium">Seleccionar Evento</Label>
+                    <select
+                        className="border rounded-md p-2 w-full"
+                        value={selectedEventId}
+                        onChange={(e) => setSelectedEventId(e.target.value)}
+                    >
+                        <option value="">Selecciona un evento</option>
+                        {assignedEvents.map((ev) => (
+                            <option key={ev.id} value={ev.id}>
+                                {ev.title} – {new Date(ev.date).toLocaleDateString("es-ES")}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Minimal info */}
+                    {selectedEvent && (
+                        <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
+                            <Badge variant="outline">{selectedEvent.venueName}</Badge>
+                            <Badge variant="outline">{new Date(selectedEvent.startsAt).toLocaleDateString()}</Badge>
+                            <Badge variant="outline">{selectedEvent.totalAvailableTickets} tickets</Badge>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* VALIDATION + SCANNER */}
+            {selectedEvent && (
+                <>
+                    <Tabs defaultValue="camera" className="relative flex justify-center w-full h-full">
+
+                        {/* Tabs floating over scanner */}
+                        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
+                            <TabsList className="bg-white/90 backdrop-blur-md shadow rounded-xl px-2">
+                                <TabsTrigger value="camera" className="cursor-pointer w-full lg:w-50">
+                                    <Camera className="mr-1 h-4 w-4" /> QR
+                                </TabsTrigger>
+                                <TabsTrigger value="manual" className="cursor-pointer w-full lg:w-50">
+                                    <Hash className="mr-1 h-4 w-4" /> Manual
+                                </TabsTrigger>
+                            </TabsList>
+                        </div>
+
+                        {/* CONTENT */}
+                        <TabsContent value="camera" className="h-full">
+
+                            {isPending && <SpinnerOverlay />}
+
+                            {scanning ? (
+                                <CameraScannerWrapper
+                                    title={"Validar QR"}
+                                    onClose={() => setScanning(false)}
+                                    onDetected={(code: any) => {
+                                        handleValidate("QR", code);
+                                        setScanning(false);
+                                    }}
+                                    formats={[BarcodeFormat.QR_CODE]}
+                                />
+                            ) : (
+                                <div className="flex h-full items-center justify-center">
+                                    <Button
+                                        className="gradient-brand"
+                                        onClick={() => setScanning(true)}
+                                    >
+                                        <QrCode className="mr-2" /> Validar QR
+                                    </Button>
+                                </div>
+                            )}
+                        </TabsContent>
+
+                        <TabsContent
+                            value="manual"
+                            className="px-4 pt-20 space-y-4 w-full lg:w-1/2 flex flex-col justify-center"
+                        >
+                            {isPending && <SpinnerOverlay />}
+
+                            <Label className="text-center">Código del Ticket</Label>
+                            <Input
+                                value={ticketCode}
+                                onChange={(e) => setTicketCode(e.target.value)}
+                                placeholder="Ingresá el código"
+                            />
+                            <Button
+                                onClick={() => handleValidate("CODE", ticketCode)}
+                                className="w-full gradient-brand text-white"
+                            >
+                                Validar Ticket
+                            </Button>
+
+                        </TabsContent>
+                    </Tabs>
+                    <div className='flex w-full justify-center mt-4 px-4 md:p-0'>
+                        {error &&
+                            <Card className="w-full max-w-md text-center py-2">
+                                <CardHeader className="space-y-2 px-2">
+                                    <div className="flex justify-center">
+                                        <AlertCircle className="h-8 w-8 text-destructive" />
+                                    </div>
+                                    <div>
+                                        <GradientText>
+                                            <CardTitle className="text-xl">{error}</CardTitle>
+                                        </GradientText>
+                                    </div>
+                                </CardHeader>
+                            </Card>
+                        }
+                        {success &&
+                            <Card className="w-full max-w-md text-center">
+                                <CardHeader className="space-y-4">
+                                    <div className="flex justify-center">
+                                        <CheckCircle2 className="h-12 w-12 text-green-500" />
+                                    </div>
+                                    <div>
+                                        <GradientText>
+                                            <CardTitle className="text-2xl">Ticket {success} validado exitosamente</CardTitle>
+                                        </GradientText>
+                                    </div>
+                                </CardHeader>
+                            </Card>
+                        }
+                    </div>
+                </>
+            )}
         </div>
     )
 }

@@ -89,7 +89,7 @@ public class TicketServiceImpl implements TicketService {
             model.setEventId(request.getEventId());
             model.setEventVenueAreaId(request.getEventVenueAreaId());
             model.setEventVenueSeatId(request.getEventVenueSeatId());
-            model.setUserId(request.getUserId());
+            model.setUserId(jwtUtils.getUserId());
             model.setCode("TCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             model.setQrToken(UUID.randomUUID().toString());
             model.setStatus(TicketStatus.ISSUED);
