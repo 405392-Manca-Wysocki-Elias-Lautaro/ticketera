@@ -61,10 +61,16 @@ export const eventService = {
      */
     async getOrganizerMetrics(): Promise<OrganizerMetrics | null> {
         try {
+            console.log("🔍 Fetching organizer metrics...");
             const response = await api.get<ApiResponse<OrganizerMetrics>>("/events/metrics");
+            console.log("✅ Metrics response:", response.data);
             return response.data.data;
         } catch (error) {
-            console.error("Error fetching organizer metrics:", error);
+            console.error("❌ Error fetching organizer metrics:", error);
+            if (error.response) {
+                console.error("Response status:", error.response.status);
+                console.error("Response data:", error.response.data);
+            }
             return null;
         }
     },

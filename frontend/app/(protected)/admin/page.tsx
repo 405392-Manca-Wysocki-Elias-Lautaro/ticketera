@@ -28,14 +28,27 @@ export default function AdminDashboardPage() {
     useEffect(() => {
         async function fetchMetrics() {
             // Verificar que tenemos token y usuario antes de hacer la petición
-            if (!user || !RoleUtils.isAdmin(user) || !token) return;
+            if (!user || !RoleUtils.isAdmin(user) || !token) {
+                console.log("🚫 Cannot fetch metrics - missing requirements:", {
+                    hasUser: !!user,
+                    isAdmin: user ? RoleUtils.isAdmin(user) : false,
+                    hasToken: !!token
+                });
+                return;
+            }
             
             try {
+                console.log("🚀 Starting metrics fetch...", {
+                    userId: user.id,
+                    userRole: user.role,
+                    tokenLength: token?.length
+                });
                 setIsLoadingMetrics(true);
                 const data = await eventService.getOrganizerMetrics();
+                console.log("📊 Metrics received:", data);
                 setMetrics(data);
             } catch (error) {
-                console.error("Error loading metrics:", error);
+                console.error("❌ Error loading metrics:", error);
             } finally {
                 setIsLoadingMetrics(false);
             }
@@ -258,20 +271,6 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-muted-foreground">Ver y gestionar todos tus eventos publicados</p>
-                                </CardContent>
-                            </Link>
-                        </Card>
-
-                        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                            <Link href="/admin/payments">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <DollarSign className="h-5 w-5 text-primary" />
-                                        Pagos
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">Revisa pagos completados y pendientes</p>
                                 </CardContent>
                             </Link>
                         </Card>

@@ -11,7 +11,7 @@ INSERT INTO users (
     created_at
 )
 VALUES (
-    '11111111-1111-1111-1111-111111111111',
+    'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
     'Elias', 
     'Manca', 
     'eliasmanca20@gmail.com',

@@ -22,10 +22,6 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
 
-    devtools: {
-        enabled: false,
-    },
-
     devIndicators: {
         position: "bottom-left",
     },
