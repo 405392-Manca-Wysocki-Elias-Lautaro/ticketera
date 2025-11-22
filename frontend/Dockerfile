@@ -1,57 +1,42 @@
 # =========================
-# Etapa base
+# Etapa de build
 # =========================
-FROM node:20-alpine AS base
+FROM node:20-alpine AS builder
 WORKDIR /app
-RUN npm install -g pnpm
-COPY package.json pnpm-lock.yaml ./
-
-# =========================
-# Etapa de desarrollo
-# =========================
-FROM base AS dev
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# 🔧 Evitar symlinks problemáticos
-RUN pnpm config set node-linker hoisted
+# Instalar pnpm
+RUN npm install -g pnpm
 
-# Copiar el código fuente (sin node_modules, ignorado por .dockerignore)
-COPY . .
+# Copiar deps
+COPY package.json pnpm-lock.yaml ./
 
-# Instalar dependencias (ahora sí dentro del contenedor)
+# Instalar deps (incluye devDependencies que Next necesita para build)
 RUN pnpm install --frozen-lockfile
 
-# Validar styled-jsx
-RUN test -d node_modules/styled-jsx || (echo "❌ styled-jsx no se encuentra en node_modules" && exit 1)
-
-EXPOSE 3000
-CMD ["pnpm", "dev"]
-
-# =========================
-# Etapa de build (producción)
-# =========================
-FROM base AS builder
-ENV NODE_ENV=production
-RUN pnpm config set node-linker hoisted
-RUN pnpm install --frozen-lockfile
+# Copiar código completo
 COPY . .
+
+# Ejecutar build
 RUN pnpm run build
 
+
 # =========================
-# Etapa final (runtime producción)
+# Etapa final (runtime)
 # =========================
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Instalar pnpm
 RUN npm install -g pnpm
-RUN pnpm config set node-linker hoisted
 
+# Copiar solo lo necesario para producción
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 COPY --from=builder /app/node_modules ./node_modules
 
