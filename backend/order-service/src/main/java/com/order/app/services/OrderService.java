@@ -182,8 +182,13 @@ public class OrderService {
                 logger.debug("parseOrGenerateUUID: generated UUID from number {}: {}", id, result);
                 return result;
             } catch (NumberFormatException ex) {
-                logger.error("parseOrGenerateUUID: failed to parse '{}' as UUID or number", idString);
-                throw new IllegalArgumentException("Invalid ID format: " + idString + ". Must be a valid UUID or numeric ID.");
+                // Si no es UUID ni número, generar UUID determinístico desde el hash del string
+                // Esto permite manejar formatos como "A-4" (fila-asiento)
+                long hash = idString.hashCode();
+                // Usar hash como parte menos significativa y un namespace fijo como parte más significativa
+                UUID result = new UUID(0x0000000000000000L, hash & 0xFFFFFFFFL);
+                logger.debug("parseOrGenerateUUID: generated UUID from string hash '{}': {}", idString, result);
+                return result;
             }
         }
     }
@@ -199,12 +204,14 @@ public class OrderService {
         for (CreateOrderRequest.OrderItemRequest item : request.getItems()) {
             item.validate();
 
-            // Validar que el asiento no esté ya reservado
+            // Validar que el asiento no esté ya reservado (en órdenes)
             if (item.getVenueSeatId() != null) {
                 UUID venueSeatUuid = parseOrGenerateUUID(item.getVenueSeatId());
                 if (orderItemRepository.existsByVenueSeatIdAndDeletedAtIsNull(venueSeatUuid)) {
-                    throw new IllegalArgumentException("Seat already reserved: " + item.getVenueSeatId());
+                    throw new IllegalArgumentException("Seat already reserved by another user: " + item.getVenueSeatId());
                 }
+                // TODO: También verificar holds activos en ticket-service
+                // Por ahora, el error de hold se manejará cuando se intente crear el hold antes de la orden
             }
         }
     }

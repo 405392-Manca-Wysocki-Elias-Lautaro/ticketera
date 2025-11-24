@@ -50,25 +50,19 @@ export default function SelectSeatsPage() {
         return urlQuantity ? Number.parseInt(urlQuantity) : 1
     })
 
-    const occupiedSeats = useMemo(() => {
-        if (!selectedArea || selectedArea.isGeneralAdmission) return new Set<string>()
+    const [occupiedSeats, setOccupiedSeats] = useState<Set<string>>(new Set())
 
-        // Para áreas numeradas, simular asientos ocupados
-        // Nota: En el servicio real, esto debería venir del backend
-        const occupied = new Set<string>()
-        const totalSeats = selectedArea.totalSeats || 100
-        const occupiedCount = Math.floor(totalSeats * 0.3)
-
-        // Simular filas A, B, C con asientos del 1 al 20 cada una
-        const rows = ['A', 'B', 'C', 'D', 'E']
-        for (let i = 0; i < occupiedCount; i++) {
-            const randomRow = rows[Math.floor(Math.random() * rows.length)]
-            const randomSeat = Math.floor(Math.random() * 20) + 1
-            occupied.add(`${randomRow}-${randomSeat}`)
+    // Obtener asientos ocupados del backend cuando se selecciona un área
+    useEffect(() => {
+        if (!selectedArea || selectedArea.isGeneralAdmission || !event?.id) {
+            setOccupiedSeats(new Set())
+            return
         }
 
-        return occupied
-    }, [selectedArea]) // Only regenerate when area changes
+        // Por ahora, asientos ocupados vacíos hasta implementar el endpoint del backend
+        // TODO: Obtener asientos ocupados desde el backend (tickets vendidos + holds activos)
+        setOccupiedSeats(new Set())
+    }, [selectedArea, event?.id])
 
     useEffect(() => {
         if (!isLoading && !user) {
