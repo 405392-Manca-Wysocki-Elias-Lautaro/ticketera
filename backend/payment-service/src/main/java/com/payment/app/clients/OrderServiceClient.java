@@ -1,6 +1,6 @@
 package com.payment.app.clients;
 
-import com.payment.app.pkg.dtos.OrderInfoResponse;
+import com.payment.app.pkg.dtos.OrderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ public class OrderServiceClient {
     /**
      * Obtiene la información de una orden por su ID
      */
-    public Optional<OrderInfoResponse> getOrderById(String orderId) {
+    public Optional<OrderResponse> getOrderById(String orderId) {
         String url = orderServiceBaseUrl + "/" + orderId;
         
         logger.info("Fetching order from: {}", url);
@@ -43,15 +43,15 @@ public class OrderServiceClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Void> entity = new HttpEntity<>(headers);
             
-            ResponseEntity<ApiResponseWrapper<OrderInfoResponse>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponseWrapper<OrderResponse>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
-                    new ParameterizedTypeReference<ApiResponseWrapper<OrderInfoResponse>>() {}
+                    new ParameterizedTypeReference<ApiResponseWrapper<OrderResponse>>() {}
             );
             
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                ApiResponseWrapper<OrderInfoResponse> wrapper = response.getBody();
+                ApiResponseWrapper<OrderResponse> wrapper = response.getBody();
                 // El order-service devuelve success: true/false
                 if (wrapper.getSuccess() != null && wrapper.getSuccess() && wrapper.getData() != null) {
                     logger.info("Order {} retrieved successfully", orderId);

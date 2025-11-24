@@ -1,4 +1,23 @@
 # =========================
+# Etapa de desarrollo (hot reload)
+# =========================
+FROM node:20-alpine AS dev
+WORKDIR /app
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+
+# Instalar pnpm
+RUN npm install -g pnpm
+
+# Exponer puertos
+EXPOSE 3000
+
+# Comando por defecto (se puede sobrescribir en docker-compose)
+CMD ["sh", "-c", "pnpm install && pnpm run dev"]
+
+# =========================
 # Etapa de build
 # =========================
 FROM node:20-alpine AS builder

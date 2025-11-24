@@ -46,6 +46,7 @@ logging.level:
   org.springframework.jdbc.core: DEBUG
   org.hibernate.SQL: DEBUG
   org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  com.order.app.services.OrderService: DEBUG
 
 management:
   endpoints.web.exposure.include: "health,info"

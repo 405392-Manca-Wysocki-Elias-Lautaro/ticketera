@@ -39,6 +39,27 @@ public class TicketServiceClient {
         logger.info("Generating ticket at: {} for orderItem: {}", url, request.getOrderItemId());
         
         try {
+            // Validar campos requeridos antes de procesar
+            if (request.getOrderItemId() == null || request.getOrderItemId().trim().isEmpty()) {
+                logger.error("OrderItemId is null or empty for ticket generation");
+                return false;
+            }
+            
+            if (request.getOccurrenceId() == null || request.getOccurrenceId().trim().isEmpty()) {
+                logger.error("OccurrenceId (eventId) is null or empty for orderItem: {}", request.getOrderItemId());
+                return false;
+            }
+            
+            if (request.getVenueAreaId() == null || request.getVenueAreaId().trim().isEmpty()) {
+                logger.error("VenueAreaId is null or empty for orderItem: {}", request.getOrderItemId());
+                return false;
+            }
+            
+            if (request.getUserId() == null || request.getUserId().trim().isEmpty()) {
+                logger.error("UserId is null or empty for orderItem: {}", request.getOrderItemId());
+                return false;
+            }
+            
             // Mapear GenerateTicketRequest a TicketGenerateRequest (formato esperado por ticket-service)
             Map<String, Object> ticketRequest = new HashMap<>();
             ticketRequest.put("orderItemId", UUID.fromString(request.getOrderItemId()));

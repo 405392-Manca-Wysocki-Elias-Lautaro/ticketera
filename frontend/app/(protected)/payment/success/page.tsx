@@ -54,7 +54,7 @@ export default function PaymentSuccessPage() {
                 setCountdown((prev) => {
                     if (prev <= 1) {
                         clearInterval(interval)
-                        router.push(`/event/${eventId}/success`)
+                        router.push("/my-tickets")
                         return 0
                     }
                     return prev - 1
@@ -109,7 +109,7 @@ export default function PaymentSuccessPage() {
                                 <p className="text-sm text-muted-foreground">
                                     Si no eres redirigido automáticamente,{" "}
                                     <button
-                                        onClick={() => router.push(`/event/${eventId}/success`)}
+                                        onClick={() => router.push("/my-tickets")}
                                         className="text-primary hover:underline font-semibold"
                                     >
                                         haz clic aquí

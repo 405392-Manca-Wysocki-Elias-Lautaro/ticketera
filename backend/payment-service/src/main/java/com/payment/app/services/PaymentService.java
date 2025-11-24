@@ -10,7 +10,7 @@ import com.mercadopago.resources.preference.Preference;
 import com.payment.app.clients.OrderServiceClient;
 import com.payment.app.models.Payment;
 import com.payment.app.pkg.dtos.CreatePaymentIntentRequest;
-import com.payment.app.pkg.dtos.OrderInfoResponse;
+import com.payment.app.pkg.dtos.OrderResponse;
 import com.payment.app.pkg.dtos.PaymentIntentResponse;
 import com.payment.app.repositories.PaymentRepository;
 import jakarta.annotation.PostConstruct;
@@ -443,9 +443,9 @@ public class PaymentService {
      */
     private String getEventIdFromOrder(String orderId) {
         try {
-            Optional<OrderInfoResponse> orderOpt = orderServiceClient.getOrderById(orderId);
+            Optional<OrderResponse> orderOpt = orderServiceClient.getOrderById(orderId);
             if (orderOpt.isPresent()) {
-                OrderInfoResponse order = orderOpt.get();
+                OrderResponse order = orderOpt.get();
                 if (order.getItems() != null && !order.getItems().isEmpty()) {
                     String eventId = order.getItems().get(0).getEventId();
                     logger.info("Event ID retrieved from order {}: {}", orderId, eventId);

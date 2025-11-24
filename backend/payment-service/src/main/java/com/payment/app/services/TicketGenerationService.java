@@ -4,7 +4,7 @@ import com.payment.app.clients.OrderServiceClient;
 import com.payment.app.clients.TicketServiceClient;
 import com.payment.app.models.Payment;
 import com.payment.app.pkg.dtos.GenerateTicketRequest;
-import com.payment.app.pkg.dtos.OrderInfoResponse;
+import com.payment.app.pkg.dtos.OrderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,14 +44,14 @@ public class TicketGenerationService {
         
         try {
             // 1. Obtener información de la orden
-            Optional<OrderInfoResponse> orderOpt = orderServiceClient.getOrderById(payment.getOrderId());
+            Optional<OrderResponse> orderOpt = orderServiceClient.getOrderById(payment.getOrderId());
             
             if (orderOpt.isEmpty()) {
                 logger.error("Order {} not found. Cannot generate tickets.", payment.getOrderId());
                 return false;
             }
             
-            OrderInfoResponse order = orderOpt.get();
+            OrderResponse order = orderOpt.get();
             
             // 2. Validar que la orden tenga items
             if (order.getItems() == null || order.getItems().isEmpty()) {
@@ -71,8 +71,31 @@ public class TicketGenerationService {
             boolean allSuccessful = true;
             int successCount = 0;
             
-            for (OrderInfoResponse.OrderItemInfo item : order.getItems()) {
+            for (OrderResponse.OrderItemResponse item : order.getItems()) {
                 try {
+                    // Log detallado de los datos del item para debug
+                    logger.debug("Processing orderItem: id={}, eventId={}, venueAreaId={}, venueSeatId={}, ticketTypeId={}", 
+                            item.getId(), item.getEventId(), item.getVenueAreaId(), item.getVenueSeatId(), item.getTicketTypeId());
+                    
+                    // Validar campos críticos antes de crear el request
+                    if (item.getId() == null) {
+                        logger.error("OrderItem ID is null, skipping ticket generation");
+                        allSuccessful = false;
+                        continue;
+                    }
+                    
+                    if (item.getEventId() == null) {
+                        logger.error("EventId is null for orderItem: {}, skipping ticket generation", item.getId());
+                        allSuccessful = false;
+                        continue;
+                    }
+                    
+                    if (item.getVenueAreaId() == null) {
+                        logger.error("VenueAreaId is null for orderItem: {}, skipping ticket generation", item.getId());
+                        allSuccessful = false;
+                        continue;
+                    }
+                    
                     // Por ahora, como no tenemos occurrence_id en el order_item,
                     // usamos el event_id. En el futuro, esto debería venir del order
                     GenerateTicketRequest ticketRequest = GenerateTicketRequest.builder()
@@ -89,6 +112,10 @@ public class TicketGenerationService {
                     
                     // Agregar venueAreaId al request
                     ticketRequest.setVenueAreaId(item.getVenueAreaId());
+                    
+                    logger.debug("Ticket request created: orderItemId={}, occurrenceId={}, venueAreaId={}, userId={}", 
+                            ticketRequest.getOrderItemId(), ticketRequest.getOccurrenceId(), 
+                            ticketRequest.getVenueAreaId(), ticketRequest.getUserId());
                     
                     boolean success = ticketServiceClient.generateTicket(ticketRequest);
                     

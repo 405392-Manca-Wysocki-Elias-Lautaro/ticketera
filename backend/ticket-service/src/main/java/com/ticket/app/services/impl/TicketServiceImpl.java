@@ -89,7 +89,11 @@ public class TicketServiceImpl implements TicketService {
             model.setEventId(request.getEventId());
             model.setEventVenueAreaId(request.getEventVenueAreaId());
             model.setEventVenueSeatId(request.getEventVenueSeatId());
-            model.setUserId(jwtUtils.getUserId());
+            // Use userId from request (for internal service calls) or JWT (for authenticated user calls)
+            UUID userId = request.getUserId() != null 
+                ? request.getUserId() 
+                : jwtUtils.getUserId();
+            model.setUserId(userId);
             model.setCode("TCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             model.setQrToken(UUID.randomUUID().toString());
             model.setStatus(TicketStatus.ISSUED);
@@ -183,7 +187,15 @@ public class TicketServiceImpl implements TicketService {
         history.setTicket(ticket);
         history.setFromStatus(from != null ? from.name().toLowerCase() : null);
         history.setToStatus(to.name().toLowerCase());
-        history.setUpdatedUser(jwtUtils.getUserId());
+        
+        UUID updatedUserId;
+        try {
+            updatedUserId = jwtUtils.getUserId();
+        } catch (Exception e) {
+            updatedUserId = ticket.getUserId();
+        }
+        history.setUpdatedUser(updatedUserId);
+        
         history.setUpdatedAt(OffsetDateTime.now());
         history.setNote(note);
 

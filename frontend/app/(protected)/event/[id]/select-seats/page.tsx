@@ -13,6 +13,7 @@ import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
 import { EventArea } from '@/types/EventArea'
+import { toast } from 'sonner'
 import { useEvent } from '@/hooks/event/useEvent'
 
 export default function SelectSeatsPage() {
@@ -22,7 +23,7 @@ export default function SelectSeatsPage() {
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
 
-    const {data: event, isLoading: isLoadingEvent} = useEvent(id);
+    const {data: event, isLoading: isLoadingEvent} = useEvent(Array.isArray(id) ? id[0] : id);
 
     const urlAreaId = searchParams.get("area")
     const urlSeats = searchParams.get("seats")
@@ -101,16 +102,19 @@ export default function SelectSeatsPage() {
     }
 
     const handleContinue = () => {
-        const total = selectedArea
-            ? selectedArea.isGeneralAdmission
-                ? (selectedArea.priceCents / 100) * quantity
-                : (selectedArea.priceCents / 100) * selectedSeats.length
-            : 0
+        if (!selectedArea) {
+            toast.error("Por favor, selecciona un área antes de continuar.");
+            return;
+        }
+
+        const total = selectedArea.isGeneralAdmission
+            ? (selectedArea.priceCents / 100) * quantity
+            : (selectedArea.priceCents / 100) * selectedSeats.length
 
         const seatsParam = selectedSeats.map((s) => `${s.row}-${s.seat}`).join(",")
 
         router.push(
-            `/event/${event?.id}/checkout?area=${selectedArea?.id}&seats=${seatsParam}&quantity=${quantity}&total=${total}`,
+            `/event/${event?.id}/checkout?area=${selectedArea.id}&seats=${seatsParam}&quantity=${quantity}&total=${total}`,
         )
     }
 
@@ -134,7 +138,7 @@ export default function SelectSeatsPage() {
                     </Link>
                 </Button>
 
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{event.title}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">{event.eventTitle}</h1>
                 <p className="text-muted-foreground mb-8">Selecciona tu área y asientos</p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

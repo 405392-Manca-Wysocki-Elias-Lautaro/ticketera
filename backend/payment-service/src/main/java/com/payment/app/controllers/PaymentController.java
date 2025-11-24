@@ -2,7 +2,7 @@ package com.payment.app.controllers;
 
 import com.payment.app.clients.OrderServiceClient;
 import com.payment.app.pkg.dtos.CreatePaymentIntentRequest;
-import com.payment.app.pkg.dtos.OrderInfoResponse;
+import com.payment.app.pkg.dtos.OrderResponse;
 import com.payment.app.pkg.dtos.PaymentIntentResponse;
 import com.payment.app.services.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,9 +77,9 @@ public class PaymentController {
         logger.info("Getting event ID for order: {}", orderId);
         
         try {
-            Optional<OrderInfoResponse> orderOpt = orderServiceClient.getOrderById(orderId);
+            Optional<OrderResponse> orderOpt = orderServiceClient.getOrderById(orderId);
             if (orderOpt.isPresent()) {
-                OrderInfoResponse order = orderOpt.get();
+                OrderResponse order = orderOpt.get();
                 if (order.getItems() != null && !order.getItems().isEmpty()) {
                     String eventId = order.getItems().get(0).getEventId();
                     Map<String, String> response = new HashMap<>();

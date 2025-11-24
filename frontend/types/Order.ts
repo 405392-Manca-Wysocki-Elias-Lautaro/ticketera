@@ -16,17 +16,17 @@ export interface CreateOrderRequest {
 }
 
 export interface OrderItem {
-  // ID del evento
-  eventId: number;
+  // ID del evento (UUID como string)
+  eventId: number | string;
   
-  // ID del área del evento (ej: Campo, Platea, etc.)
-  venueAreaId: number;
+  // ID del área del evento (UUID como string)
+  venueAreaId: string;
   
-  // ID del asiento específico (opcional, solo para asientos numerados)
-  venueSeatId?: number;
+  // ID del asiento específico (opcional, solo para asientos numerados) - UUID como string
+  venueSeatId?: string | number;
   
   // Tipo de ticket (ej: adulto, niño, VIP, etc.)
-  ticketTypeId: number;
+  ticketTypeId: number | string;
   
   // Precio unitario en centavos
   unitPriceCents: number;
@@ -64,14 +64,14 @@ export interface OrderResponse {
 export interface OrderItemResponse {
   id: number;
   
-  // ID del evento
-  eventId: number;
+  // ID del evento (UUID como string)
+  eventId: number | string;
   
-  // ID del área del evento
-  venueAreaId: number;
+  // ID del área del evento (UUID como string)
+  venueAreaId: string;
   
-  // ID del asiento específico (si aplica)
-  venueSeatId?: number;
+  // ID del asiento específico (si aplica) - UUID como string
+  venueSeatId?: string | number;
   
   // Tipo de ticket
   ticketTypeId: number;

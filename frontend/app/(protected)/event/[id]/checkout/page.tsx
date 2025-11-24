@@ -108,22 +108,26 @@ export default function CheckoutPage() {
                 return;
             }
 
-            // Construir los items de la orden con datos reales
-            // Convertir IDs de string a number para el backend
-            const eventIdNum = parseInt(String(event.id)) || 1;
-            const areaIdNum = parseInt(areaId || "1");
+            // Validar que tenemos un areaId válido (debe ser un UUID string)
+            if (!areaId || areaId === "undefined" || areaId === "null" || areaId.trim() === "") {
+                toast.error("Error: No se ha seleccionado un área válida. Por favor, vuelve a la selección de asientos.");
+                setIsProcessing(false);
+                return;
+            }
+            
+            // El eventId puede ser UUID o número - intentamos convertir si es posible
+            const eventId = event.id; // Mantener como string (UUID) o número según corresponda
             
             const items = parsedSeats.length > 0
                 ? parsedSeats.map((seat: { row: string; seat: number }) => {
-                    // Generar un ID único para el asiento basado en fila y número
-                    // Ej: Fila "A" = 1, asiento 5 = 105
-                    const rowCode = seat.row.charCodeAt(0) - 64; // A=1, B=2, etc
-                    const seatId = rowCode * 100 + seat.seat;
+                    // Para asientos numerados, generamos un identificador único
+                    // El backend espera un UUID o string, así que creamos un formato único
+                    const seatId = `${seat.row}-${seat.seat}`;
                     
                     return {
-                        eventId: eventIdNum,
-                        venueAreaId: areaIdNum,
-                        venueSeatId: seatId,
+                        eventId: eventId,
+                        venueAreaId: areaId, // UUID como string
+                        venueSeatId: seatId, // String con formato "FILA-ASIENTO"
                         ticketTypeId: 1, // 1 = adulto estándar
                         unitPriceCents: selectedArea.priceCents + Math.round(selectedArea.priceCents * 0.1),
                         quantity: 1,
@@ -131,8 +135,8 @@ export default function CheckoutPage() {
                 })
                 : [{
                     // Área general (sin asiento específico)
-                    eventId: eventIdNum,
-                    venueAreaId: areaIdNum,
+                    eventId: eventId,
+                    venueAreaId: areaId, // UUID como string
                     venueSeatId: undefined,
                     ticketTypeId: 1, // 1 = adulto estándar
                     unitPriceCents: selectedArea.priceCents,
@@ -148,7 +152,7 @@ export default function CheckoutPage() {
                     phone: phone,
                     userId: user.id, // UUID del usuario desde auth-service
                 },
-                organizerId: parseInt(String(event.id)) || 1, // Usar el mismo ID del evento como organizerId temporal
+                organizerId: event.organizerId || event.id, // Usar organizerId del evento o el eventId como fallback
                 items: items,
                 currency: "ARS",
                 paymentDescription: `Entradas para ${event.title}`,
@@ -190,8 +194,6 @@ export default function CheckoutPage() {
         } finally {
             setIsProcessing(false);
         }
-        // Redirect to success page
-        router.push(`/event/${event?.id}/success`)
     }
 
     if (isLoading || isLoadingEvent || !user || !event || !selectedArea) {

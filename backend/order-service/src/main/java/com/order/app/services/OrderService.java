@@ -162,19 +162,27 @@ public class OrderService {
      */
     private UUID parseOrGenerateUUID(String idString) {
         if (idString == null) {
+            logger.debug("parseOrGenerateUUID: input is null, returning null");
             return null;
         }
         
+        logger.debug("parseOrGenerateUUID: processing '{}'", idString);
+        
         try {
             // Intentar parsear como UUID
-            return UUID.fromString(idString);
+            UUID result = UUID.fromString(idString);
+            logger.debug("parseOrGenerateUUID: successfully parsed as UUID: {}", result);
+            return result;
         } catch (IllegalArgumentException e) {
             // Si falla, intentar como número y generar UUID determinístico
             try {
                 long id = Long.parseLong(idString);
                 // Generar UUID determinístico usando el número como parte menos significativa
-                return new UUID(0L, id);
+                UUID result = new UUID(0L, id);
+                logger.debug("parseOrGenerateUUID: generated UUID from number {}: {}", id, result);
+                return result;
             } catch (NumberFormatException ex) {
+                logger.error("parseOrGenerateUUID: failed to parse '{}' as UUID or number", idString);
                 throw new IllegalArgumentException("Invalid ID format: " + idString + ". Must be a valid UUID or numeric ID.");
             }
         }
@@ -288,6 +296,11 @@ public class OrderService {
     private List<OrderItem> createOrderItems(List<CreateOrderRequest.OrderItemRequest> itemRequests, Order order) {
         return itemRequests.stream()
             .map(itemRequest -> {
+                // Log detallado para debug
+                logger.debug("Creating OrderItem: eventId={}, venueAreaId={}, venueSeatId={}, ticketTypeId={}", 
+                        itemRequest.getEventId(), itemRequest.getVenueAreaId(), 
+                        itemRequest.getVenueSeatId(), itemRequest.getTicketTypeId());
+                
                 OrderItem item = OrderItem.builder()
                     .order(order)
                     .eventId(parseOrGenerateUUID(itemRequest.getEventId()))
@@ -296,8 +309,13 @@ public class OrderService {
                     .quantity(itemRequest.getQuantity())
                     .build();
                 
-                if (itemRequest.getVenueAreaId() != null) {
-                    item.setVenueAreaId(parseOrGenerateUUID(itemRequest.getVenueAreaId()));
+                if (itemRequest.getVenueAreaId() != null && !itemRequest.getVenueAreaId().trim().isEmpty()) {
+                    UUID venueAreaUuid = parseOrGenerateUUID(itemRequest.getVenueAreaId());
+                    logger.debug("Parsed venueAreaId '{}' to UUID: {}", itemRequest.getVenueAreaId(), venueAreaUuid);
+                    item.setVenueAreaId(venueAreaUuid);
+                } else {
+                    logger.error("VenueAreaId is null or empty for orderItem, this will cause ticket generation to fail");
+                    throw new IllegalArgumentException("VenueAreaId is required for all order items");
                 }
                 
                 if (itemRequest.getVenueSeatId() != null) {
