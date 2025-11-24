@@ -154,6 +154,8 @@ export default function CreateEventPage() {
             endsAt,
 
             areas: data.areas.map((area: any, index: number) => {
+                // Convertir precio normal a centavos (multiplicar por 100)
+                const priceInCents = Math.round(Number(area.priceCents) * 100);
 
                 if (area.isGeneralAdmission) {
                     return {
@@ -161,7 +163,7 @@ export default function CreateEventPage() {
                         isGeneralAdmission: true,
                         capacity: Number(area.capacity),
                         position: Number(area.position),
-                        priceCents: Number(area.priceCents),
+                        priceCents: priceInCents,
                         seats: [],
                     };
                 }
@@ -183,7 +185,7 @@ export default function CreateEventPage() {
                     isGeneralAdmission: false,
                     capacity: Number(area.capacity),
                     position: Number(area.position),
-                    priceCents: Number(area.priceCents),
+                    priceCents: priceInCents,
                     seats,
                 };
             }),
@@ -456,8 +458,16 @@ export default function CreateEventPage() {
                                                         <Input
                                                             className='rounded-none rounded-r-lg'
                                                             type="number"
-                                                            {...register(`areas.${i}.priceCents`)}
-                                                            placeholder="Precio en centavos"
+                                                            step="100.0"
+                                                            min="0"
+                                                            {...register(`areas.${i}.priceCents`, {
+                                                                valueAsNumber: true,
+                                                                min: {
+                                                                    value: 0,
+                                                                    message: "El precio no puede ser negativo"
+                                                                }
+                                                            })}
+                                                            placeholder="0"
                                                         />
                                                     </div>
                                                 </div>
@@ -468,7 +478,14 @@ export default function CreateEventPage() {
                                                         <Label>Capacidad</Label>
                                                         <Input
                                                             type="number"
-                                                            {...register(`areas.${i}.capacity`)}
+                                                            min="0"
+                                                            {...register(`areas.${i}.capacity`, {
+                                                                valueAsNumber: true,
+                                                                min: {
+                                                                    value: 0,
+                                                                    message: "La capacidad no puede ser negativa"
+                                                                }
+                                                            })}
                                                             placeholder="Capacidad"
                                                         />
                                                     </div>

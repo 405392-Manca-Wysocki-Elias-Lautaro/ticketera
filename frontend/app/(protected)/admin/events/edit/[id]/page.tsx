@@ -100,11 +100,20 @@ export default function EditEventPage() {
                 startTime: format(start, "HH:mm"),
                 endDate: end,
                 endTime: format(end, "HH:mm"),
-                areas: event.areas
+                // Convertir priceCents a precio normal (dividir por 100) para mostrar en el formulario
+                areas: event.areas?.map((area: any) => ({
+                    ...area,
+                    priceCents: area.priceCents ? area.priceCents / 100 : 0
+                })) || []
             })
 
             setTimeout(() => {
-                setValue("areas", event.areas || []);
+                // Convertir priceCents a precio normal (dividir por 100) para mostrar en el formulario
+                const areasWithNormalPrice = (event.areas || []).map((area: any) => ({
+                    ...area,
+                    priceCents: area.priceCents ? area.priceCents / 100 : 0
+                }));
+                setValue("areas", areasWithNormalPrice);
             });
         }
 
@@ -125,12 +134,15 @@ export default function EditEventPage() {
             startsAt,
             endsAt,
             areas: data.areas.map((area: any, index: number) => {
+                // Convertir precio normal a centavos (multiplicar por 100)
+                const priceInCents = Math.round(Number(area.priceCents) * 100);
+
                 if (area.isGeneralAdmission) {
                     return {
                         ...area,
                         capacity: Number(area.capacity),
                         position: index + 1,
-                        priceCents: Number(area.priceCents),
+                        priceCents: priceInCents,
                         seats: []
                     }
                 }
@@ -152,7 +164,7 @@ export default function EditEventPage() {
                     ...area,
                     capacity: Number(area.capacity),
                     position: index + 1,
-                    priceCents: Number(area.priceCents),
+                    priceCents: priceInCents,
                     seats
                 }
             })
@@ -380,18 +392,42 @@ export default function EditEventPage() {
 
                                             {/* precio + capacidad */}
                                             <div className="grid grid-cols-2 gap-4">
-                                                <Input
-                                                    type="number"
-                                                    {...register(`areas.${i}.priceCents`)}
-                                                    placeholder="Precio"
-                                                />
+                                                <div>
+                                                    <Label>Precio</Label>
+                                                    <div className='flex'>
+                                                        <div className='border flex justify-center items-center rounded-l-lg px-2'>ARS$</div>
+                                                        <Input
+                                                            className='rounded-none rounded-r-lg'
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            {...register(`areas.${i}.priceCents`, {
+                                                                valueAsNumber: true,
+                                                                min: {
+                                                                    value: 0,
+                                                                    message: "El precio no puede ser negativo"
+                                                                }
+                                                            })}
+                                                        />
+                                                    </div>
+                                                </div>
 
                                                 {watch(`areas.${i}.isGeneralAdmission`) && (
-                                                    <Input
-                                                        type="number"
-                                                        {...register(`areas.${i}.capacity`)}
-                                                        placeholder="Capacidad"
-                                                    />
+                                                    <div>
+                                                        <Label>Capacidad</Label>
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            {...register(`areas.${i}.capacity`, {
+                                                                valueAsNumber: true,
+                                                                min: {
+                                                                    value: 0,
+                                                                    message: "La capacidad no puede ser negativa"
+                                                                }
+                                                            })}
+                                                            placeholder="Capacidad"
+                                                        />
+                                                    </div>
                                                 )}
                                             </div>
 
