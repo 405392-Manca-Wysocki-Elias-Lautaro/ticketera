@@ -304,6 +304,9 @@ public class EventServiceImpl implements IEventService {
             Integer areaAvailable = availabilityService.getAvailableTicketsForArea(area.getId());
             Integer areaCapacity = area.getCapacity() != null ? area.getCapacity() : 
                     seatRepository.findByAreaId(area.getId()).size();
+            
+            // Contar siempre el número real de asientos para esta área
+            Integer totalSeatsForArea = seatRepository.findByAreaId(area.getId()).size();
 
             totalAvailable += areaAvailable;
             totalCapacity += areaCapacity;
@@ -318,7 +321,7 @@ public class EventServiceImpl implements IEventService {
                     .priceCents(priceCents)
                     .currency(currency)
                     .availableTickets(areaAvailable)
-                    .totalSeats(areaCapacity)
+                    .totalSeats(totalSeatsForArea)
                     .build();
 
             areaDTOs.add(areaDTO);
