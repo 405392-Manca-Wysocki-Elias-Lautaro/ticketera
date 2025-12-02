@@ -113,7 +113,7 @@ function Calendar({
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
         today: cn(
-          "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
+          "bg-accent text-white! rounded-md data-[selected=true]:rounded-none",
           defaultClassNames.today
         ),
         outside: cn(
@@ -188,11 +188,14 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
 
+  const isToday = day.date.toDateString() === new Date().toDateString()
+
   return (
     <Button
       ref={ref}
       variant="ghost"
       size="icon"
+      data-today={isToday}
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
         modifiers.selected &&
@@ -205,6 +208,18 @@ function CalendarDayButton({
       data-range-middle={modifiers.range_middle}
       className={cn(
         "data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70",
+
+        // ⭐ HOY — estado normal
+        isToday && "text-white! bg-accent!",
+
+        // ⭐ HOY — hover (bg blanco + borde violeta)
+        isToday &&
+        "hover:bg-white! hover:text-black! hover:border-violet-500! border-transparent!",
+
+        // ⭐ HOY — seleccionado (bg naranja + borde violeta)
+        (modifiers.selected && isToday) &&
+        "bg-orange-500! text-white! border-violet-500!",
+
         defaultClassNames.day,
         className
       )}

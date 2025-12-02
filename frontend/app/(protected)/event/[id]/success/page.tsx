@@ -32,6 +32,8 @@ export default function SuccessPage() {
         )
     }
 
+    return null;
+
     return (
         <div className="min-h-screen bg-background">
             <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />

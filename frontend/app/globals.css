@@ -256,3 +256,29 @@ canvas {
   background-size: 300% 100%;
   animation: gradient 8s linear infinite;
 }
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.no-spinner {
+    -moz-appearance: textfield;
+}
+
+/* Desactiva cambiar valores con scroll */
+.no-scroll {
+    pointer-events: auto;
+}
+
+.no-scroll:hover,
+.no-scroll:focus {
+    /* evita que la rueda del mouse cambie el valor */
+    -moz-appearance: textfield !important;
+}
+
+.no-scroll-number {
+    /* Para Chrome/Edge/Safari */
+    touch-action: manipulation;
+}
