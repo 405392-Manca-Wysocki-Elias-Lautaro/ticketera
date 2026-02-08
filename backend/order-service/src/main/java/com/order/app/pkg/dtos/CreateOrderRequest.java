@@ -34,6 +34,9 @@ public class CreateOrderRequest {
     @Size(max = 200, message = "Payment description cannot exceed 200 characters")
     private String paymentDescription;
     
+    @Size(max = 50, message = "Coupon code cannot exceed 50 characters")
+    private String couponCode;
+    
     // Constructors
     public CreateOrderRequest() {}
     
@@ -61,6 +64,9 @@ public class CreateOrderRequest {
     
     public String getPaymentDescription() { return paymentDescription; }
     public void setPaymentDescription(String paymentDescription) { this.paymentDescription = paymentDescription; }
+    
+    public String getCouponCode() { return couponCode; }
+    public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
     
     // Nested classes
     public static class CustomerInfo {

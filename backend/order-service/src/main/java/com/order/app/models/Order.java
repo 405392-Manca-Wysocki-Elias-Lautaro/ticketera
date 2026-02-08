@@ -50,6 +50,14 @@ public class Order {
     @Builder.Default
     private String currency = "ARS";
     
+    @Column(name = "coupon_id")
+    private UUID couponId;
+    
+    @Column(name = "discount_amount_cents")
+    @PositiveOrZero
+    @Builder.Default
+    private Long discountAmountCents = 0L;
+    
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
     

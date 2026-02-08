@@ -26,19 +26,25 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderStatusHistoryRepository statusHistoryRepository;
     private final PaymentServiceClient paymentServiceClient;
+    private final CouponService couponService;
+    private final CouponValidationService couponValidationService;
 
     public OrderService(
             OrderRepository orderRepository,
             CustomerRepository customerRepository,
             OrderItemRepository orderItemRepository,
             OrderStatusHistoryRepository statusHistoryRepository,
-            PaymentServiceClient paymentServiceClient
+            PaymentServiceClient paymentServiceClient,
+            CouponService couponService,
+            CouponValidationService couponValidationService
     ) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.orderItemRepository = orderItemRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.paymentServiceClient = paymentServiceClient;
+        this.couponService = couponService;
+        this.couponValidationService = couponValidationService;
     }
 
     /**
@@ -61,22 +67,73 @@ public class OrderService {
             List<OrderItem> items = createOrderItems(request.getItems(), order);
             order.setItems(items);
 
-            // 5. Calcular total
+            // 5. Calcular subtotal
             order.calculateTotal();
+            long subtotalCents = order.getTotalCents();
+            
+            // 6. Procesar cupón si existe
+            Coupon appliedCoupon = null;
+            long discountCents = 0L;
+            
+            if (request.getCouponCode() != null && !request.getCouponCode().isBlank()) {
+                try {
+                    // Obtener cupón
+                    appliedCoupon = couponService.getCouponByCode(
+                        request.getCouponCode(), 
+                        order.getOrganizerId()
+                    );
+                    
+                    // Obtener eventId del primer item (asumiendo todos de un evento)
+                    UUID eventId = order.getItems().get(0).getEventId();
+                    
+                    // Validar y calcular descuento
+                    discountCents = couponValidationService.validateAndCalculateDiscount(
+                        appliedCoupon,
+                        customer.getId(),
+                        eventId,
+                        subtotalCents,
+                        order.getCurrency()
+                    );
+                    
+                    // Aplicar descuento a la orden
+                    order.setCouponId(appliedCoupon.getId());
+                    order.setDiscountAmountCents(discountCents);
+                    order.setTotalCents(subtotalCents - discountCents);
+                    
+                    logger.info("Cupón {} aplicado a orden. Descuento: {} centavos", 
+                               appliedCoupon.getCode(), discountCents);
+                    
+                } catch (Exception e) {
+                    logger.warn("Error al aplicar cupón {}: {}", request.getCouponCode(), e.getMessage());
+                    // Si el cupón falla, continuar sin él (o lanzar error según política)
+                    throw new OrderCreationException("Cupón inválido: " + e.getMessage(), e);
+                }
+            }
 
-            // 6. Guardar orden
+            // 7. Guardar orden
             order = orderRepository.save(order);
 
-            // 7. Crear historial de estado
+            // 8. Registrar redención del cupón si fue aplicado
+            if (appliedCoupon != null && discountCents > 0) {
+                couponService.redeemCoupon(
+                    appliedCoupon,
+                    order.getId(),
+                    customer.getId(),
+                    discountCents,
+                    subtotalCents
+                );
+            }
+
+            // 9. Crear historial de estado
             createStatusHistory(order, null, OrderStatus.PENDING, null, "Order created");
 
-            // 8. Procesar pago (pasar la descripción del request)
+            // 10. Procesar pago (pasar la descripción del request)
             PaymentResponse paymentResponse = processPayment(order, request.getPaymentDescription());
 
-            // 9. Actualizar orden según resultado del pago
+            // 11. Actualizar orden según resultado del pago
             updateOrderAfterPayment(order, paymentResponse);
 
-            // 10. Extraer la URL de pago para incluirla en la respuesta
+            // 12. Extraer la URL de pago para incluirla en la respuesta
             String paymentUrl = paymentResponse != null && paymentResponse.requiresRedirect()
                     ? paymentResponse.getPaymentUrl()
                     : null;
