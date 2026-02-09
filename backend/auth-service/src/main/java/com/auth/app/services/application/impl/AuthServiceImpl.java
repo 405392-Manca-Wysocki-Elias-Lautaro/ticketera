@@ -369,4 +369,13 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
     }
+
+    @Override
+    public UserResponse getUserById(UUID id) {
+        UserModel user = userService.findById(id);
+        if (user == null) {
+            return null; // Or throw exception
+        }
+        return modelMapper.map(user, UserResponse.class);
+    }
 }

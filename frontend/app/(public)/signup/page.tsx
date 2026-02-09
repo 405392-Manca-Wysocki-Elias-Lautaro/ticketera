@@ -18,6 +18,8 @@ import { useRegister } from '@/hooks/auth/useRegister'
 import { useState } from 'react'
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator'
 import GradientText from '@/components/GradientText'
+import { Checkbox } from "@/components/ui/checkbox"
+import { TermsModal } from "@/components/auth/TermsModal"
 
 export default function SignUpPage() {
 
@@ -29,10 +31,19 @@ export default function SignUpPage() {
         register,
         handleSubmit,
         watch,
-        formState: { errors },
+        setValue,
+        formState: { errors, isValid },
     } = useForm<SignUpSchema>({
         resolver: zodResolver(signUpSchema),
-        mode: "onBlur",
+        defaultValues: {
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+            termsAccepted: false,
+        },
+        mode: "onChange",
     })
 
     const onSubmit = async (data: SignUpSchema) => {
@@ -44,8 +55,8 @@ export default function SignUpPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 gradient-brand">
-            <Card className="w-full max-w-md">
+        <div className="h-screen w-full grid place-items-center p-4 gradient-brand overflow-y-auto">
+            <Card className="w-full max-w-md gap-2">
                 <CardHeader className="space-y-4">
                     <Button variant="ghost" asChild className="w-fit cursor-pointer mb-0">
                         <Link href="/login">
@@ -137,6 +148,26 @@ export default function SignUpPage() {
                             )}
                         </div>
 
+                        {/* Términos y Condiciones */}
+                        <div className="flex items-start space-x-2">
+                            <Checkbox
+                                id="terms"
+                                checked={watch("termsAccepted")}
+                                onCheckedChange={(checked) => setValue("termsAccepted", checked as boolean, { shouldValidate: true })}
+                            />
+                            <div className="grid gap-1.5 leading-none">
+                                <label
+                                    htmlFor="terms"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                    Acepto los <TermsModal />
+                                </label>
+                                {errors.termsAccepted && (
+                                    <p className="text-sm text-destructive">{errors.termsAccepted.message}</p>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Errores generales */}
                         {(Object.keys(errors).length > 0 || isError) && (
                             <Alert variant="destructive">
@@ -154,7 +185,7 @@ export default function SignUpPage() {
                             <Button
                                 type="submit"
                                 className="w-full gradient-brand text-white cursor-pointer"
-                                disabled={isPending || isSuccess}
+                                disabled={isPending || isSuccess || !isValid}
                             >
                                 {(isPending || isSuccess) ? <Loader2 className="animate-spin" /> : "Crear Cuenta"}
                             </Button>

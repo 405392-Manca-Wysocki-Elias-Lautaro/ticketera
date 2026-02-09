@@ -15,7 +15,7 @@ RUN npm install -g pnpm
 EXPOSE 3000
 
 # Comando por defecto (se puede sobrescribir en docker-compose)
-CMD ["sh", "-c", "pnpm install && pnpm run dev"]
+CMD ["sh", "-c", "if [ ! -d \"node_modules/next\" ]; then echo \"Node modules not found. Installing...\"; pnpm install --prefer-offline; fi && echo \"Starting dev server...\" && pnpm run dev"]
 
 # =========================
 # Etapa de build

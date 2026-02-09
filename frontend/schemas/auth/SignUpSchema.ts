@@ -13,6 +13,9 @@ export const signUpSchema = z.object({
         .regex(/\d/, "Debe contener un número")
         .regex(/[@$!%*?&]/, "Debe contener un caracter especial (@$!%*?&)"),
     confirmPassword: z.string(),
+    termsAccepted: z.boolean().refine((val) => val === true, {
+        message: "Debes aceptar los términos y condiciones",
+    }),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
     path: ["confirmPassword"],

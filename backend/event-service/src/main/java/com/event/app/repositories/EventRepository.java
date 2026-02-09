@@ -15,4 +15,5 @@ public interface EventRepository extends JpaRepository<EventEntity, UUID>{
     List<EventEntity> findByCategoryIdAndActiveTrue(UUID categoryId);
     List<EventEntity> findByStatusAndActiveTrue(String status);
     List<EventEntity> findByTitleContainingIgnoreCaseAndActiveTrue(String title);
+    List<EventEntity> findAllByStartsAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

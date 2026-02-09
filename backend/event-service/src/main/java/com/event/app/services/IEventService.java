@@ -18,6 +18,8 @@ public interface IEventService {
     List<EventSummaryDTO> getAllEventsSummary();
     
     List<EventSummaryDTO> getAllEvents(String title);
+    
+    List<EventSummaryDTO> getEventsStartingBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 
     Optional<EventDetailDTO> getEventDetail(UUID id);
 

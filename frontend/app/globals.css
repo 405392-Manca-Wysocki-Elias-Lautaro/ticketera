@@ -256,3 +256,24 @@ canvas {
   background-size: 300% 100%;
   animation: gradient 8s linear infinite;
 }
+
+/* Global Scrollbar */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: oklch(0.6 0.22 290 / 0.6);
+  /* More vibrant purple */
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0.22 290 / 1);
+  /* Full color on hover */
+}

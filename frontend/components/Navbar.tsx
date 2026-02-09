@@ -129,6 +129,11 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
 
                     {/* RIGHT SIDE (Tickets + Profile + optional rightSlot) */}
                     <div className="flex items-center gap-2">
+                        <Button variant="ghost" asChild className="shrink-0 hidden sm:flex">
+                            <Link href="/faq">
+                                Ayuda
+                            </Link>
+                        </Button>
                         {user && (
                             <Tooltip>
                                 <TooltipTrigger asChild>

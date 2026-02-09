@@ -14,4 +14,5 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> findByCode(String code);
     Optional<Ticket> findByQrToken(String qrToken);
     List<Ticket> findByUserId(UUID userId);
+    List<Ticket> findByEventId(UUID eventId);
 }

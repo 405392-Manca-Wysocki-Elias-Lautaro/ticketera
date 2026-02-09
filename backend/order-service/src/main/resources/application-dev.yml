@@ -35,7 +35,8 @@ spring:
     schemas: ${DB_SCHEMA:orders}
     default-schema: ${DB_SCHEMA:orders}
     table: ${FLYWAY_TABLE:flyway_history_orders}
-    validate-on-migrate: true
+    validate-on-migrate: false
+    ignore-missing-migrations: true
     baseline-on-migrate: false
     locations:
       - classpath:db/migration

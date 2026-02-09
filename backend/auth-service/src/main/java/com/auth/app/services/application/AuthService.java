@@ -33,4 +33,6 @@ public interface AuthService {
     UserResponse getCurrentUser(String authorizationHeader, IpAddress ipAddress, UserAgent userAgent);
 
     boolean validateAccessToken(String token);
+
+    UserResponse getUserById(UUID id);
 }

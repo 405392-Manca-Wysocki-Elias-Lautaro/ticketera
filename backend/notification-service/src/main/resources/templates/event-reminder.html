@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Reminder</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #6366f1; text-decoration: none; }
+        .content { color: #333333; line-height: 1.6; }
+        .event-card { background-color: #f8fafc; border-left: 4px solid #6366f1; padding: 20px; margin: 20px 0; border-radius: 4px; }
+        .event-title { font-size: 20px; font-weight: bold; color: #1e293b; margin-top: 0; }
+        .event-detail { margin: 8px 0; display: flex; align-items: center; }
+        .icon { margin-right: 10px; font-size: 18px; }
+        .btn { display: inline-block; background-color: #6366f1; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; text-align: center; }
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" class="logo">Ticketera</a>
+        </div>
+        <div class="content">
+            <p>Hola <span th:text="${firstName}">Usuario</span>,</p>
+            <p>¡Tu evento está a la vuelta de la esquina! Este es un recordatorio amable para que te prepares.</p>
+            
+            <div class="event-card">
+                <h2 class="event-title" th:text="${eventName}">Nombre del Evento</h2>
+                <div class="event-detail">
+                    <span class="icon">📍</span>
+                    <span th:text="${venueName}">Lugar</span>
+                </div>
+                <div class="event-detail">
+                    <span class="icon">🕒</span>
+                    <span th:text="${startsAt}">Fecha y Hora</span>
+                </div>
+                <div class="event-detail">
+                    <span class="icon">⌛</span>
+                    <span>Comienza en: <strong th:text="${timeLeft}">Tiempo restante</strong></span>
+                </div>
+                <div class="event-detail">
+                    <span class="icon">🎫</span>
+                    <span>Código de Ticket: <strong th:text="${ticketCode}">ABC-123</strong></span>
+                </div>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="#" class="btn">Ver mi Ticket</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>Este correo fue enviado automáticamente por Ticketera.</p>
+            <p>&copy; 2024 Ticketera. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
