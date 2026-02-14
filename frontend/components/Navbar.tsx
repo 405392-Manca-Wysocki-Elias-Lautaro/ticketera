@@ -36,6 +36,7 @@ import {
 
 import { RoleUtils } from "@/utils/roleUtils"
 import GradientText from "./GradientText"
+import { ModeToggle } from "@/components/ui/ModeToggle"
 
 interface NavbarProps {
     leftSlot?: React.ReactNode
@@ -134,6 +135,7 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
                                 Ayuda
                             </Link>
                         </Button>
+                        <ModeToggle />
                         {user && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
