@@ -23,7 +23,7 @@ export default function SelectSeatsPage() {
     const searchParams = useSearchParams()
     const { user, isLoading } = useAuth()
 
-    const {data: event, isLoading: isLoadingEvent} = useEvent(Array.isArray(id) ? id[0] : id);
+    const { data: event, isLoading: isLoadingEvent } = useEvent(Array.isArray(id) ? id[0] : id);
 
     const urlAreaId = searchParams.get("area")
     const urlSeats = searchParams.get("seats")
@@ -90,6 +90,10 @@ export default function SelectSeatsPage() {
             if (exists) {
                 return prev.filter((s) => !(s.row === row && s.seat === seatNumber))
             } else {
+                if (prev.length >= 5) {
+                    toast.error("Solo puedes seleccionar hasta 5 asientos");
+                    return prev;
+                }
                 return [...prev, { row, seat: seatNumber }]
             }
         })
@@ -191,7 +195,13 @@ export default function SelectSeatsPage() {
                                                     <p className="text-3xl font-bold">{quantity}</p>
                                                     <p className="text-sm text-muted-foreground">entradas</p>
                                                 </div>
-                                                <Button variant="outline" size="icon" onClick={() => setQuantity(Math.min(10, quantity + 1))}>
+                                                <Button variant="outline" size="icon" onClick={() => {
+                                                    if (quantity >= 5) {
+                                                        toast.error("Solo puedes seleccionar hasta 5 entradas");
+                                                        return;
+                                                    }
+                                                    setQuantity(Math.min(5, quantity + 1));
+                                                }}>
                                                     +
                                                 </Button>
                                             </div>
