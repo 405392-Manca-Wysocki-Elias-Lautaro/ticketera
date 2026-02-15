@@ -33,6 +33,7 @@ export default function RootLayout({
     return (
         <html lang="es" suppressHydrationWarning>
             <head>
+                <script src="/suppress-react-warnings.js" />
                 <script src="/pwa-install.js" />
             </head>
             <body 

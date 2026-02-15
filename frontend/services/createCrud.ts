@@ -4,7 +4,7 @@ import { ApiResponse } from '@/types/Response/ApiResponse';
 export function createCrudService<TData, TParams = any>(baseUrl: string) {
     return {
         getAll: (params?: TParams) =>
-            api.get<ApiResponse<TData>>(baseUrl, { params }),
+            api.get<ApiResponse<TData[]>>(baseUrl, { params }),
 
         getById: (id: number | string) =>
             api.get<ApiResponse<TData>>(`${baseUrl}/${id}`),
