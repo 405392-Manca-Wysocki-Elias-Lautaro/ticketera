@@ -1,6 +1,7 @@
 package com.order.app.pkg.dtos;
 
 import com.order.app.models.Coupon;
+import com.order.app.models.CouponStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,14 +16,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CouponFilters {
     
-    private Coupon.CouponStatus status;
+    private CouponStatus status;
     private UUID eventId;
     private String searchText; // Para buscar por código o descripción
     
     public CouponFilters(String statusStr, String eventIdStr) {
         if (statusStr != null && !statusStr.isBlank()) {
             try {
-                this.status = Coupon.CouponStatus.valueOf(statusStr.toUpperCase());
+                this.status = CouponStatus.valueOf(statusStr.toUpperCase());
             } catch (IllegalArgumentException e) {
                 // Ignorar status inválido
             }

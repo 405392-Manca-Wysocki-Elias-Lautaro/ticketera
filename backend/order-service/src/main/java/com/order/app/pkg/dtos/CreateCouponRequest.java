@@ -1,6 +1,6 @@
 package com.order.app.pkg.dtos;
 
-import com.order.app.models.Coupon;
+import com.order.app.models.DiscountType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +29,7 @@ public class CreateCouponRequest {
     private String description;
     
     @NotNull(message = "El tipo de descuento es requerido")
-    private Coupon.DiscountType discountType;
+    private DiscountType discountType;
     
     @NotNull(message = "El valor del descuento es requerido")
     @Positive(message = "El valor del descuento debe ser positivo")
@@ -74,7 +74,7 @@ public class CreateCouponRequest {
      */
     @AssertTrue(message = "Para descuento porcentual, el valor debe estar entre 1 y 100")
     public boolean isValidPercentage() {
-        if (discountType == null || discountType != Coupon.DiscountType.PERCENTAGE) {
+        if (discountType == null || discountType != DiscountType.PERCENTAGE) {
             return true;
         }
         return discountValue != null && discountValue >= 1 && discountValue <= 100;
@@ -85,7 +85,7 @@ public class CreateCouponRequest {
      */
     @AssertTrue(message = "Para descuento de monto fijo, debe especificar la moneda")
     public boolean isValidCurrency() {
-        if (discountType == null || discountType != Coupon.DiscountType.FIXED_AMOUNT) {
+        if (discountType == null || discountType != DiscountType.FIXED_AMOUNT) {
             return true;
         }
         return currency != null && !currency.isBlank();

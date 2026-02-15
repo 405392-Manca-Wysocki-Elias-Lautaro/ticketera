@@ -2,6 +2,8 @@ package com.order.app.services;
 
 import com.order.app.exceptions.coupon.*;
 import com.order.app.models.Coupon;
+import com.order.app.models.DiscountType;
+import com.order.app.models.CouponStatus;
 import com.order.app.models.CouponRedemption;
 import com.order.app.pkg.dtos.*;
 import com.order.app.repositories.CouponRedemptionRepository;
@@ -63,7 +65,7 @@ class CouponServiceTest {
             .organizerId(organizerId)
             .code("TEST20")
             .description("Test coupon 20% off")
-            .discountType(Coupon.DiscountType.PERCENTAGE)
+            .discountType(DiscountType.PERCENTAGE)
             .discountValue(20L)
             .currency("ARS")
             .maxUses(100)
@@ -71,7 +73,7 @@ class CouponServiceTest {
             .currentUses(0)
             .validFrom(LocalDateTime.now().minusDays(1))
             .validUntil(LocalDateTime.now().plusDays(30))
-            .status(Coupon.CouponStatus.ACTIVE)
+            .status(CouponStatus.ACTIVE)
             .createdBy(userId)
             .build();
     }
@@ -87,7 +89,7 @@ class CouponServiceTest {
         CreateCouponRequest request = CreateCouponRequest.builder()
             .code("SUMMER25")
             .description("Summer discount")
-            .discountType(Coupon.DiscountType.PERCENTAGE)
+            .discountType(DiscountType.PERCENTAGE)
             .discountValue(25L)
             .currency("ARS")
             .maxUses(50)
@@ -116,7 +118,7 @@ class CouponServiceTest {
         // Arrange
         CreateCouponRequest request = CreateCouponRequest.builder()
             .code("DUPLICATE")
-            .discountType(Coupon.DiscountType.PERCENTAGE)
+            .discountType(DiscountType.PERCENTAGE)
             .discountValue(10L)
             .validFrom(LocalDateTime.now().plusDays(1))
             .validUntil(LocalDateTime.now().plusDays(30))
@@ -263,7 +265,7 @@ class CouponServiceTest {
         
         // Assert
         assertNotNull(testCoupon.getDeletedAt());
-        assertEquals(Coupon.CouponStatus.INACTIVE, testCoupon.getStatus());
+        assertEquals(CouponStatus.INACTIVE, testCoupon.getStatus());
         verify(couponRepository, times(1)).save(testCoupon);
     }
     
@@ -380,4 +382,5 @@ class CouponServiceTest {
         assertEquals(80.0, stats.getConversionRate(), 0.01);
     }
 }
+
 

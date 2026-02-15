@@ -2,6 +2,8 @@ package com.order.app.services;
 
 import com.order.app.exceptions.coupon.*;
 import com.order.app.models.Coupon;
+import com.order.app.models.CouponStatus;
+import com.order.app.models.DiscountType;
 import com.order.app.repositories.CouponRedemptionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +76,7 @@ public class CouponValidationService {
      * VALIDACIÓN 2: Verifica que el cupón esté en estado ACTIVE.
      */
     private void validateStatus(Coupon coupon) {
-        if (coupon.getStatus() != Coupon.CouponStatus.ACTIVE) {
+        if (coupon.getStatus() != CouponStatus.ACTIVE) {
             String message = switch (coupon.getStatus()) {
                 case INACTIVE -> "Este cupón no está disponible actualmente";
                 case EXPIRED -> "Este cupón ha expirado";
@@ -177,7 +179,7 @@ public class CouponValidationService {
      * VALIDACIÓN 8: Verifica que la moneda coincida (solo para FIXED_AMOUNT).
      */
     private void validateCurrency(Coupon coupon, String currency) {
-        if (coupon.getDiscountType() == Coupon.DiscountType.FIXED_AMOUNT) {
+        if (coupon.getDiscountType() == DiscountType.FIXED_AMOUNT) {
             if (!coupon.getCurrency().equalsIgnoreCase(currency)) {
                 logger.warn("Cupón {} rechazado: moneda incorrecta ({} != {})", 
                            coupon.getCode(), currency, coupon.getCurrency());

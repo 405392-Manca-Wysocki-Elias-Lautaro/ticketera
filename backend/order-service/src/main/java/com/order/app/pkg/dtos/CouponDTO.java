@@ -1,6 +1,8 @@
 package com.order.app.pkg.dtos;
 
 import com.order.app.models.Coupon;
+import com.order.app.models.CouponStatus;
+import com.order.app.models.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +25,7 @@ public class CouponDTO {
     private UUID organizerId;
     private String code;
     private String description;
-    private Coupon.DiscountType discountType;
+    private DiscountType discountType;
     private Long discountValue;
     private String currency;
     private Integer maxUses;
@@ -33,7 +35,7 @@ public class CouponDTO {
     private LocalDateTime validUntil;
     private List<UUID> eventIds;
     private Long minPurchaseAmountCents;
-    private Coupon.CouponStatus status;
+    private CouponStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UUID createdBy;
@@ -69,7 +71,7 @@ public class CouponDTO {
      */
     public boolean isCurrentlyAvailable() {
         LocalDateTime now = LocalDateTime.now();
-        return status == Coupon.CouponStatus.ACTIVE
+        return status == CouponStatus.ACTIVE
             && !now.isBefore(validFrom)
             && !now.isAfter(validUntil)
             && (maxUses == null || currentUses < maxUses);

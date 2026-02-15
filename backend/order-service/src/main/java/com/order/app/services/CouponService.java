@@ -3,6 +3,7 @@ package com.order.app.services;
 import com.order.app.exceptions.coupon.*;
 import com.order.app.models.Coupon;
 import com.order.app.models.CouponRedemption;
+import com.order.app.models.CouponStatus;
 import com.order.app.pkg.dtos.*;
 import com.order.app.repositories.CouponRedemptionRepository;
 import com.order.app.repositories.CouponRepository;
@@ -73,7 +74,7 @@ public class CouponService {
             .validUntil(request.getValidUntil())
             .eventIds(request.getEventIds())
             .minPurchaseAmountCents(request.getMinPurchaseAmountCents())
-            .status(Coupon.CouponStatus.ACTIVE)
+            .status(CouponStatus.ACTIVE)
             .createdBy(createdBy)
             .build();
         

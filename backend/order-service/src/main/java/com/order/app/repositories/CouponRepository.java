@@ -1,6 +1,7 @@
 package com.order.app.repositories;
 
 import com.order.app.models.Coupon;
+import com.order.app.models.CouponStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -52,16 +53,18 @@ public interface CouponRepository extends JpaRepository<Coupon, UUID> {
      */
     List<Coupon> findByOrganizerIdAndStatusAndDeletedAtIsNull(
         UUID organizerId, 
-        Coupon.CouponStatus status
+        CouponStatus status
     );
     
     /**
      * Lista cupones activos que contienen un eventId específico.
+     * Usa query nativa porque HQL no soporta el operador ANY con arrays de PostgreSQL.
      */
-    @Query("SELECT c FROM Coupon c WHERE c.organizerId = :organizerId " +
+    @Query(value = "SELECT * FROM orders.coupons c WHERE c.organizer_id = :organizerId " +
            "AND c.status = 'ACTIVE' " +
-           "AND c.deletedAt IS NULL " +
-           "AND (:eventId = ANY(c.eventIds) OR c.eventIds IS NULL OR SIZE(c.eventIds) = 0)")
+           "AND c.deleted_at IS NULL " +
+           "AND (:eventId = ANY(c.event_ids) OR c.event_ids IS NULL OR array_length(c.event_ids, 1) IS NULL)", 
+           nativeQuery = true)
     List<Coupon> findActiveByOrganizerAndEvent(
         @Param("organizerId") UUID organizerId,
         @Param("eventId") UUID eventId

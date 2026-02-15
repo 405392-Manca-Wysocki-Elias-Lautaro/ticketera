@@ -91,34 +91,6 @@ public class Coupon {
     private UUID createdBy;
     
     // ========================================
-    // ENUMS
-    // ========================================
-    
-    /**
-     * Tipo de descuento que aplica el cupón.
-     */
-    public enum DiscountType {
-        /** Descuento porcentual (ej: 20% de descuento) */
-        PERCENTAGE,
-        /** Monto fijo en centavos (ej: $5000 de descuento) */
-        FIXED_AMOUNT
-    }
-    
-    /**
-     * Estado del cupón.
-     */
-    public enum CouponStatus {
-        /** Cupón activo y usable */
-        ACTIVE,
-        /** Cupón desactivado manualmente */
-        INACTIVE,
-        /** Cupón expirado por fecha */
-        EXPIRED,
-        /** Cupón que alcanzó su límite de usos */
-        EXHAUSTED
-    }
-    
-    // ========================================
     // MÉTODOS DE NEGOCIO
     // ========================================
     

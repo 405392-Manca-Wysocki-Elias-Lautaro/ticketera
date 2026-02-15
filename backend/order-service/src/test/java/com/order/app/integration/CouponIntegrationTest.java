@@ -1,6 +1,8 @@
 package com.order.app.integration;
 
 import com.order.app.models.Coupon;
+import com.order.app.models.DiscountType;
+import com.order.app.models.CouponStatus;
 import com.order.app.pkg.dtos.CreateCouponRequest;
 import com.order.app.pkg.dtos.ValidateCouponRequest;
 import com.order.app.pkg.dtos.ValidateCouponResponse;
@@ -52,7 +54,7 @@ class CouponIntegrationTest {
         CreateCouponRequest createRequest = CreateCouponRequest.builder()
             .code("INTEGRATION10")
             .description("Integration test coupon")
-            .discountType(Coupon.DiscountType.PERCENTAGE)
+            .discountType(DiscountType.PERCENTAGE)
             .discountValue(10L)
             .currency("ARS")
             .maxUses(100)
@@ -86,7 +88,7 @@ class CouponIntegrationTest {
         // Paso 3: Verificar que el cupón existe en BD
         var foundCoupon = couponRepository.findById(createdCoupon.getId());
         assertTrue(foundCoupon.isPresent());
-        assertEquals(Coupon.CouponStatus.ACTIVE, foundCoupon.get().getStatus());
+        assertEquals(CouponStatus.ACTIVE, foundCoupon.get().getStatus());
     }
     
     @Test
@@ -99,7 +101,7 @@ class CouponIntegrationTest {
         
         CreateCouponRequest createRequest = CreateCouponRequest.builder()
             .code("MINTEST")
-            .discountType(Coupon.DiscountType.PERCENTAGE)
+            .discountType(DiscountType.PERCENTAGE)
             .discountValue(15L)
             .currency("ARS")
             .minPurchaseAmountCents(20000L) // Mínimo $200
@@ -136,7 +138,7 @@ class CouponIntegrationTest {
         
         CreateCouponRequest createRequest = CreateCouponRequest.builder()
             .code("USDONLY")
-            .discountType(Coupon.DiscountType.FIXED_AMOUNT)
+            .discountType(DiscountType.FIXED_AMOUNT)
             .discountValue(1000L) // $10 USD
             .currency("USD")
             .validFrom(LocalDateTime.now().minusHours(1))
@@ -171,7 +173,7 @@ class CouponIntegrationTest {
         
         CreateCouponRequest request = CreateCouponRequest.builder()
             .code("DUPLICATE")
-            .discountType(Coupon.DiscountType.PERCENTAGE)
+            .discountType(DiscountType.PERCENTAGE)
             .discountValue(10L)
             .validFrom(LocalDateTime.now().plusDays(1))
             .validUntil(LocalDateTime.now().plusDays(30))
@@ -185,4 +187,5 @@ class CouponIntegrationTest {
             () -> couponService.createCoupon(request, organizerId, userId));
     }
 }
+
 

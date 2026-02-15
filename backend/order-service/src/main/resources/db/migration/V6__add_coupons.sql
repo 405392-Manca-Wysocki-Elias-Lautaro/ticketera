@@ -95,9 +95,18 @@ CREATE INDEX idx_redemptions_date ON orders.coupon_redemptions(redeemed_at);
 ALTER TABLE orders.orders ADD COLUMN IF NOT EXISTS coupon_id UUID REFERENCES orders.coupons(id);
 ALTER TABLE orders.orders ADD COLUMN IF NOT EXISTS discount_amount_cents BIGINT DEFAULT 0;
 
--- Constraints de validación
-ALTER TABLE orders.orders ADD CONSTRAINT IF NOT EXISTS ck_discount_not_negative 
-  CHECK (discount_amount_cents >= 0);
+-- Constraints de validación (solo si no existe ya)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'ck_discount_not_negative' 
+    AND conrelid = 'orders.orders'::regclass
+  ) THEN
+    ALTER TABLE orders.orders ADD CONSTRAINT ck_discount_not_negative 
+      CHECK (discount_amount_cents >= 0);
+  END IF;
+END $$;
 
 -- Índice para búsquedas por cupón usado
 CREATE INDEX IF NOT EXISTS idx_orders_coupon_id ON orders.orders(coupon_id) 

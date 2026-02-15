@@ -1,6 +1,6 @@
 package com.order.app.pkg.dtos;
 
-import com.order.app.models.Coupon;
+import com.order.app.models.CouponStatus;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -27,7 +27,7 @@ public class UpdateCouponRequest {
     @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
     private String description;
     
-    private Coupon.CouponStatus status;
+    private CouponStatus status;
     
     @Min(value = 1, message = "El máximo de usos debe ser al menos 1")
     private Integer maxUses;
