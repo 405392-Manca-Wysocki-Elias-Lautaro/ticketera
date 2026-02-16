@@ -148,8 +148,9 @@ public class Coupon {
             // Para porcentaje: (subtotal * porcentaje) / 100
             return (subtotalCents * discountValue) / 100;
         } else {
-            // Para monto fijo: el menor entre el valor del cupón y el subtotal
-            return Math.min(discountValue, subtotalCents);
+            // discountValue está en pesos (ej: 500 = $500), convertir a centavos (* 100)
+            long discountCents = discountValue * 100;
+            return Math.min(discountCents, subtotalCents);
         }
     }
     

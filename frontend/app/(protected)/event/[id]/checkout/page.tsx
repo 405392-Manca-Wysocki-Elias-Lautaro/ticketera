@@ -65,7 +65,8 @@ export default function CheckoutPage() {
         setCouponError("")
 
         try {
-            const subtotalCents = total + serviceFee
+            // Enviar subtotal en centavos reales (total y serviceFee están en pesos, multiplicar por 100)
+            const subtotalCents = (total + serviceFee) * 100
             const response = await couponService.validateCoupon(
                 couponCode.toUpperCase(),
                 event?.id || "",
@@ -75,10 +76,12 @@ export default function CheckoutPage() {
             )
 
             if (response.valid && response.discountCents) {
-                setCouponDiscount(response.discountCents)
+                // discountCents viene en centavos reales, convertir a pesos para uso en UI
+                const discountPesos = Math.round(response.discountCents / 100)
+                setCouponDiscount(discountPesos)
                 setCouponApplied(couponCode.toUpperCase())
                 setCouponError("")
-                toast.success(`Cupón aplicado: -$${response.discountCents.toLocaleString("es-AR")}`)
+                toast.success(`Cupón aplicado: -$${discountPesos.toLocaleString("es-AR")}`)
             } else {
                 setCouponError(response.errorMessage || "Cupón no válido")
                 setCouponDiscount(0)
@@ -211,6 +214,7 @@ export default function CheckoutPage() {
                 currency: "ARS",
                 paymentDescription: `Entradas para ${event.title}`,
                 notes: `Compra de ${items.length} entrada(s) para ${event.title} - ${selectedArea.name}`,
+                ...(couponApplied && couponCode ? { couponCode: couponCode.toUpperCase() } : {}),
             };
 
             // Crear la orden y obtener la URL de pago
@@ -226,24 +230,32 @@ export default function CheckoutPage() {
 
         } catch (error: any) {
             console.error("Error creando orden:", error);
+            console.error("API Error:", error.response?.data);
+            
+            const errorMessage = error.response?.data?.message || error.message || "";
             
             if (error.response?.status === 401) {
                 toast.error("Error de autenticación. Por favor, inicia sesión nuevamente.");
             } else if (error.response?.status === 409) {
-                // Error de conflicto - asiento ya reservado
                 toast.error("Lo sentimos, el asiento seleccionado ya no está disponible. Por favor, selecciona otro asiento.");
             } else if (error.response?.status === 400) {
-                // Error de validación
-                const errorMessage = error.response?.data?.message || "";
                 if (errorMessage.toLowerCase().includes("seat") || errorMessage.toLowerCase().includes("reserved")) {
                     toast.error("El asiento seleccionado ya está reservado. Por favor, elige otro asiento.");
                 } else if (errorMessage.toLowerCase().includes("sold out") || errorMessage.toLowerCase().includes("capacity")) {
                     toast.error("No hay más entradas disponibles para este evento.");
                 } else {
-                    toast.error("Hay un problema con los datos ingresados. Por favor, verifica la información.");
+                    toast.error(errorMessage || "Hay un problema con los datos ingresados. Por favor, verifica la información.");
+                }
+            } else if (error.response?.status === 500) {
+                if (errorMessage.toLowerCase().includes("cupón") || errorMessage.toLowerCase().includes("coupon")) {
+                    toast.error("Error al aplicar el cupón. Intentá de nuevo sin cupón o con otro código.");
+                } else if (errorMessage.toLowerCase().includes("payment") || errorMessage.toLowerCase().includes("pago")) {
+                    toast.error("Error al procesar el pago. Por favor, intentá nuevamente.");
+                } else {
+                    toast.error("Error interno del servidor. Por favor, intentá nuevamente en unos momentos.");
                 }
             } else {
-                toast.error("Error al procesar el pago. Asiento ya reservado por otro usuario.");
+                toast.error("Error de conexión. Verificá tu conexión a internet e intentá nuevamente.");
             }
         } finally {
             setIsProcessing(false);

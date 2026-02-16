@@ -53,10 +53,10 @@ public class OrderService {
     public OrderResponse createOrder(CreateOrderRequest request) {
         logger.info("Creating new order for customer: {}", request.getCustomer().getEmail());
 
-        try {
-            // 1. Validar request
-            validateOrderRequest(request);
+        // 1. Validar request (lanza IllegalArgumentException si falla - no envolver)
+        validateOrderRequest(request);
 
+        try {
             // 2. Obtener o crear customer
             Customer customer = getOrCreateCustomer(request.getCustomer());
 
@@ -105,8 +105,10 @@ public class OrderService {
                     
                 } catch (Exception e) {
                     logger.warn("Error al aplicar cupón {}: {}", request.getCouponCode(), e.getMessage());
-                    // Si el cupón falla, continuar sin él (o lanzar error según política)
-                    throw new OrderCreationException("Cupón inválido: " + e.getMessage(), e);
+                    // Si el cupón falla, continuar sin descuento en vez de bloquear la compra
+                    logger.info("Continuando sin cupón para la orden");
+                    appliedCoupon = null;
+                    discountCents = 0L;
                 }
             }
 
@@ -141,6 +143,10 @@ public class OrderService {
             logger.info("Order created successfully: {} with payment URL: {}", order.getId(), paymentUrl);
             return OrderResponse.fromEntity(order, paymentUrl);
 
+        } catch (IllegalArgumentException e) {
+            // Propagar errores de validación directamente para que el controller devuelva 400
+            logger.warn("Validation error creating order: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
             logger.error("Error creating order for customer {}: {}", request.getCustomer().getEmail(), e.getMessage(), e);
             throw new OrderCreationException("Failed to create order: " + e.getMessage(), e);
@@ -261,14 +267,12 @@ public class OrderService {
         for (CreateOrderRequest.OrderItemRequest item : request.getItems()) {
             item.validate();
 
-            // Validar que el asiento no esté ya reservado (en órdenes)
-            if (item.getVenueSeatId() != null) {
+            // Validar que el asiento no esté ya reservado (solo en órdenes PAID o PENDING no expiradas)
+            if (item.getVenueSeatId() != null && !item.getVenueSeatId().isBlank()) {
                 UUID venueSeatUuid = parseOrGenerateUUID(item.getVenueSeatId());
-                if (orderItemRepository.existsByVenueSeatIdAndDeletedAtIsNull(venueSeatUuid)) {
+                if (orderItemRepository.isSeatActivelyReserved(venueSeatUuid)) {
                     throw new IllegalArgumentException("Seat already reserved by another user: " + item.getVenueSeatId());
                 }
-                // TODO: También verificar holds activos en ticket-service
-                // Por ahora, el error de hold se manejará cuando se intente crear el hold antes de la orden
             }
         }
     }
