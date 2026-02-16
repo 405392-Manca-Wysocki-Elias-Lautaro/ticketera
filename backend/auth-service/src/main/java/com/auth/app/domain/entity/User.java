@@ -34,6 +34,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "organization_id")
+    private UUID organizationId;
+
     @Column(name = "first_name")
     private String firstName;
 

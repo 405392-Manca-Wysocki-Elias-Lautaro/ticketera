@@ -61,6 +61,15 @@ spring:
             - PreserveHostHeader
           order: -100
 
+        - id: staff
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
+          predicates:
+            - Path=/api/staff/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/staff/?(?<segment>.*), /staff/${segment}
+          order: -100
+
         - id: notifications
           uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification-dev:8080}"
           predicates:

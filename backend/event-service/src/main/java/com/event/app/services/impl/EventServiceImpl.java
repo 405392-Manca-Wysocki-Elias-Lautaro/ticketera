@@ -21,12 +21,14 @@ import com.event.app.entities.AreaPricingEntity;
 import com.event.app.entities.EventEntity;
 import com.event.app.entities.SeatEntity;
 import com.event.app.exceptions.EventNotFoundException;
+import com.event.app.entities.EventStaffEntity;
 import com.event.app.models.Event;
 import com.event.app.repositories.AreaPricingRepository;
 import com.event.app.repositories.AreaRepository;
 import com.event.app.repositories.CategoryRepository;
 import com.event.app.repositories.EventRepository;
 import com.event.app.repositories.SeatRepository;
+import com.event.app.repositories.EventStaffRepository;
 import com.event.app.services.IAvailabilityService;
 import com.event.app.services.IEventService;
 
@@ -38,6 +40,7 @@ public class EventServiceImpl implements IEventService {
     private final SeatRepository seatRepository;
     private final AreaPricingRepository areaPricingRepository;
     private final CategoryRepository categoryRepository;
+    private final EventStaffRepository eventStaffRepository;
     private final IAvailabilityService availabilityService;
     private final ModelMapper modelMapper;
 
@@ -47,6 +50,7 @@ public class EventServiceImpl implements IEventService {
             SeatRepository seatRepository,
             AreaPricingRepository areaPricingRepository,
             CategoryRepository categoryRepository,
+            EventStaffRepository eventStaffRepository,
             IAvailabilityService availabilityService,
             ModelMapper modelMapper) {
         this.eventRepository = eventRepository;
@@ -54,6 +58,7 @@ public class EventServiceImpl implements IEventService {
         this.seatRepository = seatRepository;
         this.areaPricingRepository = areaPricingRepository;
         this.categoryRepository = categoryRepository;
+        this.eventStaffRepository = eventStaffRepository;
         this.availabilityService = availabilityService;
         this.modelMapper = modelMapper;
     }
@@ -195,8 +200,39 @@ public class EventServiceImpl implements IEventService {
     @Override
     public Optional<EventDetailDTO> getEventDetail(UUID id) {
         return eventRepository.findById(id)
-                .filter(EventEntity::getActive)
                 .map(this::mapToEventDetail);
+    }
+
+    @Override
+    @Transactional
+    public void assignStaff(UUID eventId, UUID userId, UUID assignedBy) {
+        if (!eventRepository.existsById(eventId)) {
+            throw new EventNotFoundException(eventId);
+        }
+        if (eventStaffRepository.findByEventIdAndUserId(eventId, userId).isPresent()) {
+            return;
+        }
+        
+        EventStaffEntity eventStaff = EventStaffEntity.builder()
+                .eventId(eventId)
+                .userId(userId)
+                .assignedBy(assignedBy)
+                .build();
+        
+        eventStaffRepository.save(eventStaff);
+    }
+
+    @Override
+    @Transactional
+    public void removeStaff(UUID eventId, UUID userId) {
+        eventStaffRepository.deleteByEventIdAndUserId(eventId, userId);
+    }
+
+    @Override
+    public List<UUID> getEventStaffUserIds(UUID eventId) {
+        return eventStaffRepository.findByEventId(eventId).stream()
+                .map(EventStaffEntity::getUserId)
+                .collect(Collectors.toList());
     }
 
     @Override

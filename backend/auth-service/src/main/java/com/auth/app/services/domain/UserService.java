@@ -8,10 +8,12 @@ import com.auth.app.domain.model.UserModel;
 
 public interface UserService {
     UserModel create(UserModel request);
+    UserModel createStaff(UserModel request);
     UserModel update(UUID id, UserModel request);
     void delete(UUID id);
     List<UserModel> getAll();
     UserModel findById(UUID id);
     UserModel findByEmail(String email);
     Optional<UserModel> findOptionalByEmail(String email);
+    List<UserModel> getStaffByOrganization(UUID organizationId);
 }

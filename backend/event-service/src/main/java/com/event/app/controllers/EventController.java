@@ -144,5 +144,39 @@ public class EventController {
         
         return ApiResponseFactory.success("Métricas obtenidas exitosamente", metrics);
     }
+
+    @PostMapping("/{id}/staff")
+    public ResponseEntity<ApiResponse<Void>> assignStaff(@PathVariable UUID id, @RequestBody java.util.Map<String, UUID> request) {
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+             throw new UnauthorizedException("Only owners or admins can assign staff");
+        }
+
+        UUID userId = request.get("userId");
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is required");
+        }
+        
+        UUID assignedBy = jwtUtils.getUserId();
+        
+        eventService.assignStaff(id, userId, assignedBy);
+        
+        return ApiResponseFactory.success("Staff assigned successfully");
+    }
+
+    @DeleteMapping("/{id}/staff/{userId}")
+    public ResponseEntity<ApiResponse<Void>> removeStaff(@PathVariable UUID id, @PathVariable UUID userId) {
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+             throw new UnauthorizedException("Only owners or admins can remove staff");
+        }
+
+        eventService.removeStaff(id, userId);
+        return ApiResponseFactory.success("Staff removed successfully");
+    }
+
+    @GetMapping("/{id}/staff")
+    public ResponseEntity<ApiResponse<List<UUID>>> getEventStaff(@PathVariable UUID id) {
+        List<UUID> staffIds = eventService.getEventStaffUserIds(id);
+        return ApiResponseFactory.success("Event staff retrieved successfully", staffIds);
+    }
 }
 

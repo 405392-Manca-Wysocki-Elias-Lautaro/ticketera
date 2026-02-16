@@ -30,5 +30,10 @@ public interface IEventService {
     Event updateEvent(UUID id, EventDTO eventDTO);
 
     void deleteEvent(UUID id);
+
+    // Staff management
+    void assignStaff(UUID eventId, UUID userId, UUID assignedBy);
+    void removeStaff(UUID eventId, UUID userId);
+    List<UUID> getEventStaffUserIds(UUID eventId);
 }
 
