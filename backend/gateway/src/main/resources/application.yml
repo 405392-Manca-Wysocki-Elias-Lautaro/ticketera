@@ -71,6 +71,7 @@ gateway:
     - /refresh
     - /events
     - /categories
+    - /coupons/validate
     - /_next/**
     - /__nextjs_original-stack-frames
     - /__nextjs_font/**

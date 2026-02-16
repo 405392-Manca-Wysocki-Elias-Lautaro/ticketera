@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { ApiResponse } from "@/types/Response/ApiResponse";
+import type { ApiResponse } from "@/types/Response/Apiresponse";
 import type { OrganizerMetrics } from "@/types/OrganizerMetrics";
 import { CreateEvent } from '@/types/Request/CreateEvent';
 import { createCrudService } from "./createCrud";

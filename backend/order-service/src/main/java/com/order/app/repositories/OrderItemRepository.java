@@ -31,4 +31,11 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
     Long sumQuantityByEventAndTicketType(@Param("eventId") UUID eventId, @Param("ticketTypeId") UUID ticketTypeId);
     
     boolean existsByVenueSeatIdAndDeletedAtIsNull(UUID venueSeatId);
+    
+    @Query("SELECT COUNT(oi) > 0 FROM OrderItem oi JOIN oi.order o " +
+           "WHERE oi.venueSeatId = :seatId " +
+           "AND oi.deletedAt IS NULL " +
+           "AND o.deletedAt IS NULL " +
+           "AND (o.status = 'PAID' OR (o.status = 'PENDING' AND o.expiresAt > CURRENT_TIMESTAMP))")
+    boolean isSeatActivelyReserved(@Param("seatId") UUID seatId);
 }

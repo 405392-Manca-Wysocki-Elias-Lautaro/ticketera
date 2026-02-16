@@ -13,6 +13,7 @@ export interface CreateOrderRequest {
   externalReference?: string;
   expiresAt?: string;
   paymentDescription?: string;
+  couponCode?: string;
 }
 
 export interface OrderItem {
