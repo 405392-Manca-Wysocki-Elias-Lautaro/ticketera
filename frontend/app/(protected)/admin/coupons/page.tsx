@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Copy, Trash2, Edit, BarChart3 } from "lucide-react";
+import { Plus, Search, Trash2, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -58,6 +58,20 @@ export default function CouponsPage() {
         loadCoupons();
     }, []);
 
+    // Recargar cupones cuando la página se vuelve visible
+    useEffect(() => {
+        const handleFocus = () => {
+            loadCoupons();
+        };
+
+        window.addEventListener('focus', handleFocus);
+        
+        // También recargar cuando el componente se monta
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, []);
+
     useEffect(() => {
         filterCoupons();
     }, [coupons, searchTerm, statusFilter]);
@@ -66,15 +80,22 @@ export default function CouponsPage() {
         try {
             setLoading(true);
             const data = await couponService.getCoupons();
-            setCoupons(data);
+            setCoupons(data || []);
         } catch (error) {
+            console.error("Error loading coupons:", error);
             toast.error("No se pudieron cargar los cupones");
+            setCoupons([]);
         } finally {
             setLoading(false);
         }
     };
 
     const filterCoupons = () => {
+        if (!coupons || !Array.isArray(coupons)) {
+            setFilteredCoupons([]);
+            return;
+        }
+        
         let filtered = [...coupons];
 
         // Filtro por búsqueda
@@ -109,16 +130,6 @@ export default function CouponsPage() {
         }
     };
 
-    const handleDuplicate = async (coupon: Coupon) => {
-        try {
-            await couponService.duplicateCoupon(coupon.id);
-            toast.success("Cupón duplicado correctamente");
-            loadCoupons();
-        } catch (error) {
-            toast.error("No se pudo duplicar el cupón");
-        }
-    };
-
     const getStatusBadge = (status: CouponStatus) => {
         const styles = {
             ACTIVE: "bg-green-500",
@@ -145,7 +156,7 @@ export default function CouponsPage() {
         if (coupon.discountType === DiscountType.PERCENTAGE) {
             return `${coupon.discountValue}%`;
         }
-        return `$${(coupon.discountValue / 100).toFixed(2)}`;
+        return `$${coupon.discountValue.toLocaleString("es-AR")}`;
     };
 
     const formatDate = (dateString: string) => {
@@ -181,7 +192,7 @@ export default function CouponsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{coupons.length}</div>
+                        <div className="text-2xl font-bold">{coupons?.length || 0}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -190,7 +201,7 @@ export default function CouponsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-green-600">
-                            {coupons.filter((c) => c.status === CouponStatus.ACTIVE).length}
+                            {coupons?.filter((c) => c.status === CouponStatus.ACTIVE).length || 0}
                         </div>
                     </CardContent>
                 </Card>
@@ -200,7 +211,7 @@ export default function CouponsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-red-600">
-                            {coupons.filter((c) => c.status === CouponStatus.EXPIRED).length}
+                            {coupons?.filter((c) => c.status === CouponStatus.EXPIRED).length || 0}
                         </div>
                     </CardContent>
                 </Card>
@@ -210,7 +221,7 @@ export default function CouponsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-orange-600">
-                            {coupons.filter((c) => c.status === CouponStatus.EXHAUSTED).length}
+                            {coupons?.filter((c) => c.status === CouponStatus.EXHAUSTED).length || 0}
                         </div>
                     </CardContent>
                 </Card>
@@ -316,24 +327,6 @@ export default function CouponsPage() {
                                                     title="Ver estadísticas"
                                                 >
                                                     <BarChart3 className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() =>
-                                                        router.push(`/admin/coupons/${coupon.id}/edit`)
-                                                    }
-                                                    title="Editar"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleDuplicate(coupon)}
-                                                    title="Duplicar"
-                                                >
-                                                    <Copy className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"

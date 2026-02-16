@@ -21,14 +21,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { couponService } from "@/services/couponService";
-import { eventService } from "@/services/eventService";
 import type { Coupon, UpdateCouponRequest } from "@/types/Coupon";
 import { CouponStatus } from "@/types/enums/CouponStatus";
 import { DiscountType } from "@/types/enums/DiscountType";
-import type { Event } from "@/types/Event";
 
 export default function EditCouponPage() {
     const router = useRouter();
@@ -38,9 +35,6 @@ export default function EditCouponPage() {
     const [loading, setLoading] = useState(false);
     const [loadingCoupon, setLoadingCoupon] = useState(true);
     const [coupon, setCoupon] = useState<Coupon | null>(null);
-    const [events, setEvents] = useState<Event[]>([]);
-    const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
-    const [applyToAllEvents, setApplyToAllEvents] = useState(true);
 
     const [formData, setFormData] = useState<UpdateCouponRequest>({
         description: "",
@@ -55,7 +49,6 @@ export default function EditCouponPage() {
 
     useEffect(() => {
         loadCoupon();
-        loadEvents();
     }, [couponId]);
 
     const loadCoupon = async () => {
@@ -83,19 +76,20 @@ export default function EditCouponPage() {
         }
     };
 
-    const loadEvents = async () => {
-        try {
-            const response = await eventService.getAll();
-            setEvents(response.data.data);
-        } catch (error) {
-            toast.error("No se pudieron cargar los eventos");
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (new Date(formData.validFrom!) >= new Date(formData.validUntil!)) {
+        // Validar que la fecha de inicio no sea anterior a la fecha actual
+        const now = new Date();
+        const validFrom = new Date(formData.validFrom!);
+        const validUntil = new Date(formData.validUntil!);
+
+        if (validFrom < now) {
+            toast.error("La fecha de inicio no puede ser anterior a la fecha actual");
+            return;
+        }
+
+        if (validFrom >= validUntil) {
             toast.error("La fecha de fin debe ser posterior a la fecha de inicio");
             return;
         }
@@ -104,7 +98,7 @@ export default function EditCouponPage() {
             setLoading(true);
             const dataToSend = {
                 ...formData,
-                eventIds: applyToAllEvents ? [] : selectedEvents,
+                eventIds: [], // Siempre aplicar a todos los eventos
             };
 
             await couponService.updateCoupon(couponId, dataToSend);
@@ -119,14 +113,6 @@ export default function EditCouponPage() {
 
     const handleChange = (field: keyof UpdateCouponRequest, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const toggleEventSelection = (eventId: string) => {
-        setSelectedEvents((prev) =>
-            prev.includes(eventId)
-                ? prev.filter((id) => id !== eventId)
-                : [...prev, eventId]
-        );
     };
 
     if (loadingCoupon || !coupon) {
@@ -156,10 +142,6 @@ export default function EditCouponPage() {
                             {coupon.code}
                         </p>
                     </div>
-                    <Button type="submit" disabled={loading}>
-                        <Save className="mr-2 h-4 w-4" />
-                        {loading ? "Guardando..." : "Guardar Cambios"}
-                    </Button>
                 </div>
 
                 {/* Info No Editable */}
@@ -238,65 +220,18 @@ export default function EditCouponPage() {
                         <CardTitle>Límites de Uso</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="maxUses">Máximo de Usos Totales</Label>
-                                <Input
-                                    id="maxUses"
-                                    type="number"
-                                    min="1"
-                                    placeholder="Ilimitado"
-                                    value={formData.maxUses || ""}
-                                    onChange={(e) =>
-                                        handleChange(
-                                            "maxUses",
-                                            e.target.value ? parseInt(e.target.value) : undefined
-                                        )
-                                    }
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="maxUsesPerCustomer">
-                                    Usos por Cliente
-                                </Label>
-                                <Input
-                                    id="maxUsesPerCustomer"
-                                    type="number"
-                                    min="1"
-                                    placeholder="Ilimitado"
-                                    value={formData.maxUsesPerCustomer || ""}
-                                    onChange={(e) =>
-                                        handleChange(
-                                            "maxUsesPerCustomer",
-                                            e.target.value ? parseInt(e.target.value) : undefined
-                                        )
-                                    }
-                                />
-                            </div>
-                        </div>
-
                         <div className="space-y-2">
-                            <Label htmlFor="minPurchaseAmount">
-                                Monto Mínimo de Compra
-                            </Label>
+                            <Label htmlFor="maxUses">Máximo de Usos Totales</Label>
                             <Input
-                                id="minPurchaseAmount"
+                                id="maxUses"
                                 type="number"
-                                min="0"
-                                step="0.01"
-                                placeholder="0.00"
-                                value={
-                                    formData.minPurchaseAmountCents
-                                        ? formData.minPurchaseAmountCents / 100
-                                        : ""
-                                }
+                                min="1"
+                                placeholder="Ilimitado"
+                                value={formData.maxUses || ""}
                                 onChange={(e) =>
                                     handleChange(
-                                        "minPurchaseAmountCents",
-                                        e.target.value
-                                            ? Math.round(parseFloat(e.target.value) * 100)
-                                            : undefined
+                                        "maxUses",
+                                        e.target.value ? parseInt(e.target.value) : undefined
                                     )
                                 }
                             />
@@ -316,6 +251,7 @@ export default function EditCouponPage() {
                                 <Input
                                     id="validFrom"
                                     type="datetime-local"
+                                    min={new Date().toISOString().slice(0, 16)}
                                     value={formData.validFrom}
                                     onChange={(e) => handleChange("validFrom", e.target.value)}
                                 />
@@ -326,67 +262,12 @@ export default function EditCouponPage() {
                                 <Input
                                     id="validUntil"
                                     type="datetime-local"
+                                    min={formData.validFrom || new Date().toISOString().slice(0, 16)}
                                     value={formData.validUntil}
                                     onChange={(e) => handleChange("validUntil", e.target.value)}
                                 />
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Eventos Aplicables */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Eventos Aplicables</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="allEvents"
-                                checked={applyToAllEvents}
-                                onCheckedChange={(checked) => {
-                                    setApplyToAllEvents(checked as boolean);
-                                    if (checked) setSelectedEvents([]);
-                                }}
-                            />
-                            <Label htmlFor="allEvents" className="cursor-pointer">
-                                Aplicar a todos mis eventos
-                            </Label>
-                        </div>
-
-                        {!applyToAllEvents && (
-                            <div className="space-y-2">
-                                <Label>Seleccionar eventos específicos:</Label>
-                                <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-2">
-                                    {events.length === 0 ? (
-                                        <p className="text-sm text-muted-foreground text-center py-4">
-                                            No tienes eventos disponibles
-                                        </p>
-                                    ) : (
-                                        events.map((event) => (
-                                            <div
-                                                key={event.id}
-                                                className="flex items-center space-x-2"
-                                            >
-                                                <Checkbox
-                                                    id={`event-${event.id}`}
-                                                    checked={selectedEvents.includes(event.id)}
-                                                    onCheckedChange={() =>
-                                                        toggleEventSelection(event.id)
-                                                    }
-                                                />
-                                                <Label
-                                                    htmlFor={`event-${event.id}`}
-                                                    className="cursor-pointer flex-1"
-                                                >
-                                                    {event.title}
-                                                </Label>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
 

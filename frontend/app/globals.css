@@ -238,6 +238,77 @@ canvas {
   user-select: none;
 }
 
+/* Prevenir selección de texto en elementos no editables */
+h1, h2, h3, h4, h5, h6,
+p:not([contenteditable]),
+span:not([contenteditable]),
+div:not([contenteditable]),
+label:not([contenteditable]),
+nav,
+header,
+footer,
+section,
+article,
+aside,
+main,
+form > *:not(input):not(textarea):not([contenteditable]),
+.card,
+.card-title,
+.card-description,
+.card-header,
+.card-content,
+.card-footer,
+[class*="text-"],
+[class*="font-"],
+[class*="bg-"],
+svg,
+img {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+/* Elementos clickeables muestran la manito */
+button,
+[role="button"],
+a,
+select,
+[role="tab"],
+[role="menuitem"],
+[role="option"],
+[role="link"],
+[role="checkbox"],
+[role="radio"],
+[role="switch"],
+[role="combobox"],
+summary {
+  cursor: pointer !important;
+}
+
+/* Permitir selección solo en inputs, textareas y elementos editables */
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable],
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  cursor: text !important;
+}
+
 /*  ================================
     GRADIENT TEXT ANIMATION
     ================================ */

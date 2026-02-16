@@ -2,6 +2,7 @@ package com.order.app.controllers;
 
 import com.order.app.models.CouponRedemption;
 import com.order.app.pkg.dtos.*;
+import com.order.app.pkg.dtos.response.ApiResponse;
 import com.order.app.services.CouponService;
 import com.order.app.utils.JwtUtils;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +32,7 @@ import java.util.UUID;
  * - GET /api/orders/coupons/redemptions - Reporte de redenciones
  */
 @RestController
-@RequestMapping("/api/orders/coupons")
+@RequestMapping("/coupons")
 public class CouponController {
     
     private static final Logger logger = LoggerFactory.getLogger(CouponController.class);
@@ -48,16 +50,31 @@ public class CouponController {
      * Crea un nuevo cupón para el organizador autenticado.
      */
     @PostMapping
-    public ResponseEntity<CouponDTO> createCoupon(@Valid @RequestBody CreateCouponRequest request) {
+    public ResponseEntity<ApiResponse<CouponDTO>> createCoupon(@Valid @RequestBody CreateCouponRequest request) {
         logger.info("POST /api/orders/coupons - Creating coupon: {}", request.getCode());
         
-        UUID organizerId = jwtUtils.getOrganizerId();
-        UUID createdBy = jwtUtils.getUserId();
-        
-        CouponDTO coupon = couponService.createCoupon(request, organizerId, createdBy);
-        
-        logger.info("Coupon created successfully: {}", coupon.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(coupon);
+        try {
+            UUID organizerId = jwtUtils.getOrganizerId();
+            UUID createdBy = jwtUtils.getUserId();
+            
+            logger.info("OrganizerId: {}, CreatedBy: {}", organizerId, createdBy);
+            
+            CouponDTO coupon = couponService.createCoupon(request, organizerId, createdBy);
+            
+            logger.info("Coupon created successfully: {}", coupon.getId());
+            
+            ApiResponse<CouponDTO> response = ApiResponse.<CouponDTO>builder()
+                    .success(true)
+                    .message("Cupón creado exitosamente")
+                    .data(coupon)
+                    .timestamp(OffsetDateTime.now())
+                    .build();
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            logger.error("Error creating coupon: {}", e.getMessage(), e);
+            throw e;
+        }
     }
     
     /**
@@ -70,7 +87,7 @@ public class CouponController {
      * - search: texto para buscar en código o descripción
      */
     @GetMapping
-    public ResponseEntity<List<CouponDTO>> getCoupons(
+    public ResponseEntity<ApiResponse<List<CouponDTO>>> getCoupons(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String eventId,
             @RequestParam(required = false) String search
@@ -85,7 +102,15 @@ public class CouponController {
         List<CouponDTO> coupons = couponService.getCouponsByOrganizer(organizerId, filters);
         
         logger.debug("Found {} coupons", coupons.size());
-        return ResponseEntity.ok(coupons);
+        
+        ApiResponse<List<CouponDTO>> response = ApiResponse.<List<CouponDTO>>builder()
+                .success(true)
+                .message("Cupones obtenidos exitosamente")
+                .data(coupons)
+                .timestamp(OffsetDateTime.now())
+                .build();
+        
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -93,13 +118,20 @@ public class CouponController {
      * Obtiene un cupón específico por ID.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<CouponDTO> getCoupon(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<CouponDTO>> getCoupon(@PathVariable UUID id) {
         logger.debug("GET /api/orders/coupons/{}", id);
         
         UUID organizerId = jwtUtils.getOrganizerId();
         CouponDTO coupon = couponService.getCouponById(id, organizerId);
         
-        return ResponseEntity.ok(coupon);
+        ApiResponse<CouponDTO> response = ApiResponse.<CouponDTO>builder()
+                .success(true)
+                .message("Cupón obtenido exitosamente")
+                .data(coupon)
+                .timestamp(OffsetDateTime.now())
+                .build();
+        
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -107,7 +139,7 @@ public class CouponController {
      * Actualiza un cupón existente.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<CouponDTO> updateCoupon(
+    public ResponseEntity<ApiResponse<CouponDTO>> updateCoupon(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCouponRequest request
     ) {
@@ -117,7 +149,15 @@ public class CouponController {
         CouponDTO coupon = couponService.updateCoupon(id, request, organizerId);
         
         logger.info("Coupon updated successfully: {}", id);
-        return ResponseEntity.ok(coupon);
+        
+        ApiResponse<CouponDTO> response = ApiResponse.<CouponDTO>builder()
+                .success(true)
+                .message("Cupón actualizado exitosamente")
+                .data(coupon)
+                .timestamp(OffsetDateTime.now())
+                .build();
+        
+        return ResponseEntity.ok(response);
     }
     
     /**
