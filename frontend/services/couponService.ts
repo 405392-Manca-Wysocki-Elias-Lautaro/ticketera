@@ -96,22 +96,27 @@ export const couponService = {
     /**
      * Valida un código de cupón para un evento específico
      */
-    async validateCoupon(code: string, eventId: string, amount: number): Promise<{
+    async validateCoupon(code: string, eventId: string, subtotalCents: number, organizerId?: string, customerId?: string): Promise<{
         valid: boolean;
-        discountAmount?: number;
-        message?: string;
+        discountCents?: number;
+        errorMessage?: string;
+        coupon?: any;
     }> {
         try {
-            const response = await api.post<ApiResponse<{
+            const response = await api.post<{
                 valid: boolean;
-                discountAmount?: number;
-                message?: string;
-            }>>(`${BASE_URL}/validate`, {
+                discountCents?: number;
+                errorMessage?: string;
+                coupon?: any;
+            }>(`${BASE_URL}/validate`, {
                 code,
                 eventId,
-                amountCents: amount
+                subtotalCents,
+                organizerId: organizerId || eventId,
+                currency: "ARS",
+                customerId,
             });
-            return response.data.data;
+            return response.data;
         } catch (error) {
             console.error("Error validating coupon:", error);
             throw error;

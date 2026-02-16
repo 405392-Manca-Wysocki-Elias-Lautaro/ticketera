@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ArrowLeft, Loader2, ChevronDown, CreditCard } from "lucide-react"
+import { ArrowLeft, Loader2, ChevronDown, CreditCard, Tag, X, Check } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { useEvent } from '@/hooks/event/useEvent'
@@ -18,6 +18,7 @@ import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
 import { useMercadoPagoCheckout } from '@/hooks/useMercadoPagoCheckout'
 import { orderService } from '@/services/orderService'
+import { couponService } from '@/services/couponService'
 import type { CreateOrderRequest } from '@/types/Order'
 import { toast } from 'sonner'
 
@@ -31,6 +32,11 @@ export default function CheckoutPage() {
     const [preferenceId, setPreferenceId] = useState<string | undefined>()
     const [phone, setPhone] = useState("")
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [couponCode, setCouponCode] = useState("")
+    const [couponDiscount, setCouponDiscount] = useState(0)
+    const [couponApplied, setCouponApplied] = useState<string | null>(null)
+    const [couponLoading, setCouponLoading] = useState(false)
+    const [couponError, setCouponError] = useState("")
 
     const areaId = searchParams.get("area")
     const seats = searchParams.get("seats")
@@ -47,7 +53,55 @@ export default function CheckoutPage() {
         : []
 
     const serviceFee = Math.round(total * 0.1)
-    const finalTotal = total + serviceFee
+    const finalTotal = total + serviceFee - couponDiscount
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) {
+            setCouponError("Ingresá un código de cupón")
+            return
+        }
+
+        setCouponLoading(true)
+        setCouponError("")
+
+        try {
+            const subtotalCents = total + serviceFee
+            const response = await couponService.validateCoupon(
+                couponCode.toUpperCase(),
+                event?.id || "",
+                subtotalCents,
+                event?.organizerId || event?.id || "",
+                user?.id
+            )
+
+            if (response.valid && response.discountCents) {
+                setCouponDiscount(response.discountCents)
+                setCouponApplied(couponCode.toUpperCase())
+                setCouponError("")
+                toast.success(`Cupón aplicado: -$${response.discountCents.toLocaleString("es-AR")}`)
+            } else {
+                setCouponError(response.errorMessage || "Cupón no válido")
+                setCouponDiscount(0)
+                setCouponApplied(null)
+            }
+        } catch (error: any) {
+            console.error("Error validating coupon:", error)
+            const msg = error.response?.data?.errorMessage || error.response?.data?.message || "No se pudo validar el cupón"
+            setCouponError(msg)
+            setCouponDiscount(0)
+            setCouponApplied(null)
+        } finally {
+            setCouponLoading(false)
+        }
+    }
+
+    const handleRemoveCoupon = () => {
+        setCouponCode("")
+        setCouponDiscount(0)
+        setCouponApplied(null)
+        setCouponError("")
+        toast.info("Cupón removido")
+    }
 
     // Hook de Mercado Pago
     const { isSDKReady, isLoading: isMPLoading, renderPaymentButton } = useMercadoPagoCheckout({
@@ -398,6 +452,67 @@ export default function CheckoutPage() {
                                     </div>
                                 </div>
 
+                                {/* Cupón de descuento */}
+                                <div className="pt-4 border-t space-y-3">
+                                    <p className="text-sm font-medium flex items-center gap-1.5">
+                                        <Tag className="h-3.5 w-3.5" />
+                                        Cupón de descuento
+                                    </p>
+                                    {couponApplied ? (
+                                        <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <Check className="h-4 w-4 text-green-600" />
+                                                <span className="text-sm font-mono font-bold text-green-700">{couponApplied}</span>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6"
+                                                onClick={handleRemoveCoupon}
+                                            >
+                                                <X className="h-3.5 w-3.5 text-muted-foreground" />
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Código del cupón"
+                                                value={couponCode}
+                                                onChange={(e) => {
+                                                    setCouponCode(e.target.value.toUpperCase())
+                                                    setCouponError("")
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        e.preventDefault()
+                                                        handleApplyCoupon()
+                                                    }
+                                                }}
+                                                className="text-sm font-mono"
+                                                disabled={couponLoading}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleApplyCoupon}
+                                                disabled={couponLoading || !couponCode.trim()}
+                                                className="shrink-0"
+                                            >
+                                                {couponLoading ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    "Aplicar"
+                                                )}
+                                            </Button>
+                                        </div>
+                                    )}
+                                    {couponError && (
+                                        <p className="text-xs text-destructive">{couponError}</p>
+                                    )}
+                                </div>
+
                                 <div className="pt-4 border-t space-y-2 text-sm">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Subtotal</span>
@@ -407,6 +522,12 @@ export default function CheckoutPage() {
                                         <span className="text-muted-foreground">Cargo por servicio</span>
                                         <span className="font-medium">${serviceFee.toLocaleString()}</span>
                                     </div>
+                                    {couponDiscount > 0 && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span>Descuento ({couponApplied})</span>
+                                            <span className="font-medium">-${couponDiscount.toLocaleString()}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="pt-4 border-t">
