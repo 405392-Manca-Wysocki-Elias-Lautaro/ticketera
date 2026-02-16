@@ -36,6 +36,7 @@ import {
 
 import { RoleUtils } from "@/utils/roleUtils"
 import GradientText from "./GradientText"
+import { ModeToggle } from "@/components/ui/ModeToggle"
 
 interface NavbarProps {
     leftSlot?: React.ReactNode
@@ -129,6 +130,12 @@ export function Navbar({ leftSlot, rightSlot, hideSearchOn = [] }: NavbarProps) 
 
                     {/* RIGHT SIDE (Tickets + Profile + optional rightSlot) */}
                     <div className="flex items-center gap-2">
+                        <Button variant="ghost" asChild className="shrink-0 hidden sm:flex">
+                            <Link href="/faq">
+                                Ayuda
+                            </Link>
+                        </Button>
+                        <ModeToggle />
                         {user && (
                             <Tooltip>
                                 <TooltipTrigger asChild>

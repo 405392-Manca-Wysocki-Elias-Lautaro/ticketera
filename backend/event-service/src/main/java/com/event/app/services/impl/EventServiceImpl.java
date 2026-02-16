@@ -184,6 +184,15 @@ public class EventServiceImpl implements IEventService {
     }
 
     @Override
+    public List<EventSummaryDTO> getEventsStartingBetween(LocalDateTime start, LocalDateTime end) {
+        List<EventEntity> events = eventRepository.findAllByStartsAtBetween(start, end);
+        return events.stream()
+                .filter(EventEntity::getActive)
+                .map(this::mapToEventSummary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<EventDetailDTO> getEventDetail(UUID id) {
         return eventRepository.findById(id)
                 .filter(EventEntity::getActive)

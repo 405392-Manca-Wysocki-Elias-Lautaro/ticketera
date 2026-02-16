@@ -9,9 +9,10 @@ public enum NotificationType {
     PASSWORD_RESET_REQUEST(EnumSet.of(NotificationChannel.EMAIL)),
     PASSWORD_RESET_SUCCESS(EnumSet.of(NotificationChannel.EMAIL)),
     USER_WELCOME(EnumSet.of(NotificationChannel.EMAIL)),
-    LOGIN_ALERT(EnumSet.of(NotificationChannel.EMAIL));
+    LOGIN_ALERT(EnumSet.of(NotificationChannel.EMAIL)),
 
-    // // 🎟️ Eventos y tickets
+    // 🎟️ Eventos y tickets
+    EVENT_REMINDER(EnumSet.of(NotificationChannel.EMAIL));
     // ORDER_STATUS_UPDATE(EnumSet.of(NotificationChannel.EMAIL, NotificationChannel.WHATSAPP)),
     // ORDER_CONFIRMED(EnumSet.of(NotificationChannel.EMAIL, NotificationChannel.WHATSAPP, NotificationChannel.TELEGRAM)),
 

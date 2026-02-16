@@ -87,4 +87,15 @@ public class ApiResponseFactory {
     public static ResponseEntity<Void> noContent() {
         return ResponseEntity.noContent().build();
     }
+    // ❌ Not Found (HTTP 404)
+    public static <T> ResponseEntity<ApiResponse<T>> notFound(String message) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(
+                        ApiResponse.<T>builder()
+                                .success(false)
+                                .message(message)
+                                .timestamp(OffsetDateTime.now())
+                                .build()
+                );
+    }
 }

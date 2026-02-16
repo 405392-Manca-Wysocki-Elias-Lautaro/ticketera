@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { showBrandConsoleMessage } from '@/utils/showBrandConsoleMessage';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 
 const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -35,24 +36,31 @@ export default function RootLayout({
             <head>
                 <script src="/pwa-install.js" />
             </head>
-            <body 
+            <body
                 className={`${geist.className} antialiased bg-background text-foreground overflow-hidden`}
                 suppressHydrationWarning
             >
                 <Toaster position="top-center" richColors />
                 <ReactQueryProvider>
-                    <SidebarProvider>
-                        <TooltipProvider>
-                            <div className='h-screen w-screen'>
-                                {children}
-                            </div>
-                        </TooltipProvider>
-                    </SidebarProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <SidebarProvider>
+                            <TooltipProvider>
+                                <div className='h-screen w-screen overflow-y-auto'>
+                                    {children}
+                                </div>
+                            </TooltipProvider>
+                        </SidebarProvider>
+                    </ThemeProvider>
                 </ReactQueryProvider>
-                
+
                 {/* Mercado Pago SDK - Al final del body */}
-                <Script 
-                    src="https://sdk.mercadopago.com/js/v2" 
+                <Script
+                    src="https://sdk.mercadopago.com/js/v2"
                     strategy="lazyOnload"
                 />
             </body>

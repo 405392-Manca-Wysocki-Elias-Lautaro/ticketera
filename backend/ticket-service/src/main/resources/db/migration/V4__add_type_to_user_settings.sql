@@ -1,0 +1,1 @@
+ALTER TABLE tickets.user_settings ADD COLUMN type VARCHAR(255) NOT NULL DEFAULT 'SYSTEM';
