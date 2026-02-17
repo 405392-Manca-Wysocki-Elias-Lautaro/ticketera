@@ -65,7 +65,7 @@ export const eventService = {
             const response = await api.get<ApiResponse<OrganizerMetrics>>("/events/metrics");
             console.log("✅ Metrics response:", response.data);
             return response.data.data;
-        } catch (error) {
+        } catch (error: any) {
             console.error("❌ Error fetching organizer metrics:", error);
             if (error.response) {
                 console.error("Response status:", error.response.status);
@@ -77,7 +77,20 @@ export const eventService = {
 
     create: (data: CreateEvent) => api.post(`${BASE_URL}`, data),
 
-    getAllCategories: () => api.get(`${BASE_URL}/categories`)
+    getAllCategories: () => api.get(`${BASE_URL}/categories`),
+
+    // Staff management
+    assignStaff: (eventId: string, userId: string) => api.post<ApiResponse<void>>(`${BASE_URL}/${eventId}/staff`, { userId }),
+    removeStaff: (eventId: string, userId: string) => api.delete<ApiResponse<void>>(`${BASE_URL}/${eventId}/staff/${userId}`),
+    getEventStaff: (eventId: string) => api.get<ApiResponse<string[]>>(`${BASE_URL}/${eventId}/staff`),
+
+    // Organization events
+    getMyOrganizationEvents: () => api.get<ApiResponse<EventInfo[]>>(`${BASE_URL}/my-organization`),
+
+    // New methods for multi-assignment
+    getStaffAssignments: (userId: string) => api.get<ApiResponse<EventInfo[]>>(`${BASE_URL}/staff/${userId}/events`),
+    updateStaffAssignments: (userId: string, eventIds: string[]) => api.put<ApiResponse<void>>(`${BASE_URL}/staff/${userId}/events`, eventIds),
+
 
 };
 

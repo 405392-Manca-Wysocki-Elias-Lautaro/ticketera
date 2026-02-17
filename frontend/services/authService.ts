@@ -6,6 +6,7 @@ import { RegisterRequest } from '@/types/Request/RegisterRequest';
 import { ResetPasswordRequest } from '@/types/Request/ResetPasswordRequest';
 import { ApiResponse } from '@/types/Response/ApiResponse';
 import { AuthResponse } from '@/types/Response/AuthResponse';
+import { User } from '@/types/User';
 
 const BASE_URL = "/auth";
 
@@ -48,5 +49,13 @@ export const authService = {
 
     refresh: () => api.post<ApiResponse<AuthResponse>>(
         `${BASE_URL}/refresh`
+    ),
+
+    getStaff: () => api.get<ApiResponse<User[]>>(
+        `/staff`
+    ),
+
+    createStaff: (data: RegisterRequest) => api.post<ApiResponse<User>>(
+        `/staff`, data
     ),
 };

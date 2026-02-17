@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.auth.app.domain.entity.PasswordResetToken;
 import com.auth.app.domain.enums.LogAction;
+import com.auth.app.domain.enums.RoleCode;
 import com.auth.app.domain.events.UserLoginFromNewDeviceEvent;
 import com.auth.app.domain.events.UserPasswordResetRequestEvent;
 import com.auth.app.domain.events.UserPasswordResetSuccessEvent;
@@ -24,6 +25,7 @@ import com.auth.app.domain.model.AuthModel;
 import com.auth.app.domain.model.PasswordResetTokenModel;
 import com.auth.app.domain.model.RefreshTokenModel;
 import com.auth.app.domain.model.UserModel;
+import com.auth.app.domain.model.RoleModel;
 import com.auth.app.domain.valueObjects.IpAddress;
 import com.auth.app.domain.valueObjects.UserAgent;
 import com.auth.app.dto.request.ChangePasswordRequest;
@@ -49,6 +51,7 @@ import com.auth.app.services.domain.PasswordResetService;
 import com.auth.app.services.domain.RefreshTokenService;
 import com.auth.app.services.domain.TrustedDevicesService;
 import com.auth.app.services.domain.UserService;
+import com.auth.app.services.domain.RoleService;
 import com.auth.app.utils.EnvironmentUtils;
 import com.auth.app.utils.TokenUtils;
 
@@ -71,6 +74,8 @@ public class AuthServiceImpl implements AuthService {
     private final TrustedDevicesService trustedDevicesService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final PasswordResetService passwordResetService;
+    private final RoleService roleService;
+    private final com.auth.app.repositories.OrganizationRepository organizationRepository;
 
     @Value("${security.password-reset.expiration-minutes}")
     private Integer resetPasswordTokenExpirationMinutes;
@@ -78,7 +83,37 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthModel register(RegisterRequest request, IpAddress ipAddress, UserAgent userAgent) {
 
-        UserModel saved = userService.create(modelMapper.map(request, UserModel.class));
+        UserModel userModel = modelMapper.map(request, UserModel.class);
+
+        if (request.getRole() != null) {
+            try {
+                RoleCode roleCode = RoleCode.valueOf(request.getRole().toUpperCase());
+                RoleModel role = roleService.findByCode(roleCode);
+                userModel.setRole(role);
+
+                if (roleCode == RoleCode.ADMIN) {
+                    if (request.getOrganizationName() == null || request.getOrganizationName().isBlank()) {
+                        throw new IllegalArgumentException("Organization name is required for ADMIN role");
+                    }
+                    if (request.getOrganizationAddress() == null || request.getOrganizationAddress().isBlank()) {
+                        throw new IllegalArgumentException("Organization address is required for ADMIN role");
+                    }
+
+                    com.auth.app.domain.entity.Organization organization = com.auth.app.domain.entity.Organization.builder()
+                            .name(request.getOrganizationName())
+                            .address(request.getOrganizationAddress())
+                            .build();
+
+                    organization = organizationRepository.save(organization);
+                    userModel.setOrganizationId(organization.getId());
+                }
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid role provided or missing organization details: {}", e.getMessage());
+                throw e; 
+            }
+        }
+
+        UserModel saved = userService.create(userModel);
 
         String verifyEmailToken = emailVerificationService.generateToken(saved);
 

@@ -7,6 +7,7 @@ import {
     TicketIcon,
     QrCode,
     Ticket,
+    UserCog,
 } from "lucide-react"
 
 export const SidebarConfig = {
@@ -15,6 +16,7 @@ export const SidebarConfig = {
         { title: "Mis Eventos", href: "/admin/events", icon: Calendar },
         { title: "Crear Evento", href: "/admin/events/create", icon: Plus },
         { title: "Cupones", href: "/admin/coupons", icon: Ticket },
+        { title: "Gestionar Staff", href: "/admin/staff", icon: UserCog },
         { title: "Validar Tickets", href: "/admin/validate", icon: TicketIcon },
         { title: "Configuración", href: "/admin/settings", icon: Settings },
     ],

@@ -1,5 +1,5 @@
 version: "2"
-authtoken: 35WajvzaXLVJXIfBCYWRCAlBzms_6eBXGCWsiUz5CDo4ePCR3
+authtoken: 39m9VF1ZBPCS33FStKj0urZGFZ7_6HHutsRFRTZPqix1gmRqN
 tunnels:
   backend:
     addr: 8080

@@ -81,9 +81,9 @@ public class EventController {
      */
     @GetMapping("/my-organization")
     public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getMyOrganizationEvents() {
-        // Verificar que sea OWNER
-        if (!jwtUtils.isOwner()) {
-            throw new UnauthorizedException("Solo los OWNER pueden acceder a esta funcionalidad");
+        // Verificar que sea OWNER o ADMIN
+        if (!jwtUtils.isOwner() && !jwtUtils.isAdmin()) {
+            throw new UnauthorizedException("Solo los OWNER y ADMIN pueden acceder a esta funcionalidad");
         }
 
         // Obtener el organizerId del JWT
@@ -143,6 +143,71 @@ public class EventController {
         OrganizerMetricsDTO metrics = metricsService.getOrganizerMetrics(organizerId);
         
         return ApiResponseFactory.success("Métricas obtenidas exitosamente", metrics);
+    }
+
+    @PostMapping("/{id}/staff")
+    public ResponseEntity<ApiResponse<Void>> assignStaff(@PathVariable UUID id, @RequestBody java.util.Map<String, UUID> request) {
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+             throw new UnauthorizedException("Only owners or admins can assign staff");
+        }
+
+        UUID userId = request.get("userId");
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is required");
+        }
+        
+        UUID assignedBy = jwtUtils.getUserId();
+        
+        eventService.assignStaff(id, userId, assignedBy);
+        
+        return ApiResponseFactory.success("Staff assigned successfully");
+    }
+
+    @DeleteMapping("/{id}/staff/{userId}")
+    public ResponseEntity<ApiResponse<Void>> removeStaff(@PathVariable UUID id, @PathVariable UUID userId) {
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+             throw new UnauthorizedException("Only owners or admins can remove staff");
+        }
+
+        eventService.removeStaff(id, userId);
+        return ApiResponseFactory.success("Staff removed successfully");
+    }
+
+    @GetMapping("/{id}/staff")
+    public ResponseEntity<ApiResponse<List<UUID>>> getEventStaff(@PathVariable UUID id) {
+        List<UUID> staffIds = eventService.getEventStaffUserIds(id);
+        return ApiResponseFactory.success("Event staff retrieved successfully", staffIds);
+    }
+
+    /**
+     * GET /staff/{userId}/events - Obtener eventos asignados a un miembro del staff (ADMIN/OWNER)
+     */
+    @GetMapping("/staff/{userId}/events")
+    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getEventsForStaffUser(@PathVariable UUID userId) {
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+            throw new UnauthorizedException("Only owners or admins can see staff assignments");
+        }
+
+        List<EventSummaryDTO> events = eventService.getEventsForUser(userId);
+        return ApiResponseFactory.success("Staff assignments retrieved successfully", events);
+    }
+
+    /**
+     * PUT /staff/{userId}/events - Actualizar asignación de eventos para un miembro del staff (ADMIN/OWNER)
+     */
+    @PutMapping("/staff/{userId}/events")
+    public ResponseEntity<ApiResponse<Void>> updateStaffAssignments(
+            @PathVariable UUID userId, 
+            @RequestBody List<UUID> eventIds) {
+        
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+            throw new UnauthorizedException("Only owners or admins can manage staff assignments");
+        }
+        
+        UUID assignedBy = jwtUtils.getUserId();
+        eventService.updateStaffAssignments(userId, eventIds, assignedBy);
+        
+        return ApiResponseFactory.success("Staff assignments updated successfully");
     }
 }
 

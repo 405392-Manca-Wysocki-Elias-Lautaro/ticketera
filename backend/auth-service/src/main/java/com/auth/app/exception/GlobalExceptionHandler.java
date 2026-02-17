@@ -28,6 +28,8 @@ import com.auth.app.exception.exceptions.TokenExpiredException;
 import com.auth.app.exception.exceptions.TooManyAttemptsException;
 import com.auth.app.exception.exceptions.UserAlreadyVerifiedException;
 import com.auth.app.exception.exceptions.WeakPasswordException;
+import com.auth.app.exception.exceptions.MissingOrganizationException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.auth.app.utils.ApiErrorFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -208,6 +210,20 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         log.warn("Password change rejected at {}: {}", request.getRequestURI(), ex.getMessage());
         return ApiErrorFactory.error(ErrorCatalog.SAME_PASSWORD, null);
+    }
+
+    @ExceptionHandler(MissingOrganizationException.class)
+    public ResponseEntity<ApiResponse<ApiError>> handleMissingOrganization(MissingOrganizationException ex,
+            HttpServletRequest request) {
+        log.warn("Missing organization at {}: {}", request.getRequestURI(), ex.getMessage());
+        return ApiErrorFactory.error(ex.getError(), null);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<ApiError>> handleNoResourceFound(NoResourceFoundException ex,
+            HttpServletRequest request) {
+        log.warn("Resource not found at {}: {}", request.getRequestURI(), ex.getMessage());
+        return ApiErrorFactory.error(ErrorCatalog.ENTITY_NOT_FOUND, null);
     }
 
     // 💥 Fallback genérico

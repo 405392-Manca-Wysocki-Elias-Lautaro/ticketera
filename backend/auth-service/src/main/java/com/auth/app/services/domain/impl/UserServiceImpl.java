@@ -48,7 +48,30 @@ public class UserServiceImpl implements UserService {
         user.setEmailVerified(false);
         user.setActive(false);
 
-        user.setRole(modelMapper.map(roleService.findByCode(RoleCode.CUSTOMER), Role.class));
+        if (user.getRole() == null) {
+            user.setRole(modelMapper.map(roleService.findByCode(RoleCode.CUSTOMER), Role.class));
+        }
+
+        return modelMapper.map(userRepository.save(user), UserModel.class);
+    }
+
+    @Override
+    @Transactional
+    public UserModel createStaff(UserModel userModel) {
+        if (userRepository.existsByEmail(userModel.getEmail())) {
+            throw new EmailAlreadyExistsException();
+        }
+
+        PasswordValidator.validate(userModel.getPassword());
+
+        User user = modelMapper.map(userModel, User.class);
+        user.setPasswordHash(passwordEncoder.encode(userModel.getPassword()));
+        
+        // Staff created by admin are active and verified by default
+        user.setEmailVerified(true);
+        user.setActive(true);
+
+        user.setRole(modelMapper.map(roleService.findByCode(RoleCode.STAFF), Role.class));
 
         return modelMapper.map(userRepository.save(user), UserModel.class);
     }
@@ -105,6 +128,13 @@ public class UserServiceImpl implements UserService {
     public Optional<UserModel> findOptionalByEmail(String email) {
         return userRepository.findByEmail(email)
                 .map(user -> modelMapper.map(user, UserModel.class));
+    }
+
+    @Override
+    public List<UserModel> getStaffByOrganization(UUID organizationId) {
+        return userRepository.findByOrganizationIdAndRole_Code(organizationId, RoleCode.STAFF).stream()
+                .map(user -> modelMapper.map(user, UserModel.class))
+                .collect(Collectors.toList());
     }
 
 }

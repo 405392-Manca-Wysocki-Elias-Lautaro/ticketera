@@ -135,5 +135,15 @@ public class JwtUtils {
             return false;
         }
     }
+    /**
+     * Checks if the user has ADMIN role.
+     */
+    public boolean isAdmin() {
+        try {
+            return "ADMIN".equalsIgnoreCase(getRole());
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
 

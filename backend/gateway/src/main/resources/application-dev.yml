@@ -61,6 +61,15 @@ spring:
             - PreserveHostHeader
           order: -100
 
+        - id: staff
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth-dev:8080}"
+          predicates:
+            - Path=/api/staff/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/staff/?(?<segment>.*), /staff/${segment}
+          order: -100
+
         - id: notifications
           uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification-dev:8080}"
           predicates:
@@ -145,12 +154,12 @@ spring:
         add-to-simple-url-handler-mapping: true
         corsConfigurations:
           "[/**]":
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "http://localhost:3001"
-              - "https://mini-fur-picture-merger.trycloudflare.com"
+            allowedOrigins: 
+              - "https://*.ngrok-free.dev"
+              - "http://localhost:[*]"
             allowedMethods: "*"
             allowedHeaders: "*"
+            allowedOriginPatterns: "*"
             exposedHeaders:
               - "Set-Cookie"
             allowCredentials: true

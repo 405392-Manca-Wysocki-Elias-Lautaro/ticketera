@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserModel {
     private UUID id;
+    private UUID organizationId;
     private String firstName;
     private String lastName;
     private String email;

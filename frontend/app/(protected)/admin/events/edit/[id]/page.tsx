@@ -29,7 +29,9 @@ import { ArrowLeft, Plus, Trash2, CalendarIcon, Loader2 } from "lucide-react"
 import type { CreateEvent, CreateSeat } from "@/types/Request/CreateEvent"
 import { useCategories } from "@/hooks/event/useCategories"
 import { toast } from "sonner"
+import { toast } from "sonner"
 import { useEvent } from '@/hooks/event/useEvent'
+import { EventStaffManager } from "@/components/admin/event/EventStaffManager"
 
 export default function EditEventPage() {
     const router = useRouter();
@@ -517,8 +519,13 @@ export default function EditEventPage() {
                             </Button>
                         </StarBorder>
                     </div>
+                    </div>
                 </form>
-            </div>
-        </div>
+
+                <div className="mt-12">
+                     <EventStaffManager eventId={id as string} />
+                </div>
+            </div >
+        </div >
     )
 }
