@@ -48,7 +48,9 @@ public class UserServiceImpl implements UserService {
         user.setEmailVerified(false);
         user.setActive(false);
 
-        user.setRole(modelMapper.map(roleService.findByCode(RoleCode.CUSTOMER), Role.class));
+        if (user.getRole() == null) {
+            user.setRole(modelMapper.map(roleService.findByCode(RoleCode.CUSTOMER), Role.class));
+        }
 
         return modelMapper.map(userRepository.save(user), UserModel.class);
     }

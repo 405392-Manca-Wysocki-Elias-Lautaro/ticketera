@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useResendVerificationEmail } from "@/hooks/auth/useResendVerificationEmail";
 import { handleApiError } from "@/utils/handleApiError";
 import { ApiResponse } from '@/types/Response/ApiResponse';
+import { RoleCode } from "@/types/enums/RoleCode";
 
 export function useLogin() {
     const { setToken, setUser, setSessionFlag } = useAuthStore();
@@ -28,7 +29,16 @@ export function useLogin() {
             setSessionFlag(true);
 
             toast.success(`Bienvenido ${authResponse.user.firstName || ""}`);
-            router.push("/dashboard");
+
+            const roleCode = authResponse.user.role.code;
+
+            if (roleCode === RoleCode.ADMIN || roleCode === RoleCode.SUPER_ADMIN || roleCode === RoleCode.OWNER) {
+                router.push("/admin");
+            } else if (roleCode === RoleCode.STAFF) {
+                router.push("/staff");
+            } else {
+                router.push("/dashboard");
+            }
         },
         onError: (error: AxiosError<any>) => {
             const code = error.response?.data?.data?.code;

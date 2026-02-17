@@ -12,13 +12,38 @@ export const signUpSchema = z.object({
         .regex(/[A-Z]/, "Debe contener una letra mayúscula")
         .regex(/\d/, "Debe contener un número")
         .regex(/[@$!%*?&]/, "Debe contener un caracter especial (@$!%*?&)"),
+    role: z.enum(["CUSTOMER", "ADMIN"]),
     confirmPassword: z.string(),
     termsAccepted: z.boolean().refine((val) => val === true, {
         message: "Debes aceptar los términos y condiciones",
     }),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
+    organizationName: z.string().optional(),
+    organizationAddress: z.string().optional(),
+}).superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom, // Use generic error code for simplicity
+            message: "Las contraseñas no coinciden",
+            path: ["confirmPassword"],
+        });
+    }
+
+    if (data.role === "ADMIN") {
+        if (!data.organizationName || data.organizationName.trim().length === 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "El nombre de la organización es obligatorio",
+                path: ["organizationName"],
+            });
+        }
+        if (!data.organizationAddress || data.organizationAddress.trim().length === 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "La dirección de la organización es obligatoria",
+                path: ["organizationAddress"],
+            });
+        }
+    }
 });
 
 export type SignUpSchema = z.infer<typeof signUpSchema>;
