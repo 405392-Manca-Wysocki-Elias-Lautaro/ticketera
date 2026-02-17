@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface EventStaffRepository extends JpaRepository<EventStaffEntity, UUID> {
     List<EventStaffEntity> findByEventId(UUID eventId);
+    List<EventStaffEntity> findByUserId(UUID userId);
     Optional<EventStaffEntity> findByEventIdAndUserId(UUID eventId, UUID userId);
     void deleteByEventIdAndUserId(UUID eventId, UUID userId);
 }

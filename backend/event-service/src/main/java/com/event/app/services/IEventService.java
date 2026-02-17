@@ -35,5 +35,9 @@ public interface IEventService {
     void assignStaff(UUID eventId, UUID userId, UUID assignedBy);
     void removeStaff(UUID eventId, UUID userId);
     List<UUID> getEventStaffUserIds(UUID eventId);
+    
+    // New methods for multi-event assignment
+    List<EventSummaryDTO> getEventsForUser(UUID userId);
+    void updateStaffAssignments(UUID userId, List<UUID> eventIds, UUID assignedBy);
 }
 

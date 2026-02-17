@@ -236,6 +236,57 @@ public class EventServiceImpl implements IEventService {
     }
 
     @Override
+    public List<EventSummaryDTO> getEventsForUser(UUID userId) {
+        List<UUID> eventIds = eventStaffRepository.findByUserId(userId).stream()
+                .map(EventStaffEntity::getEventId)
+                .collect(Collectors.toList());
+        
+        if (eventIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        List<EventEntity> events = eventRepository.findAllById(eventIds);
+        return events.stream()
+                .map(this::mapToEventSummary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void updateStaffAssignments(UUID userId, List<UUID> eventIds, UUID assignedBy) {
+         // Get current assignments
+         List<EventStaffEntity> currentAssignments = eventStaffRepository.findByUserId(userId);
+         List<UUID> currentEventIds = currentAssignments.stream()
+                 .map(EventStaffEntity::getEventId)
+                 .collect(Collectors.toList());
+         
+         // Identify events to add
+         List<UUID> toAdd = eventIds.stream()
+                 .filter(id -> !currentEventIds.contains(id))
+                 .collect(Collectors.toList());
+         
+         // Identify events to remove
+         List<EventStaffEntity> toRemove = currentAssignments.stream()
+                 .filter(assignment -> !eventIds.contains(assignment.getEventId()))
+                 .collect(Collectors.toList());
+         
+         // Add new assignments
+         for (UUID eventId : toAdd) {
+             if (eventRepository.existsById(eventId)) {
+                 EventStaffEntity newAssignment = EventStaffEntity.builder()
+                         .userId(userId)
+                         .eventId(eventId)
+                         .assignedBy(assignedBy)
+                         .build();
+                 eventStaffRepository.save(newAssignment);
+             }
+         }
+         
+         // Remove old assignments
+         eventStaffRepository.deleteAll(toRemove);
+    }
+
+    @Override
     public List<EventSummaryDTO> getEventsByOrganizerId(UUID organizerId) {
         List<EventEntity> events = eventRepository.findByOrganizerIdAndActiveTrue(organizerId);
         

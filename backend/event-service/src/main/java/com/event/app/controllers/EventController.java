@@ -178,5 +178,36 @@ public class EventController {
         List<UUID> staffIds = eventService.getEventStaffUserIds(id);
         return ApiResponseFactory.success("Event staff retrieved successfully", staffIds);
     }
+
+    /**
+     * GET /staff/{userId}/events - Obtener eventos asignados a un miembro del staff (ADMIN/OWNER)
+     */
+    @GetMapping("/staff/{userId}/events")
+    public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getEventsForStaffUser(@PathVariable UUID userId) {
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+            throw new UnauthorizedException("Only owners or admins can see staff assignments");
+        }
+
+        List<EventSummaryDTO> events = eventService.getEventsForUser(userId);
+        return ApiResponseFactory.success("Staff assignments retrieved successfully", events);
+    }
+
+    /**
+     * PUT /staff/{userId}/events - Actualizar asignación de eventos para un miembro del staff (ADMIN/OWNER)
+     */
+    @PutMapping("/staff/{userId}/events")
+    public ResponseEntity<ApiResponse<Void>> updateStaffAssignments(
+            @PathVariable UUID userId, 
+            @RequestBody List<UUID> eventIds) {
+        
+        if (!jwtUtils.isOwner() && !"ADMIN".equalsIgnoreCase(jwtUtils.getRole())) {
+            throw new UnauthorizedException("Only owners or admins can manage staff assignments");
+        }
+        
+        UUID assignedBy = jwtUtils.getUserId();
+        eventService.updateStaffAssignments(userId, eventIds, assignedBy);
+        
+        return ApiResponseFactory.success("Staff assignments updated successfully");
+    }
 }
 

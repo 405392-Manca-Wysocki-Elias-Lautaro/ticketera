@@ -87,6 +87,10 @@ export const eventService = {
     // Organization events
     getMyOrganizationEvents: () => api.get<ApiResponse<EventInfo[]>>(`${BASE_URL}/my-organization`),
 
+    // New methods for multi-assignment
+    getStaffAssignments: (userId: string) => api.get<ApiResponse<EventInfo[]>>(`${BASE_URL}/staff/${userId}/events`),
+    updateStaffAssignments: (userId: string, eventIds: string[]) => api.put<ApiResponse<void>>(`${BASE_URL}/staff/${userId}/events`, eventIds),
+
 
 };
 
