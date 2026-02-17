@@ -37,16 +37,16 @@ export interface OrderItem {
 }
 
 export interface OrderResponse {
-  id: number;
+  id: string; // UUID from backend
   customer: {
-    id: number;
+    id: string; // UUID from backend
     email: string;
     firstName: string;
     lastName: string;
     phone: string;
     userId?: string; // UUID from auth-service
   };
-  organizerId: number;
+  organizerId: string; // UUID from backend
   status: string;
   totalCents: number;
   currency: string;

@@ -14,7 +14,7 @@ export const orderService = {
   /**
    * Obtiene una orden por su ID
    */
-  async getOrder(orderId: number): Promise<OrderResponse> {
+  async getOrder(orderId: string): Promise<OrderResponse> {
     const response = await api.get<ApiResponse<OrderResponse>>(`/orders/${orderId}`);
     return response.data.data;
   },
@@ -22,9 +22,20 @@ export const orderService = {
   /**
    * Obtiene las órdenes de un cliente
    */
-  async getCustomerOrders(customerId: number): Promise<OrderResponse[]> {
+  async getCustomerOrders(customerId: string): Promise<OrderResponse[]> {
     const response = await api.get<ApiResponse<OrderResponse[]>>(`/orders/customer/${customerId}`);
     return response.data.data;
+  },
+
+  /**
+   * Consulta el estado del pago de una orden (usado para polling).
+   * Usa _silent para no mostrar toasts de error globales.
+   */
+  async getPaymentStatus(orderId: string): Promise<{ orderId: string; status: string }> {
+    const response = await api.get(`/payments/orders/${orderId}/status`, {
+      _silent: true,
+    } as any);
+    return response.data?.data || response.data;
   },
 };
 

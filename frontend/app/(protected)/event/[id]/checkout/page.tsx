@@ -9,14 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ArrowLeft, Loader2, ChevronDown, CreditCard, Tag, X, Check } from "lucide-react"
+import { ArrowLeft, Loader2, ChevronDown, CreditCard, Tag, X, Check, ExternalLink, Clock } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from '@/hooks/auth/useAuth'
 import { useEvent } from '@/hooks/event/useEvent'
 import { Navbar } from '@/components/Navbar'
 import GradientText from '@/components/GradientText'
 import StarBorder from '@/components/StarBorder'
-import { useMercadoPagoCheckout } from '@/hooks/useMercadoPagoCheckout'
 import { orderService } from '@/services/orderService'
 import { couponService } from '@/services/couponService'
 import type { CreateOrderRequest } from '@/types/Order'
@@ -29,8 +28,11 @@ export default function CheckoutPage() {
     const { user, isLoading } = useAuth()
     const { data: event, isLoading: isLoadingEvent } = useEvent(params.id as string)
     const [isProcessing, setIsProcessing] = useState(false)
-    const [preferenceId, setPreferenceId] = useState<string | undefined>()
     const [phone, setPhone] = useState("")
+    const [waitingPayment, setWaitingPayment] = useState(false)
+    const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null)
+    const [paymentUrl, setPaymentUrl] = useState<string | null>(null)
+    const [paymentWindow, setPaymentWindow] = useState<Window | null>(null)
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [couponCode, setCouponCode] = useState("")
     const [couponDiscount, setCouponDiscount] = useState(0)
@@ -106,30 +108,48 @@ export default function CheckoutPage() {
         toast.info("Cupón removido")
     }
 
-    // Hook de Mercado Pago
-    const { isSDKReady, isLoading: isMPLoading, renderPaymentButton } = useMercadoPagoCheckout({
-        preferenceId,
-        onReady: () => {
-            console.log("Botón de Mercado Pago renderizado exitosamente");
-        },
-        onError: (error) => {
-            console.error("Error en Mercado Pago:", error);
-            toast.error("Error al cargar el botón de pago");
-        },
-    });
-
     useEffect(() => {
         if (!isLoading && !user) {
             router.push("/login")
         }
     }, [user, isLoading, router])
 
-    // Renderizar el botón cuando el SDK esté listo y tengamos el preferenceId
+    // Polling del estado del pago cuando se abre la pestaña de MP
     useEffect(() => {
-        if (isSDKReady && preferenceId) {
-            renderPaymentButton("wallet-container");
-        }
-    }, [isSDKReady, preferenceId, renderPaymentButton]);
+        if (!waitingPayment || !paymentOrderId) return;
+
+        const pollInterval = setInterval(async () => {
+            try {
+                const data = await orderService.getPaymentStatus(paymentOrderId);
+                
+                if (data.status === 'CAPTURED') {
+                    clearInterval(pollInterval);
+                    toast.success("Pago confirmado. Redirigiendo a tus tickets...");
+                    router.push("/my-tickets");
+                } else if (data.status === 'FAILED' || data.status === 'CANCELED') {
+                    clearInterval(pollInterval);
+                    setWaitingPayment(false);
+                    setIsProcessing(false);
+                    toast.error("El pago fue rechazado o cancelado. Podés intentar nuevamente.");
+                }
+            } catch (error) {
+                console.error("Error consultando estado del pago:", error);
+            }
+        }, 4000);
+
+        // Timeout de 10 minutos
+        const timeout = setTimeout(() => {
+            clearInterval(pollInterval);
+            setWaitingPayment(false);
+            setIsProcessing(false);
+            toast.error("Tiempo de espera agotado. Si ya pagaste, revisá en 'Mis Tickets'.");
+        }, 600000);
+
+        return () => {
+            clearInterval(pollInterval);
+            clearTimeout(timeout);
+        };
+    }, [waitingPayment, paymentOrderId, router]);
 
     const validatePhone = (value: string) => {
         const cleaned = value.replace(/[\s\-()]/g, "")
@@ -221,9 +241,21 @@ export default function CheckoutPage() {
             const orderResponse = await orderService.createOrder(orderRequest);
 
             if (orderResponse.paymentUrl) {
-                // Si el backend devuelve una URL directa, redirigir
-                toast.success("Redirigiendo a Mercado Pago...");
-                window.location.href = orderResponse.paymentUrl;
+                // Abrir Mercado Pago en una nueva pestaña
+                const mpWindow = window.open(orderResponse.paymentUrl, '_blank');
+                
+                if (mpWindow) {
+                    // La pestaña se abrió correctamente
+                    setPaymentWindow(mpWindow);
+                    setPaymentOrderId(orderResponse.id);
+                    setPaymentUrl(orderResponse.paymentUrl);
+                    setWaitingPayment(true);
+                    toast.info("Se abrió Mercado Pago en una nueva pestaña. Completá el pago allí.");
+                } else {
+                    // El navegador bloqueó el popup, fallback a redirección directa
+                    toast.info("Redirigiendo a Mercado Pago...");
+                    window.location.href = orderResponse.paymentUrl;
+                }
             } else {
                 toast.error("No se pudo obtener la URL de pago");
             }
@@ -284,6 +316,65 @@ export default function CheckoutPage() {
 
                 <h1 className="text-2xl md:text-3xl font-bold mb-8">Finalizar Compra</h1>
 
+                {/* Estado de espera de pago */}
+                {waitingPayment ? (
+                    <Card className="max-w-2xl mx-auto">
+                        <CardContent className="pt-12 pb-8 space-y-6 text-center">
+                            <div className="flex justify-center">
+                                <div className="relative">
+                                    <Clock className="h-20 w-20 text-primary animate-pulse" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h2 className="text-2xl font-bold mb-2">Esperando confirmaci&oacute;n de pago...</h2>
+                                <p className="text-muted-foreground">
+                                    Complet&aacute; el pago en la pesta&ntilde;a de Mercado Pago que se abri&oacute;.
+                                </p>
+                            </div>
+
+                            <div className="bg-muted/50 rounded-lg p-6 space-y-3">
+                                <div className="flex items-center justify-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                    <p className="text-sm text-muted-foreground">
+                                        Verificando el estado del pago autom&aacute;ticamente...
+                                    </p>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Esta p&aacute;gina se actualizar&aacute; sola cuando se confirme el pago.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        if (paymentWindow && !paymentWindow.closed) {
+                                            paymentWindow.focus();
+                                        } else if (paymentUrl) {
+                                            const newWindow = window.open(paymentUrl, '_blank');
+                                            if (newWindow) setPaymentWindow(newWindow);
+                                        }
+                                    }}
+                                    className="gap-2"
+                                >
+                                    <ExternalLink className="h-4 w-4" />
+                                    Ir a la pesta&ntilde;a de Mercado Pago
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setWaitingPayment(false);
+                                        setIsProcessing(false);
+                                    }}
+                                >
+                                    Cancelar
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ) : (
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Payment Form */}
                     <div className="md:col-span-2">
@@ -292,7 +383,7 @@ export default function CheckoutPage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <CreditCard className="h-5 w-5" />
-                                        Información de Contacto
+                                        Informaci&oacute;n de Contacto
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -328,7 +419,7 @@ export default function CheckoutPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">Teléfono</Label>
+                                        <Label htmlFor="phone">Tel&eacute;fono</Label>
                                         <Input
                                             id="phone"
                                             type="tel"
@@ -347,17 +438,12 @@ export default function CheckoutPage() {
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Método de Pago</CardTitle>
+                                    <CardTitle>M&eacute;todo de Pago</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="text-sm text-muted-foreground mb-4">
-                                        Serás redirigido a Mercado Pago para completar tu pago de forma segura.
+                                        Se abrir&aacute; Mercado Pago en una nueva pesta&ntilde;a para completar tu pago de forma segura.
                                     </div>
-
-                                    {/* Contenedor para el botón de Mercado Pago */}
-                                    {preferenceId && (
-                                        <div id="wallet-container" className="min-h-[48px]"></div>
-                                    )}
 
                                     <StarBorder className='w-full'>
                                         <Button 
@@ -554,6 +640,7 @@ export default function CheckoutPage() {
                         </Card>
                     </div>
                 </div>
+                )}
             </main>
         </div>
     )

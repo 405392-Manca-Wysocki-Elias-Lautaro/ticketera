@@ -1,6 +1,7 @@
 package com.payment.app.controllers;
 
 import com.payment.app.clients.OrderServiceClient;
+import com.payment.app.models.Payment;
 import com.payment.app.pkg.dtos.CreatePaymentIntentRequest;
 import com.payment.app.pkg.dtos.OrderResponse;
 import com.payment.app.pkg.dtos.PaymentIntentResponse;
@@ -60,6 +61,35 @@ public class PaymentController {
             
         } catch (Exception e) {
             logger.error("Unexpected error creating payment intent: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/orders/{orderId}/status")
+    @Operation(summary = "Get payment status for an order",
+               description = "Returns the current payment status for polling from the frontend")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Payment status retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Payment not found for the given order")
+    })
+    public ResponseEntity<Map<String, String>> getPaymentStatus(
+            @PathVariable String orderId) {
+        
+        logger.info("Getting payment status for order: {}", orderId);
+        
+        try {
+            Payment payment = paymentService.getPaymentByOrderId(orderId);
+            Map<String, String> response = new HashMap<>();
+            response.put("orderId", orderId);
+            response.put("status", payment.getStatus().name());
+            return ResponseEntity.ok(response);
+            
+        } catch (PaymentService.PaymentNotFoundException e) {
+            logger.warn("Payment not found for order: {}", orderId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            
+        } catch (Exception e) {
+            logger.error("Error getting payment status for order {}: {}", orderId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
