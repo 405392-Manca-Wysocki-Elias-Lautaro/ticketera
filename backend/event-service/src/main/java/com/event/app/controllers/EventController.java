@@ -81,9 +81,9 @@ public class EventController {
      */
     @GetMapping("/my-organization")
     public ResponseEntity<ApiResponse<List<EventSummaryDTO>>> getMyOrganizationEvents() {
-        // Verificar que sea OWNER
-        if (!jwtUtils.isOwner()) {
-            throw new UnauthorizedException("Solo los OWNER pueden acceder a esta funcionalidad");
+        // Verificar que sea OWNER o ADMIN
+        if (!jwtUtils.isOwner() && !jwtUtils.isAdmin()) {
+            throw new UnauthorizedException("Solo los OWNER y ADMIN pueden acceder a esta funcionalidad");
         }
 
         // Obtener el organizerId del JWT

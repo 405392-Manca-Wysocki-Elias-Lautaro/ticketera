@@ -64,6 +64,7 @@ public class TokenProvider {
                 .setId(UUID.randomUUID().toString())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole().getCode())
+                .claim("organizerId", user.getOrganizationId())
                 .claim("deviceId", deviceId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))

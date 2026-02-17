@@ -154,12 +154,12 @@ spring:
         add-to-simple-url-handler-mapping: true
         corsConfigurations:
           "[/**]":
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "http://localhost:3001"
-              - "https://mini-fur-picture-merger.trycloudflare.com"
+            allowedOrigins: 
+              - "https://*.ngrok-free.dev"
+              - "http://localhost:[*]"
             allowedMethods: "*"
             allowedHeaders: "*"
+            allowedOriginPatterns: "*"
             exposedHeaders:
               - "Set-Cookie"
             allowCredentials: true
