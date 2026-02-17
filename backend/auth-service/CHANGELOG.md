@@ -1,3 +1,47 @@
+# [1.0.0-next.13](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.12...auth-v1.0.0-next.13) (2026-02-17)
+
+
+### Bug Fixes
+
+* fix build ([cd44575](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/cd445758b0c320f5c88d3f0c63b886c048bf2240))
+* fix build ([c9b727e](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c9b727ee5e50dd6752a4ecdc0ad3f1207ab520db))
+* fix event name ([4c26050](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/4c2605074e7609e0371f828c55a9bb42c5706e01))
+* fix event name ([be92a7d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/be92a7d378fe8aa46548c456b59430319fa316c1))
+* fix ticket service ([8173e53](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/8173e534bbfa9c9b689c80d830e5c8d5ce44db16))
+* missing param ([aaf8ca3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/aaf8ca3067d9cceacf1f6dee0052df5724c42052))
+* pricing ([ba41137](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ba4113765acfe77422616818267e363fd1c22d03))
+* Rename Even and Orde model classes ([cb0990d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/cb0990d2a321b47acc49b301d99c7d179a32e73d))
+* rename order -> Order ([8d8ae62](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/8d8ae625834072129d8e1f07d9125a7b8887999b))
+* rename order -> Order ([72af563](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/72af5633465169d2625c347644b7095c7c60fcbb))
+* Rename Order and Event  model classes ([3cc2754](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/3cc2754ffa9bb096a11d7a040103d693e46dfaaa))
+
+
+### Features
+
+* add coupon validation and discount processing in order service ([d54c977](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/d54c97774a6bc0fcf2393b61bb188039805f67af))
+* add scanner, hooks, and loading overlay ([ffeddea](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ffeddeaa4180fc70a77931556dcc49e9f92b3411))
+* add Workbox service worker for improved caching and routing capabilities ([1b46ca3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/1b46ca3d64f06ed47e11b03530aaa097914fb037))
+* **db:** agregar script de semilla para usuarios iniciales ([7026657](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/70266574010c6e60e2e319d08a6609e02aefe071))
+* enhance coupon functionality by improving discount calculation, adding seat reservation checks, and seeding initial coupon data for testing ([e5027cf](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/e5027cf3f782fe736582e3ed8274f002533dce6f))
+* enhance payment processing and order management ([c2a6cb2](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/c2a6cb269c2c08e455b8f2931269b6a74f179d23))
+* enhance security configurations and improve coupon management UI with better error handling and user experience ([196aa15](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/196aa15bdb8fc99b4e97058a3dbfe8fe0273834c))
+* **event:** add event service and typed CRUD integration ([ed205fe](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ed205fee692d2af41689f499e63cdd7c1c301df2))
+* implement coupon application and validation in checkout process, enhancing user experience with real-time feedback and error handling ([7b167c3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/7b167c33c97041ca22170c00ef8d9028d298c70a))
+* implement coupon management features including creation, editing, and statistics display ([ca4913c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/ca4913cc35edd0bdd87549848bc650f034df7f1a))
+* Implement EventClient and related configurations ([fc310ed](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/fc310edec2a0737d7bb4eed34c7cdd79ae570df9))
+* implement export csv in my events ([96473f0](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/96473f0717371a6855806cd335914a6c2904a198))
+* improve event creation ([1694bf6](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/1694bf6381bb3c9267e35722d2d229649da17c17))
+* improve event functionality and details in the interface ([43a895d](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/43a895d63acc6757a151d0fc7f338b8de8cfefd5))
+* improve scaling and positioning logic in ticket components and add device context ([a684218](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/a684218b1df62ca182b828c5d814a81f30ae84b3))
+* improve the event editing page with reactive forms and status optimization ([a98776b](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/a98776bf12429d1c9e28cc6307d6cdd8f15a2a7a))
+* improve TS config and API error handling ([fcf3ff5](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/fcf3ff5ab06e12a0fb1cb825f1e1d1f8a60b6ac0))
+* Refactor event creation and dashboard functionality ([aadc71c](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/aadc71c11b4f3d52237fb0f1c1ecd1d5aae67077))
+* **reminders:** implementar sistema integral de recordatorios de eventos ([7fe43a9](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/7fe43a9ac27d8ec7326dc269ff5dafcdbcaa8783))
+* **ui:** implementar soporte para temas claro y oscuro ([b9f77d3](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/b9f77d3e2b30231f9a9804657aaf175ffd191d89))
+* **ui:** limitar selección de asientos y habilitar scroll global ([b632570](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/b632570d3271e5d0ed1d130c99df540740382b98))
+* update auth, ticket logic, and frontend ticket handling ([730cb74](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/730cb743fb44bc7e56718efa3f83d13694422b3e))
+* update coupon statistics page with enhanced loading states, improved error handling, and additional metrics for better user insights ([197d030](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/commit/197d03057a364d33360b1a78cd6a1ae5c80bf796))
+
 # [1.0.0-next.12](https://github.com/405392-Manca-Wysocki-Elias-Lautaro/ticketera/compare/auth-v1.0.0-next.11...auth-v1.0.0-next.12) (2025-11-19)
 
 
