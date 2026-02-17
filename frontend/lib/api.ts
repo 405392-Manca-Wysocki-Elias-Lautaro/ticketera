@@ -64,7 +64,9 @@ api.interceptors.response.use(
             }
         }
 
-        handleApiError(error);
+        if (!originalRequest._silent) {
+            handleApiError(error);
+        }
         return Promise.reject(error);
     }
 );

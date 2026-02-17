@@ -34,7 +34,7 @@ public class OrderServiceClient {
      * Obtiene la información de una orden por su ID
      */
     public Optional<OrderResponse> getOrderById(String orderId) {
-        String url = orderServiceBaseUrl + "/" + orderId;
+        String url = orderServiceBaseUrl + "/internal/orders/" + orderId;
         
         logger.info("Fetching order from: {}", url);
         
