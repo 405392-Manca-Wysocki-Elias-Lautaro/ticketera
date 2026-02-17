@@ -150,10 +150,10 @@ public class TicketServiceImpl implements TicketService {
 
     private TicketModel validateAndUpdate(Ticket entity) {
 
-        UUID currentUserId = jwtUtils.getUserId();
         UserRole role = jwtUtils.getRole();
 
-        if (!entity.getUserId().equals(currentUserId) && !RoleUtil.isPrivileged(role)) {
+        // 🔒 Only privileged users (ADMIN, STAFF) can validate tickets
+        if (!RoleUtil.isPrivileged(role)) {
             throw new UnauthorizedTicketAccessException();
         }
 
