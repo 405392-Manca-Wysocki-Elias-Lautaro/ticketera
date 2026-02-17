@@ -19,6 +19,13 @@ import { useValidateTicket } from '@/hooks/ticket/useValidateTicket'
 import { SpinnerOverlay } from '@/components/SpinnerOverlay'
 import { useEvents } from '@/hooks/event/useEvents'
 import { Event } from '@/types/Event'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 export default function StaffDashboardPage() {
     const router = useRouter();
@@ -120,18 +127,18 @@ export default function StaffDashboardPage() {
 
                     {/* Select */}
                     <Label className="font-medium">Seleccionar Evento</Label>
-                    <select
-                        className="border rounded-md p-2 w-full"
-                        value={selectedEventId}
-                        onChange={(e) => setSelectedEventId(e.target.value)}
-                    >
-                        <option value="">Selecciona un evento</option>
-                        {assignedEvents.map((ev) => (
-                            <option key={ev.id} value={ev.id}>
-                                {ev.title} – {new Date(ev.date).toLocaleDateString("es-ES")}
-                            </option>
-                        ))}
-                    </select>
+                    <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecciona un evento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {assignedEvents.map((ev) => (
+                                <SelectItem key={ev.id} value={ev.id}>
+                                    {ev.title} – {new Date(ev.date).toLocaleDateString("es-ES")}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
                     {/* Minimal info */}
                     {selectedEvent && (
