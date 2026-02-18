@@ -1,0 +1,399 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: ticketera-postgres-preview
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ticketera_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_pass_123}
+      POSTGRES_DB: ${POSTGRES_DB:-ticketera_dev}
+      TZ: ${TZ:-America/Argentina/Cordoba}
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - postgres_data_preview:/var/lib/postgresql/data
+      - ./infra/postgres/dev/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [ backend_net ]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-preview
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq_data_preview:/var/lib/rabbitmq
+      - rabbitmq_data_preview:/var/log/rabbitmq
+    ports:
+      - "5672:5672"     # puerto AMQP (comunicación entre microservicios)
+      - "15672:15672"   # panel web http://localhost:15672
+    networks: [ backend_net ]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.2
+    container_name: redis-preview
+    restart: always
+    ports:
+      - "6379:6379"   # expuesto al host para acceder desde el IDE o RedisInsight
+    volumes:
+      - redis_data_preview:/data
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    environment:
+      TZ: ${TZ}
+    networks: [backend_net]
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog-preview
+    ports:
+      - "2525:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks: [ backend_net ]
+
+  gateway-preview:
+    container_name: gateway-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=preview \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/gateway:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: preview
+      SERVICES_AUTH_BASE_URL: http://auth-preview:8080
+      SERVICES_EVENT_BASE_URL: http://event-preview:8080
+      SERVICES_TICKET_BASE_URL: http://ticket-preview:8080
+      SERVICES_PAYMENT_BASE_URL: http://payment-preview:8080
+      SERVICES_NOTIFICATION_BASE_URL: http://notification-preview:8080
+      SERVICES_ORDER_BASE_URL: http://order-preview:8080
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      AUTH_URL: ${AUTH_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD:
+      FRONTEND_URL: ${FRONTEND_URL}
+    depends_on:
+      - auth-preview
+      - event-preview
+      - ticket-preview
+      - payment-preview
+      - notification-preview
+      - order-preview
+    networks: [backend_net]
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+
+  auth-preview:
+    container_name: auth-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/auth-service:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key:/app/keys/jwtRS256.key:ro
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${AUTH_DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_FLYWAY_SCHEMAS: ${AUTH_DB_SCHEMA:-auth-dev}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${AUTH_DB_SCHEMA:-auth-dev}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      FRONTEND_URL: ${FRONTEND_URL}
+      JWT_PRIVATE_KEY: /app/keys/jwtRS256.key
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backend_net]
+    ports:
+      - "8082:8080"
+      - "5006:5005"
+
+  event-preview:
+    container_name: event-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/event-service:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${EVENT_DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_FLYWAY_SCHEMAS: ${EVENT_DB_SCHEMA:-event-dev}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${EVENT_DB_SCHEMA:-event-dev}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backend_net]
+    ports:
+      - "8083:8080"
+      - "5007:5005"
+
+  ticket-preview:
+    container_name: ticket-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/ticket-service:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${TICKET_DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_FLYWAY_SCHEMAS: ${TICKET_DB_SCHEMA:-ticket-dev}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${TICKET_DB_SCHEMA:-ticket-dev}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      EVENT_URL: ${EVENT_DEV:-http://event-preview:8080}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backend_net]
+    ports:
+      - "8084:8080"
+      - "5010:5005"
+
+  payment-preview:
+    container_name: payment-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/payment-service:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${PAYMENT_DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_FLYWAY_SCHEMAS: ${PAYMENT_DB_SCHEMA:-payments}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${PAYMENT_DB_SCHEMA:-payments}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-APP_USR-3149021535390307-110914-55fe675713252fa4a2d138b203497d1f-2977404984}
+      MERCADOPAGO_NOTIFICATION_URL: ${MERCADOPAGO_NOTIFICATION_URL:-https://windy-nydia-noncoincident.ngrok-free.dev/webhook}
+      MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET:-82a340637b5047413ca7508084133830d307f38743778ebee3bb38e84fb454b3}
+      MERCADOPAGO_SUCCESS_URL: ${MERCADOPAGO_SUCCESS_URL:-http://localhost:3000/my-tickets}
+      MERCADOPAGO_FAILURE_URL: ${MERCADOPAGO_FAILURE_URL:-http://localhost:3000/dashboard}
+      MERCADOPAGO_PENDING_URL: ${MERCADOPAGO_PENDING_URL:-http://localhost:3000/my-tickets}
+      ORDER_SERVICE_URL: ${ORDER_SERVICE_URL:-http://order-preview:8080}
+      TICKET_SERVICE_URL: ${TICKET_SERVICE_URL:-http://ticket-preview:8080}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backend_net]
+    ports:
+      - "8081:8080"
+      - "5009:5005"
+
+  notification-preview:
+    container_name: notification-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/notification-service:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${NOTIFICATION_DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_FLYWAY_SCHEMAS: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${NOTIFICATION_DB_SCHEMA:-notification-dev}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backend_net]
+    ports:
+      - "8086:8080"
+      - "5008:5005"
+
+  order-preview:
+    container_name: order-preview
+    image: maven:3.9.8-eclipse-temurin-17
+    working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - |
+        set -e
+        mvn -q -Pdev -DskipTests dependency:go-offline
+        exec mvn -q -Pdev \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-XX:MaxRAMPercentage=75.0" \
+          -Dspring-boot.run.fork=false \
+          spring-boot:run
+    volumes:
+      - ./backend/order-service:/workspace
+      - maven_cache_preview:/root/.m2
+      - ./keys/jwtRS256.key.pub:/app/keys/jwtRS256.key.pub:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=${ORDER_DB_SCHEMA},public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_FLYWAY_SCHEMAS: ${ORDER_DB_SCHEMA:-order-dev}
+      SPRING_FLYWAY_DEFAULT_SCHEMA: ${ORDER_DB_SCHEMA:-order-dev}
+      SPRING_FLYWAY_CREATE_SCHEMAS: "true"
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwtRS256.key.pub
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      PAYMENT_SERVICE_URL: http://payment-preview:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backend_net]
+    ports:
+      - "8087:8080"
+      - "5011:5005"
+
+  frontend-preview:
+    container_name: frontend-preview
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        - NEXT_PUBLIC_API_URL=https://leana-hypersophisticated-scarlett.ngrok-free.dev/api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - gateway-preview
+    networks: [backend_net]
+
+networks:
+  backend_net:
+
+volumes:
+  postgres_data_preview:
+  maven_cache_preview:
+  rabbitmq_data_preview:
+  redis_data_preview:

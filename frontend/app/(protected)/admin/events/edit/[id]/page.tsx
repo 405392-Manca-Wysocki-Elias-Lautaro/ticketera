@@ -29,13 +29,13 @@ import { ArrowLeft, Plus, Trash2, CalendarIcon, Loader2 } from "lucide-react"
 import type { CreateEvent, CreateSeat } from "@/types/Request/CreateEvent"
 import { useCategories } from "@/hooks/event/useCategories"
 import { toast } from "sonner"
-import { toast } from "sonner"
 import { useEvent } from '@/hooks/event/useEvent'
 import { EventStaffManager } from "@/components/admin/event/EventStaffManager"
 
 export default function EditEventPage() {
     const router = useRouter();
-    const { id } = useParams();
+    const params = useParams();
+    const id = Array.isArray(params.id) ? params.id[0] : params.id;
     const { user, isLoading: isLoadingAuth } = useAuth();
 
     const { data: event, isLoading: isLoadingEvent } = useEvent(id);
@@ -261,7 +261,7 @@ export default function EditEventPage() {
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent>
-                                                <Calendar selected={field.value} onSelect={field.onChange} />
+                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
                                             </PopoverContent>
                                         </Popover>
                                     )}
@@ -286,7 +286,7 @@ export default function EditEventPage() {
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent>
-                                                <Calendar selected={field.value} onSelect={field.onChange} />
+                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
                                             </PopoverContent>
                                         </Popover>
                                     )}
@@ -454,7 +454,7 @@ export default function EditEventPage() {
                                                         <Plus className="mr-2 h-4 w-4" /> Agregar fila
                                                     </Button>
 
-                                                    {(rows ?? []).map((row, rowIndex) => (
+                                                    {(rows ?? []).map((row: { id: string; name: string; startSeat: number; endSeat: number }, rowIndex: number) => (
 
                                                         <div key={row.id} className="grid grid-cols-12 gap-2 items-center">
 
@@ -481,7 +481,7 @@ export default function EditEventPage() {
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => {
-                                                                    const newRows = rows.filter(r => r.id !== row.id)
+                                                                    const newRows = rows.filter((r: { id: string }) => r.id !== row.id)
                                                                     setValue(`areas.${i}.rows`, newRows)
                                                                 }}
                                                             >
@@ -519,11 +519,11 @@ export default function EditEventPage() {
                             </Button>
                         </StarBorder>
                     </div>
-                    </div>
+
                 </form>
 
                 <div className="mt-12">
-                     <EventStaffManager eventId={id as string} />
+                    <EventStaffManager eventId={id as string} />
                 </div>
             </div >
         </div >

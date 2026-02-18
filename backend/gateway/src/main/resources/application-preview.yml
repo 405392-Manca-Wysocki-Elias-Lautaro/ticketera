@@ -1,0 +1,207 @@
+spring:
+  config:
+    activate:
+      on-profile: preview
+
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: false
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+
+        - id: auth
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth-preview:8080}"
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/auth/(?<segment>.*), /${segment}
+          order: -100
+        
+        - id: events
+          uri: "${SERVICES_EVENT_BASE_URL:http://event-preview:8080}"
+          predicates:
+            - Path=/api/events/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/events/?(?<segment>.*), /${segment}
+          order: -100
+
+        - id: tickets
+          uri: "${SERVICES_TICKET_BASE_URL:http://ticket-preview:8080}"
+          predicates:
+            - Path=/api/tickets/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/tickets/(?<segment>.*), /${segment}
+          order: -100
+
+        - id: payments
+          uri: "${SERVICES_PAYMENT_BASE_URL:http://payment-preview:8080}"
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/payments/(?<segment>.*), /${segment}
+          order: -100
+
+        # Webhook route for MercadoPago (public, no auth required) - alta prioridad
+        - id: mercadopago-webhook
+          uri: "${SERVICES_PAYMENT_BASE_URL:http://payment-preview:8080}"
+          predicates:
+            - Path=/webhook
+          filters:
+            - PreserveHostHeader
+          order: -100
+
+        - id: staff
+          uri: "${SERVICES_AUTH_BASE_URL:http://auth-preview:8080}"
+          predicates:
+            - Path=/api/staff/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/staff/(?<segment>.*), /staff/${segment}
+          order: -100
+
+        - id: notifications
+          uri: "${SERVICES_NOTIFICATION_BASE_URL:http://notification-preview:8080}"
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/notifications/(?<segment>.*), /${segment}
+          order: -100
+
+        - id: orders
+          uri: "${SERVICES_ORDER_BASE_URL:http://order-preview:8080}"
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - PreserveHostHeader
+            - RewritePath=/api/orders/(?<segment>.*), /${segment}
+          order: -100
+
+        # --- OpenAPI aggregation ---
+        - id: openapi-auth
+          uri: http://auth-preview:8080
+          predicates:
+            - Path=/v3/api-docs/auth
+          filters:
+            - RewritePath=/v3/api-docs/auth, /v3/api-docs
+        - id: openapi-events
+          uri: http://event-preview:8080
+          predicates:
+            - Path=/v3/api-docs/events
+          filters:
+            - RewritePath=/v3/api-docs/events, /v3/api-docs
+        - id: openapi-tickets
+          uri: http://ticket-preview:8080
+          predicates:
+            - Path=/v3/api-docs/tickets
+          filters:
+            - RewritePath=/v3/api-docs/tickets, /v3/api-docs
+        - id: openapi-payments
+          uri: http://payment-preview:8080
+          predicates:
+            - Path=/v3/api-docs/payments
+          filters:
+            - RewritePath=/v3/api-docs/payments, /v3/api-docs
+        - id: openapi-notifications
+          uri: http://notification-preview:8080
+          predicates:
+            - Path=/v3/api-docs/notifications
+          filters:
+            - RewritePath=/v3/api-docs/notifications, /v3/api-docs
+        - id: openapi-orders
+          uri: http://order-preview:8080
+          predicates:
+            - Path=/v3/api-docs/orders
+          filters:
+            - RewritePath=/v3/api-docs/orders, /v3/api-docs
+
+        # Frontend Preview routes (production build)
+        - id: next-static-preview
+          uri: http://frontend-preview:3000
+          predicates:
+            - Path=/_next/**
+          filters:
+            - PreserveHostHeader
+          order: -200
+
+        - id: next-public-preview
+          uri: http://frontend-preview:3000
+          predicates:
+            - Path=/favicon.ico, /manifest.webmanifest, /assets/**, /textures/**, /__nextjs_font/**
+          filters:
+            - PreserveHostHeader
+          order: -150
+
+        - id: frontend-preview
+          uri: http://frontend-preview:3000
+          predicates:
+            - Path=/**
+          filters:
+            - PreserveHostHeader
+          order: -100
+
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins: 
+              - "https://*.ngrok-free.dev"
+              - "http://localhost:[*]"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowedOriginPatterns: "*"
+            exposedHeaders:
+              - "Set-Cookie"
+            allowCredentials: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    urls:
+      - name: auth
+        url: /v3/api-docs/auth
+      - name: events
+        url: /v3/api-docs/events
+      - name: tickets
+        url: /v3/api-docs/tickets
+      - name: payments
+        url: /v3/api-docs/payments
+      - name: notifications
+        url: /v3/api-docs/notifications
+      - name: orders
+        url: /v3/api-docs/orders
+    persist-authorization: true
+    try-it-out-enabled: true
+    display-request-duration: true
+    disable-swagger-default-url: true
+    config-url: /v3/api-docs/swagger-config
+  server-url: http://localhost:8080
+  cors:
+    enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.security: DEBUG
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.web.reactive.function.client: TRACE
+    org.springframework.web.reactive.function.server: TRACE
+
+management:
+  endpoint:
+    health:
+      show-details: always

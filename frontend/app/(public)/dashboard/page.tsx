@@ -10,7 +10,7 @@ import { EventCard } from '@/components/dashboard/EventCard'
 import { useEvents } from '@/hooks/event/useEvents'
 import { useCategories } from '@/hooks/event/useCategories'
 import { Category } from '@/types/Category'
-import { InstallPWAButton } from '@/components/pwa/InstallPwaButton'
+import { PWAInstallButton } from "@/components/pwa/PWAInstallButton"
 
 export default function DashboardPage() {
 
@@ -48,7 +48,7 @@ export default function DashboardPage() {
         <div className="h-screen bg-background overflow-auto">
             <Navbar />
 
-            <InstallPWAButton />
+            <PWAInstallButton />
 
             <div className="h-auto w-full mx-auto px-6 py-8">
                 {/* Header */}

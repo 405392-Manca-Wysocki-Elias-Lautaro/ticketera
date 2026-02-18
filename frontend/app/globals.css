@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -239,7 +240,12 @@ canvas {
 }
 
 /* Prevenir selección de texto en elementos no editables */
-h1, h2, h3, h4, h5, h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 p:not([contenteditable]),
 span:not([contenteditable]),
 div:not([contenteditable]),
@@ -251,7 +257,7 @@ section,
 article,
 aside,
 main,
-form > *:not(input):not(textarea):not([contenteditable]),
+form>*:not(input):not(textarea):not([contenteditable]),
 .card,
 .card-title,
 .card-description,

@@ -46,6 +46,7 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/r
+      - classpath:db/seed
     clean-disabled: true
 
 external:

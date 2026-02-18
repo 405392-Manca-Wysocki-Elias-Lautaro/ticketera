@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export function generateViewport() {
     return {
-        themeColor: "#ED1C24"
+        themeColor: "#C204B1"
     }
 }
 

@@ -37,6 +37,10 @@ RUN pnpm install --frozen-lockfile
 # Copiar código completo
 COPY . .
 
+# ARG para la URL de la API (se pasa en build time)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 # Ejecutar build
 RUN pnpm run build
 
@@ -56,7 +60,7 @@ RUN npm install -g pnpm
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY --from=builder /app/next.config.js ./next.config.js
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000

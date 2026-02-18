@@ -3,7 +3,7 @@ project:
 
 spring:
   application:
-    name: notification-service
+    name: event-service
   main.banner-mode: "off"
   sql.init.mode: never
 
