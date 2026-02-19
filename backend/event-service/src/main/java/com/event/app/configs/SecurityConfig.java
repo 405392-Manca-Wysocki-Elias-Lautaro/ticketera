@@ -10,6 +10,8 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,6 +32,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
+                // 1. Docs & Internal
                 .requestMatchers(
                     "/actuator/**",
                     "/v3/api-docs/**",
@@ -37,6 +40,19 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/internal/**"
                 ).permitAll()
+
+                // 2. Protected Endpoints (Specific rules first)
+                .requestMatchers("/my-organization/**").authenticated()
+                .requestMatchers("/staff/**").authenticated()
+                .requestMatchers("/metrics/**").authenticated()
+                .requestMatchers("/{id}/staff/**").authenticated()
+
+                // 3. Public Endpoints
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/categories/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/*").permitAll()
+
+                // 4. Default
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)));
