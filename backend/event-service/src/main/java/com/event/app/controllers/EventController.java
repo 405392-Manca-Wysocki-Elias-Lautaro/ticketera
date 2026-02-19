@@ -105,11 +105,17 @@ public class EventController {
             throw new UnauthorizedException("Solo el personal autorizado puede acceder a esta funcionalidad");
         }
 
-        // Obtener el organizerId del JWT
-        UUID organizerId = jwtUtils.getOrganizerId();
-        
-        // Obtener eventos del organizador asignado al usuario
-        List<EventSummaryDTO> events = eventService.getEventsByOrganizerId(organizerId);
+        List<EventSummaryDTO> events;
+
+        if (jwtUtils.isOwner()) {
+            // Si es OWNER, ve todos los eventos de su organización
+            UUID organizerId = jwtUtils.getOrganizerId();
+            events = eventService.getEventsByOrganizerId(organizerId);
+        } else {
+            // Si es STAFF, solo ve los eventos asignados
+            UUID userId = jwtUtils.getUserId();
+            events = eventService.getEventsForUser(userId);
+        }
         
         return ApiResponseFactory.success("Eventos obtenidos exitosamente", events);
     }

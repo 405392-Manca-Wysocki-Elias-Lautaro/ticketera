@@ -11,4 +11,6 @@ public class TicketValidateRequest {
 
     @NotBlank
     private String value;
+
+    private java.util.UUID eventId;
 }

@@ -19,22 +19,22 @@ VALUES
   -- Evento 1: Concierto de Rock Nacional
   ('11111111-1111-1111-1111-111111111111', 'c0c0c0c0-c0c0-c0c0-c0c0-c0c0c0c0c0c0', 'Rock Nacional: Los Auténticos Decadentes', 'rock-nacional-decadentes', 'Los Auténticos Decadentes presentan su nuevo álbum en un show imperdible con todos sus clásicos.', 
    (SELECT id FROM events.categories WHERE name = 'Teatro' LIMIT 1), -- Usamos Teatro temporalmente o buscamos otra si existiera Música
-   '/rock-festival-concert-stage-lights-crowd.jpg', 'published', 'Movistar Arena', 'Estadio cubierto de última generación', 'Av. Corrientes 6271', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6037, -58.4214, '2025-12-10T21:00:00-03:00', '2025-12-11T00:00:00-03:00', true),
+   '/rock-festival-concert-stage-lights-crowd.jpg', 'published', 'Movistar Arena', 'Estadio cubierto de última generación', 'Av. Corrientes 6271', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6037, -58.4214, '2026-02-20T20:00:00-03:00', '2026-02-20T23:00:00-03:00', true),
   
   -- Evento 2: Obra de Teatro
   ('22222222-2222-2222-2222-222222222222', 'c0c0c0c0-c0c0-c0c0-c0c0-c0c0c0c0c0c0', 'Esperando la Carroza - El Musical', 'esperando-la-carroza-musical', 'La clásica comedia argentina llevada al formato musical con un elenco de lujo.', 
    (SELECT id FROM events.categories WHERE name = 'Teatro' LIMIT 1),
-   '/theater-play-stage-performance-dramatic-lighting.jpg', 'published', 'Teatro El Nacional', 'Teatro histórico en el barrio de San Nicolás', 'Av. Corrientes 960', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6037, -58.3816, '2025-11-20T20:00:00-03:00', '2025-11-20T22:30:00-03:00', true),
+   '/theater-play-stage-performance-dramatic-lighting.jpg', 'published', 'Teatro El Nacional', 'Teatro histórico en el barrio de San Nicolás', 'Av. Corrientes 960', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6037, -58.3816, '2026-02-20T19:30:00-03:00', '2026-02-20T22:00:00-03:00', true),
   
   -- Evento 3: Conferencia de Tecnología
   ('33333333-3333-3333-3333-333333333333', 'c0c0c0c0-c0c0-c0c0-c0c0-c0c0c0c0c0c0', 'TechConf Argentina 2025', 'techconf-argentina-2025', 'La conferencia de tecnología más importante de Argentina. Charlas sobre IA, Cloud, DevOps y más.', 
    (SELECT id FROM events.categories WHERE name = 'Tecnología' LIMIT 1),
-   '/tech-conference-modern.jpg', 'published', 'Centro de Convenciones Buenos Aires', 'Moderno centro de convenciones en Puerto Madero', 'Av. Alicia Moreau de Justo 200', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6118, -58.3632, '2025-11-05T09:00:00-03:00', '2025-11-05T19:00:00-03:00', true),
+   '/tech-conference-modern.jpg', 'published', 'Centro de Convenciones Buenos Aires', 'Moderno centro de convenciones en Puerto Madero', 'Av. Alicia Moreau de Justo 200', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6118, -58.3632, '2026-02-20T15:00:00-03:00', '2026-02-20T22:00:00-03:00', true),
   
   -- Evento 4: Festival Gastronómico
   ('44444444-4444-4444-4444-444444444444', 'c0c0c0c0-c0c0-c0c0-c0c0-c0c0c0c0c0c0', 'Festival del Asado Argentino', 'festival-asado-argentino', 'El mejor festival de asado con parrilleros de todo el país. Degustaciones, música en vivo y más.', 
    (SELECT id FROM events.categories WHERE name = 'Gastronomía' LIMIT 1),
-   '/jazz-concert-intimate-venue-saxophone-piano.jpg', 'published', 'Parque de la Ciudad', 'Amplio espacio verde al aire libre', 'Av. Fernández de la Cruz 4200', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6753, -58.4789, '2025-12-01T12:00:00-03:00', '2025-12-01T20:00:00-03:00', true)
+   '/jazz-concert-intimate-venue-saxophone-piano.jpg', 'published', 'Parque de la Ciudad', 'Amplio espacio verde al aire libre', 'Av. Fernández de la Cruz 4200', 'Buenos Aires', 'Buenos Aires', 'Argentina', -34.6753, -58.4789, '2026-02-20T17:00:00-03:00', '2026-02-20T23:00:00-03:00', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Crear áreas para cada evento

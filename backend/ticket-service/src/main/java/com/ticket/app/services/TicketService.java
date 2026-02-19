@@ -8,8 +8,8 @@ import com.ticket.app.dto.request.TicketGenerateRequest;
 
 public interface TicketService {
     TicketModel generateTicket(TicketGenerateRequest request);
-    TicketModel validateByQrToken(String qrToken);
-    TicketModel validateByCode(String code);
+    TicketModel validateByQrToken(String qrToken, UUID eventId);
+    TicketModel validateByCode(String code, UUID eventId);
     TicketModel getById(UUID id);
     List<TicketModel> getByUserId();
 }

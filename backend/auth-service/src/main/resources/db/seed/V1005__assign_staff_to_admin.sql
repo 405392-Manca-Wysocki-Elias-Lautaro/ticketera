@@ -1,8 +1,8 @@
 DO $$
 DECLARE
     admin_org_id UUID;
-    staff_user_email VARCHAR := 'staff@ticketera.com';
-    admin_user_email VARCHAR := 'admin@ticketera.com';
+    staff_user_email VARCHAR := 'staff@ticketly.com';
+    admin_user_email VARCHAR := 'admin@ticketly.com';
 BEGIN
     -- 1. Asegurar que admin tenga organization_id
     -- Si ya tiene, lo usa. Si no, genera uno nuevo.

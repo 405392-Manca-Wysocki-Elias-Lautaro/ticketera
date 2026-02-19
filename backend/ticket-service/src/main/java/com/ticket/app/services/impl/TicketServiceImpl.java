@@ -126,7 +126,7 @@ public class TicketServiceImpl implements TicketService {
     // ------------------------------------------------------------
     @Override
     @Transactional
-    public TicketModel validateByQrToken(String qrToken) {
+    public TicketModel validateByQrToken(String qrToken, UUID eventId) {
 
         UserRole role = jwtUtils.getRole();
 
@@ -136,25 +136,30 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket entity = ticketRepository.findByQrToken(qrToken)
                 .orElseThrow(TicketNotFoundException::new);
-        return validateAndUpdate(entity);
+        return validateAndUpdate(entity, eventId);
     }
 
     @Override
     @Transactional
-    public TicketModel validateByCode(String code) {
+    public TicketModel validateByCode(String code, UUID eventId) {
         Ticket entity = ticketRepository.findByCode(code)
                 .orElseThrow(TicketNotFoundException::new);
 
-        return validateAndUpdate(entity);
+        return validateAndUpdate(entity, eventId);
     }
 
-    private TicketModel validateAndUpdate(Ticket entity) {
+    private TicketModel validateAndUpdate(Ticket entity, UUID eventId) {
 
         UserRole role = jwtUtils.getRole();
 
         // 🔒 Only privileged users (ADMIN, STAFF) can validate tickets
         if (!RoleUtil.isPrivileged(role)) {
             throw new UnauthorizedTicketAccessException();
+        }
+
+        // 🛑 Check if ticket belongs to the selected event
+        if (!entity.getEventId().equals(eventId)) {
+            throw new com.ticket.app.exception.exceptions.TicketEventMismatchException();
         }
 
         TicketStatus fromStatus = entity.getStatus();

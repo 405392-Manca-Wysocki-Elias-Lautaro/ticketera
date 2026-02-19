@@ -19,6 +19,8 @@ public enum ErrorCatalog {
             "The ticket has expired."),
     INVALID_TICKET_VALIDATION_TYPE(HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_TICKET_VALIDATION_TYPE,
             "Invalid ticket validation type. Accepted values are 'QR' or 'CODE'."),
+    TICKET_EVENT_MISMATCH(HttpStatus.BAD_REQUEST, ErrorCodes.TICKET_EVENT_MISMATCH,
+            "The ticket does not belong to the selected event."),
     // 🧾 Holds
     HOLD_CONVERSION_ERROR(HttpStatus.CONFLICT, ErrorCodes.HOLD_CONVERSION_ERROR,
             "The hold cannot be converted because it is not active."),

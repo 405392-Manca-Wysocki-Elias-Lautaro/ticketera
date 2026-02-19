@@ -88,6 +88,13 @@ public class GlobalExceptionHandler {
         return ApiErrorFactory.error(ErrorCatalog.INVALID_TICKET_VALIDATION_TYPE, null);
     }
 
+    @ExceptionHandler(TicketEventMismatchException.class)
+    public ResponseEntity<ApiResponse<ApiError>> handleEventMismatch(TicketEventMismatchException ex,
+            HttpServletRequest request) {
+        log.warn("Ticket event mismatch at {}: {}", request.getRequestURI(), ex.getMessage());
+        return ApiErrorFactory.error(ErrorCatalog.TICKET_EVENT_MISMATCH, null);
+    }
+
     @ExceptionHandler(SeatAlreadyHeldException.class)
     public ResponseEntity<ApiResponse<ApiError>> handleSeatAlreadyHeld(SeatAlreadyHeldException ex,
             HttpServletRequest request) {

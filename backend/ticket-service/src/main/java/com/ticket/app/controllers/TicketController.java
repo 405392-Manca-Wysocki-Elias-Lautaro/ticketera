@@ -41,9 +41,9 @@ public class TicketController {
         TicketModel ticket;
 
         if ("QR".equalsIgnoreCase(request.getType())) {
-            ticket = ticketService.validateByQrToken(request.getValue());
+            ticket = ticketService.validateByQrToken(request.getValue(), request.getEventId());
         } else if ("CODE".equalsIgnoreCase(request.getType())) {
-            ticket = ticketService.validateByCode(request.getValue());
+            ticket = ticketService.validateByCode(request.getValue(), request.getEventId());
         } else {
             throw new InvalidTicketValidationTypeException(request.getType());
         }
