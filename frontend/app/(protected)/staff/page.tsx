@@ -11,8 +11,8 @@ import { useAuth } from "@/hooks/auth/useAuth"
 import { ValidationTabs } from "@/components/ticket/ValidationTabs"
 import { useRouter } from 'next/navigation'
 import { useValidateTicket } from '@/hooks/ticket/useValidateTicket'
-import { useEvents } from '@/hooks/event/useEvents'
-import { Event } from '@/types/Event'
+import { useAssignedEvents } from '@/hooks/event/useAssignedEvents'
+import { EventInfo } from '@/services/eventService'
 import {
     Select,
     SelectContent,
@@ -31,9 +31,9 @@ export default function StaffDashboardPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    const { data: assignedEvents, isLoading: isLoadingEvents } = useEvents();
+    const { data: assignedEvents, isLoading: isLoadingEvents } = useAssignedEvents();
 
-    const selectedEvent = assignedEvents?.find((e: Event) => e.id === selectedEventId)
+    const selectedEvent = assignedEvents?.find((e: EventInfo) => e.id === selectedEventId)
 
     // redirect if not admin
     useEffect(() => {
@@ -52,7 +52,7 @@ export default function StaffDashboardPage() {
         if (!value || isPending) return;
 
         validate(
-            { type, value },
+            { type, value, eventId: selectedEventId },
             {
                 onSuccess: (res: any) => {
                     setSuccess(res.data?.data?.code);
@@ -80,6 +80,10 @@ export default function StaffDashboardPage() {
 
                         case "EXPIRED_TICKET":
                             setError("El ticket ha expirado y no puede ser utilizado.");
+                            break;
+
+                        case "TICKET_EVENT_MISMATCH":
+                            setError("El ticket no pertenece al evento seleccionado.");
                             break;
 
                         case "INVALID_TICKET_VALIDATION_TYPE":
@@ -128,7 +132,7 @@ export default function StaffDashboardPage() {
                         <SelectContent>
                             {assignedEvents.map((ev) => (
                                 <SelectItem key={ev.id} value={ev.id}>
-                                    {ev.title} – {new Date(ev.date).toLocaleDateString("es-ES")}
+                                    {ev.title} – {ev.startsAt ? new Date(ev.startsAt).toLocaleDateString("es-ES") : "Fecha pendientes"}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -138,7 +142,7 @@ export default function StaffDashboardPage() {
                     {selectedEvent && (
                         <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
                             <Badge variant="outline">{selectedEvent.venueName}</Badge>
-                            <Badge variant="outline">{new Date(selectedEvent.startsAt).toLocaleDateString()}</Badge>
+                            <Badge variant="outline">{selectedEvent.startsAt ? new Date(selectedEvent.startsAt).toLocaleDateString() : "Fecha no disponible"}</Badge>
                             <Badge variant="outline">{selectedEvent.totalAvailableTickets} tickets</Badge>
                         </div>
                     )}

@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { ApiResponse } from "@/types/Response/Apiresponse";
+import type { ApiResponse } from "@/types/Response/ApiResponse";
 import type { OrganizerMetrics } from "@/types/OrganizerMetrics";
 import { CreateEvent } from '@/types/Request/CreateEvent';
 import { createCrudService } from "./createCrud";
@@ -17,6 +17,7 @@ export interface EventInfo {
     country?: string;
     startsAt?: string;
     endsAt?: string;
+    totalAvailableTickets?: number;
 }
 
 const BASE_URL = "/events";
@@ -80,6 +81,7 @@ export const eventService = {
     getAllCategories: () => api.get(`${BASE_URL}/categories`),
 
     // Staff management
+    getAssignedEvents: () => api.get<ApiResponse<EventInfo[]>>(`${BASE_URL}/staff`),
     assignStaff: (eventId: string, userId: string) => api.post<ApiResponse<void>>(`${BASE_URL}/${eventId}/staff`, { userId }),
     removeStaff: (eventId: string, userId: string) => api.delete<ApiResponse<void>>(`${BASE_URL}/${eventId}/staff/${userId}`),
     getEventStaff: (eventId: string) => api.get<ApiResponse<string[]>>(`${BASE_URL}/${eventId}/staff`),

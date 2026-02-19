@@ -9,6 +9,11 @@ const protectedRoutes = [
     "/profile",
 ]
 
+const protectedSubPaths = [
+    "/select-seats",
+    "/checkout"
+]
+
 // 👨‍👩‍👧‍👦 Rutas públicas que un usuario autenticado no debería visitar (ej: login)
 const publicOnlyRoutes = ["/login", "/signup", "/verify-email", "/forgot-password"]
 
@@ -18,12 +23,13 @@ export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
 
     const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
+    const isProtectedSubPath = protectedSubPaths.some(sub => pathname.includes(sub))
     const isPublicOnly = publicOnlyRoutes.includes(pathname)
 
     const isAuthenticated = refreshToken && sessionFlag
 
     // No autenticado → ruta protegida
-    if (!isAuthenticated && isProtected) {
+    if (!isAuthenticated && (isProtected || isProtectedSubPath)) {
         const loginUrl = new URL("/login", req.url)
         loginUrl.searchParams.set("from", pathname)
         return NextResponse.redirect(loginUrl)

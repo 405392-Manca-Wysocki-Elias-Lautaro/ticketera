@@ -15,8 +15,8 @@ import { useEvent } from '@/hooks/event/useEvent'
 export default function EventDetailPage() {
     const router = useRouter();
     const params = useParams();
-    const id = params.id;
-    const { isLoading: isLoadingAuth } = useAuth();
+    const id = Array.isArray(params.id) ? params.id[0] : params.id;
+    const { isLoading: isLoadingAuth, isAuthenticated } = useAuth();
     const { data: event, isLoading: isLoadingEvent } = useEvent(id);
 
     if (isLoadingAuth || isLoadingEvent) {
@@ -174,7 +174,13 @@ export default function EventDetailPage() {
                                     <Button
                                         className="w-full gradient-brand text-white"
                                         size="lg"
-                                        onClick={() => router.push(`/event/${event?.id}/select-seats`)}
+                                        onClick={() => {
+                                            if (!isAuthenticated) {
+                                                router.push(`/login?from=/event/${event?.id}/select-seats`)
+                                                return
+                                            }
+                                            router.push(`/event/${event?.id}/select-seats`)
+                                        }}
                                     >
                                         Comprar Entradas
                                     </Button>

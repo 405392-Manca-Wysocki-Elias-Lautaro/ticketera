@@ -40,7 +40,7 @@ export default function TicketCard({ ticket, onViewQR }: { ticket: Ticket; onVie
                 <div className="flex-1 space-y-4">
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
-                            <h3 className="font-bold text-lg line-clamp-2 mb-1">{ticket?.event?.eventTitle}</h3>
+                            <h3 className="font-bold text-lg line-clamp-2 mb-1">{ticket?.event?.title}</h3>
                             <Badge variant={ticket.status === TicketStatus.ISSUED ? "secondary" : "default"}>
                                 {ticket.status === TicketStatus.ISSUED ? "Válido" : "Usado"}
                             </Badge>

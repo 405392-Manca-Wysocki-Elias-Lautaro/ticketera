@@ -25,10 +25,11 @@ export const ticketService = {
   /**
    * Valida un ticket por su código QR o código manual
    */
-  async validateTicket(type: 'QR' | 'CODE', value: string): Promise<Ticket> {
+  async validateTicket(type: 'QR' | 'CODE', value: string, eventId: string): Promise<Ticket> {
     const response = await api.post<ApiResponse<Ticket>>('/tickets/validate', {
       type,
-      value
+      value,
+      eventId
     });
     return response.data.data;
   },
@@ -42,8 +43,8 @@ export const ticketService = {
   },
 
 
-    getByUserId: () => api.get<ApiResponse<Ticket>>(`${BASE_URL}/user`),
-    validate: (data: ValidateTicket) => api.post<ApiResponse<Ticket>>(`${BASE_URL}/validate`, data),
+  getByUserId: () => api.get<ApiResponse<Ticket>>(`${BASE_URL}/user`),
+  validate: (data: ValidateTicket) => api.post<ApiResponse<Ticket>>(`${BASE_URL}/validate`, data),
 
 };
 

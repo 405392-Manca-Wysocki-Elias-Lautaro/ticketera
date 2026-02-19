@@ -1,7 +1,7 @@
 export interface Ticket {
     id: string
     eventId: string
-    eventTitle: string
+    title: string
     eventDate: string
     eventTime: string
     eventLocation: string
@@ -16,7 +16,7 @@ export const mockTickets: Ticket[] = [
     {
         id: "t1",
         eventId: "1",
-        eventTitle: "Festival de Rock 2025",
+        title: "Festival de Rock 2025",
         eventDate: "2025-11-20T18:00:00",
         eventTime: "18:00",
         eventLocation: "Estadio Ciudad de La Plata",
@@ -28,7 +28,7 @@ export const mockTickets: Ticket[] = [
     {
         id: "t2",
         eventId: "2",
-        eventTitle: "Rock & Lights Experience",
+        title: "Rock & Lights Experience",
         eventDate: "2025-12-10T21:00:00",
         eventTime: "21:00",
         eventLocation: "Luna Park, Buenos Aires",
@@ -41,7 +41,7 @@ export const mockTickets: Ticket[] = [
     {
         id: "t3",
         eventId: "6",
-        eventTitle: "Jazz Íntimo en Palermo",
+        title: "Jazz Íntimo en Palermo",
         eventDate: "2025-11-28T22:00:00",
         eventTime: "22:00",
         eventLocation: "Thelonious Club, Palermo",
@@ -54,7 +54,7 @@ export const mockTickets: Ticket[] = [
     {
         id: "t4",
         eventId: "10",
-        eventTitle: "Obra de Teatro 'Sombras del Tiempo'",
+        title: "Obra de Teatro 'Sombras del Tiempo'",
         eventDate: "2025-11-27T20:00:00",
         eventTime: "20:00",
         eventLocation: "Teatro San Martín, Buenos Aires",
@@ -67,7 +67,7 @@ export const mockTickets: Ticket[] = [
     {
         id: "t5",
         eventId: "5",
-        eventTitle: "Partido Final Copa de Oro",
+        title: "Partido Final Copa de Oro",
         eventDate: "2025-12-12T17:00:00",
         eventTime: "17:00",
         eventLocation: "Estadio Único Madre de Ciudades",

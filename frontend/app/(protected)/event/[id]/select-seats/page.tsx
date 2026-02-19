@@ -136,7 +136,7 @@ export default function SelectSeatsPage() {
                     </Link>
                 </Button>
 
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{event.eventTitle}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">{event.title}</h1>
                 <p className="text-muted-foreground mb-8">Selecciona tu área y asientos</p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

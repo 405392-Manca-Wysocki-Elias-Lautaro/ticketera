@@ -4,7 +4,7 @@ import { Category } from "./Category"
 export interface Event {
     id: string
     organizerId: string
-    eventTitle: string
+    title: string
     slug: string
     description: string
     coverUrl: string

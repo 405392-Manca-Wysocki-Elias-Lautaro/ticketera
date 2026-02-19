@@ -40,7 +40,7 @@ export default function MyTicketsPage() {
 
     const validTickets = tickets.filter((t: Ticket) => t.status === TicketStatus.ISSUED);
     const usedTickets = tickets.filter((t: Ticket) => t.status === TicketStatus.CHECKED_IN);
-    
+
     const handleViewQR = (ticket: Ticket) => {
         setSelectedTicket(ticket)
     }
@@ -104,7 +104,7 @@ export default function MyTicketsPage() {
                     <LanyardTicket
                         code={selectedTicket.code}
                         qrCode={selectedTicket.qrBase64}
-                        eventTitle={selectedTicket.event?.eventTitle}
+                        eventTitle={selectedTicket.event?.title}
                         areaName={selectedTicket.event?.area?.name}
                         seatNumber={selectedTicket.event?.area?.seat || null}
                         onClose={() => setSelectedTicket(null)}
