@@ -168,7 +168,8 @@ public class EventServiceImpl implements IEventService {
 
     @Override
     public List<EventSummaryDTO> getAllEventsSummary() {
-        List<EventEntity> events = eventRepository.findByActiveTrue();
+        // Solo muestra eventos activos cuya fecha de fin aún no ha pasado
+        List<EventEntity> events = eventRepository.findByActiveTrueAndEndsAtAfter(LocalDateTime.now());
         
         return events.stream()
                 .map(this::mapToEventSummary)
@@ -181,7 +182,9 @@ public class EventServiceImpl implements IEventService {
             return getAllEventsSummary();
         }
         
-        List<EventEntity> events = eventRepository.findByTitleContainingIgnoreCaseAndActiveTrue(title.trim());
+        // Filtra por título y también excluye eventos vencidos
+        List<EventEntity> events = eventRepository
+                .findByTitleContainingIgnoreCaseAndActiveTrueAndEndsAtAfter(title.trim(), LocalDateTime.now());
         
         return events.stream()
                 .map(this::mapToEventSummary)

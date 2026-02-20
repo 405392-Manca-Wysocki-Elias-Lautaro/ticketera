@@ -37,4 +37,6 @@ public class RegisterRequest {
     private String organizationName;
 
     private String organizationAddress;
+
+    private boolean termsAccepted;
 }

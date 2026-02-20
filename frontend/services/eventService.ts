@@ -7,6 +7,7 @@ import { createCrudService } from "./createCrud";
 // Interface básica del evento (puedes expandirla según necesites)
 export interface EventInfo {
     id: string;
+    organizerId: string;
     title: string;
     description?: string;
     coverUrl?: string;

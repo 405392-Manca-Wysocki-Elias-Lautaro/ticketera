@@ -73,7 +73,7 @@ export default function CheckoutPage() {
                 couponCode.toUpperCase(),
                 event?.id || "",
                 subtotalCents,
-                event?.organizerId || event?.id || "",
+                event?.organizerId || "",
                 user?.id
             )
 
@@ -121,7 +121,7 @@ export default function CheckoutPage() {
         const pollInterval = setInterval(async () => {
             try {
                 const data = await orderService.getPaymentStatus(paymentOrderId);
-                
+
                 if (data.status === 'CAPTURED') {
                     clearInterval(pollInterval);
                     toast.success("Pago confirmado. Redirigiendo a tus tickets...");
@@ -195,13 +195,13 @@ export default function CheckoutPage() {
                 setIsProcessing(false);
                 return;
             }
-            
+
             const eventId = event.id;
-            
+
             const items = parsedSeats.length > 0
                 ? parsedSeats.map((seat: { row: string; seat: number }) => {
                     const seatId = `${seat.row}-${seat.seat}`;
-                    
+
                     return {
                         eventId: eventId,
                         venueAreaId: areaId,
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                     phone: phone,
                     userId: user.id,
                 },
-                organizerId: event.organizerId || event.id,
+                organizerId: event.organizerId,
                 items: items,
                 currency: "ARS",
                 paymentDescription: `Entradas para ${event.title}`,
@@ -259,9 +259,9 @@ export default function CheckoutPage() {
             mpWindow?.close();
             console.error("Error creando orden:", error);
             console.error("API Error:", error.response?.data);
-            
+
             const errorMessage = error.response?.data?.message || error.message || "";
-            
+
             if (error.response?.status === 401) {
                 toast.error("Error de autenticación. Por favor, inicia sesión nuevamente.");
             } else if (error.response?.status === 409) {
@@ -371,271 +371,271 @@ export default function CheckoutPage() {
                     </Card>
                 ) : (
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Payment Form */}
-                    <div className="md:col-span-2">
-                        <form onSubmit={handleCreateOrder} className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <CreditCard className="h-5 w-5" />
-                                        Informaci&oacute;n de Contacto
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input 
-                                            id="email" 
-                                            type="email" 
-                                            defaultValue={user.email} 
-                                            disabled
-                                            className="bg-muted"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="firstName">Nombre</Label>
-                                        <Input 
-                                            id="firstName" 
-                                            defaultValue={user.firstName || ""} 
-                                            disabled
-                                            className="bg-muted"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="lastName">Apellido</Label>
-                                        <Input 
-                                            id="lastName" 
-                                            defaultValue={user.lastName || ""} 
-                                            disabled
-                                            className="bg-muted"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone">Tel&eacute;fono</Label>
-                                        <Input
-                                            id="phone"
-                                            type="tel"
-                                            placeholder="+54 11 1234-5678"
-                                            value={phone}
-                                            onChange={(e) => {
-                                                setPhone(e.target.value)
-                                                if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }))
-                                            }}
-                                            required
-                                        />
-                                        {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>M&eacute;todo de Pago</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="text-sm text-muted-foreground mb-4">
-                                        Se abrir&aacute; Mercado Pago en una nueva pesta&ntilde;a para completar tu pago de forma segura.
-                                    </div>
-
-                                    <StarBorder className='w-full'>
-                                        <Button 
-                                            type="submit" 
-                                            className="w-full gradient-brand text-white" 
-                                            size="lg" 
-                                            disabled={isProcessing}
-                                        >
-                                            {isProcessing ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Procesando...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Continuar con el pago
-                                                </>
-                                            )}
-                                        </Button>
-                                    </StarBorder>
-                                </CardContent>
-                            </Card>
-
-                            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                </svg>
-                                <span>Pago seguro procesado por Mercado Pago</span>
-                            </div>
-                        </form>
-                    </div>
-
-                    {/* Order Summary */}
-                    <div className="md:col-span-1">
-                        <Card className="sticky top-20">
-                            <CardHeader>
-                                <CardTitle>Resumen del Pedido</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <p className="font-semibold mb-1">{event.title}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {new Date(event.startsAt).toLocaleDateString("es-ES")} - {new Date(event.startsAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Área</span>
-                                        <span className="font-medium">{selectedArea.name}</span>
-                                    </div>
-
-                                    {selectedArea.isGeneralAdmission ? (
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Cantidad</span>
-                                            <span className="font-medium">
-                                                {quantity} entrada{Number(quantity) > 1 ? "s" : ""}
-                                            </span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Payment Form */}
+                        <div className="md:col-span-2">
+                            <form onSubmit={handleCreateOrder} className="space-y-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <CreditCard className="h-5 w-5" />
+                                            Informaci&oacute;n de Contacto
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                defaultValue={user.email}
+                                                disabled
+                                                className="bg-muted"
+                                            />
                                         </div>
-                                    ) : (
-                                        <div>
-                                            <div className="flex justify-between mb-1">
-                                                <span className="text-muted-foreground">Asientos</span>
-                                                <span className="font-medium">{parsedSeats.length}</span>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="firstName">Nombre</Label>
+                                            <Input
+                                                id="firstName"
+                                                defaultValue={user.firstName || ""}
+                                                disabled
+                                                className="bg-muted"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="lastName">Apellido</Label>
+                                            <Input
+                                                id="lastName"
+                                                defaultValue={user.lastName || ""}
+                                                disabled
+                                                className="bg-muted"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="phone">Tel&eacute;fono</Label>
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                placeholder="+54 11 1234-5678"
+                                                value={phone}
+                                                onChange={(e) => {
+                                                    setPhone(e.target.value)
+                                                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }))
+                                                }}
+                                                required
+                                            />
+                                            {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>M&eacute;todo de Pago</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="text-sm text-muted-foreground mb-4">
+                                            Se abrir&aacute; Mercado Pago en una nueva pesta&ntilde;a para completar tu pago de forma segura.
+                                        </div>
+
+                                        <StarBorder className='w-full'>
+                                            <Button
+                                                type="submit"
+                                                className="w-full gradient-brand text-white"
+                                                size="lg"
+                                                disabled={isProcessing}
+                                            >
+                                                {isProcessing ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Procesando...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Continuar con el pago
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </StarBorder>
+                                    </CardContent>
+                                </Card>
+
+                                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                    </svg>
+                                    <span>Pago seguro procesado por Mercado Pago</span>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Order Summary */}
+                        <div className="md:col-span-1">
+                            <Card className="sticky top-20">
+                                <CardHeader>
+                                    <CardTitle>Resumen del Pedido</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <p className="font-semibold mb-1">{event.title}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {new Date(event.startsAt).toLocaleDateString("es-ES")} - {new Date(event.startsAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Área</span>
+                                            <span className="font-medium">{selectedArea.name}</span>
+                                        </div>
+
+                                        {selectedArea.isGeneralAdmission ? (
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">Cantidad</span>
+                                                <span className="font-medium">
+                                                    {quantity} entrada{Number(quantity) > 1 ? "s" : ""}
+                                                </span>
                                             </div>
-                                            {parsedSeats.length <= 3 ? (
-                                                <div className="space-y-1 pl-4">
-                                                    {parsedSeats.map((seat: { row: string; seat: number }, idx: number) => (
-                                                        <p key={idx} className="text-xs text-muted-foreground">
-                                                            Fila {seat.row} - Asiento {seat.seat}
-                                                        </p>
-                                                    ))}
+                                        ) : (
+                                            <div>
+                                                <div className="flex justify-between mb-1">
+                                                    <span className="text-muted-foreground">Asientos</span>
+                                                    <span className="font-medium">{parsedSeats.length}</span>
                                                 </div>
-                                            ) : (
-                                                <Collapsible>
+                                                {parsedSeats.length <= 3 ? (
                                                     <div className="space-y-1 pl-4">
-                                                        {parsedSeats.slice(0, 2).map((seat: { row: string; seat: number }, idx: number) => (
+                                                        {parsedSeats.map((seat: { row: string; seat: number }, idx: number) => (
                                                             <p key={idx} className="text-xs text-muted-foreground">
                                                                 Fila {seat.row} - Asiento {seat.seat}
                                                             </p>
                                                         ))}
                                                     </div>
-                                                    <CollapsibleTrigger asChild>
-                                                        <Button variant="ghost" size="sm" className="h-6 text-xs pl-4 mt-1">
-                                                            Ver todos
-                                                            <ChevronDown className="ml-1 h-3 w-3" />
-                                                        </Button>
-                                                    </CollapsibleTrigger>
-                                                    <CollapsibleContent className="space-y-1 pl-4 mt-1">
-                                                        {parsedSeats.slice(2).map((seat: { row: string; seat: number }, idx: number) => (
-                                                            <p key={idx} className="text-xs text-muted-foreground">
-                                                                Fila {seat.row} - Asiento {seat.seat}
-                                                            </p>
-                                                        ))}
-                                                    </CollapsibleContent>
-                                                </Collapsible>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Precio unitario</span>
-                                        <span className="font-medium">{selectedArea.currency}${(selectedArea.priceCents / 100).toLocaleString()}</span>
-                                    </div>
-                                </div>
-
-                                {/* Cupón de descuento */}
-                                <div className="pt-4 border-t space-y-3">
-                                    <p className="text-sm font-medium flex items-center gap-1.5">
-                                        <Tag className="h-3.5 w-3.5" />
-                                        Cupón de descuento
-                                    </p>
-                                    {couponApplied ? (
-                                        <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-md px-3 py-2">
-                                            <div className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm font-mono font-bold text-green-700">{couponApplied}</span>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6"
-                                                onClick={handleRemoveCoupon}
-                                            >
-                                                <X className="h-3.5 w-3.5 text-muted-foreground" />
-                                            </Button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex gap-2">
-                                            <Input
-                                                placeholder="Código del cupón"
-                                                value={couponCode}
-                                                onChange={(e) => {
-                                                    setCouponCode(e.target.value.toUpperCase())
-                                                    setCouponError("")
-                                                }}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
-                                                        e.preventDefault()
-                                                        handleApplyCoupon()
-                                                    }
-                                                }}
-                                                className="text-sm font-mono"
-                                                disabled={couponLoading}
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handleApplyCoupon}
-                                                disabled={couponLoading || !couponCode.trim()}
-                                                className="shrink-0"
-                                            >
-                                                {couponLoading ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
                                                 ) : (
-                                                    "Aplicar"
+                                                    <Collapsible>
+                                                        <div className="space-y-1 pl-4">
+                                                            {parsedSeats.slice(0, 2).map((seat: { row: string; seat: number }, idx: number) => (
+                                                                <p key={idx} className="text-xs text-muted-foreground">
+                                                                    Fila {seat.row} - Asiento {seat.seat}
+                                                                </p>
+                                                            ))}
+                                                        </div>
+                                                        <CollapsibleTrigger asChild>
+                                                            <Button variant="ghost" size="sm" className="h-6 text-xs pl-4 mt-1">
+                                                                Ver todos
+                                                                <ChevronDown className="ml-1 h-3 w-3" />
+                                                            </Button>
+                                                        </CollapsibleTrigger>
+                                                        <CollapsibleContent className="space-y-1 pl-4 mt-1">
+                                                            {parsedSeats.slice(2).map((seat: { row: string; seat: number }, idx: number) => (
+                                                                <p key={idx} className="text-xs text-muted-foreground">
+                                                                    Fila {seat.row} - Asiento {seat.seat}
+                                                                </p>
+                                                            ))}
+                                                        </CollapsibleContent>
+                                                    </Collapsible>
                                                 )}
-                                            </Button>
-                                        </div>
-                                    )}
-                                    {couponError && (
-                                        <p className="text-xs text-destructive">{couponError}</p>
-                                    )}
-                                </div>
+                                            </div>
+                                        )}
 
-                                <div className="pt-4 border-t space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Subtotal</span>
-                                        <span className="font-medium">${total.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Cargo por servicio</span>
-                                        <span className="font-medium">${serviceFee.toLocaleString()}</span>
-                                    </div>
-                                    {couponDiscount > 0 && (
-                                        <div className="flex justify-between text-green-600">
-                                            <span>Descuento ({couponApplied})</span>
-                                            <span className="font-medium">-${couponDiscount.toLocaleString()}</span>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Precio unitario</span>
+                                            <span className="font-medium">{selectedArea.currency}${(selectedArea.priceCents / 100).toLocaleString()}</span>
                                         </div>
-                                    )}
-                                </div>
-
-                                <div className="pt-4 border-t">
-                                    <div className="flex justify-between text-lg font-bold">
-                                        <span>Total</span>
-                                        <GradientText>
-                                            <span className='font-bold'>${finalTotal.toLocaleString()}</span>
-                                        </GradientText>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+
+                                    {/* Cupón de descuento */}
+                                    <div className="pt-4 border-t space-y-3">
+                                        <p className="text-sm font-medium flex items-center gap-1.5">
+                                            <Tag className="h-3.5 w-3.5" />
+                                            Cupón de descuento
+                                        </p>
+                                        {couponApplied ? (
+                                            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Check className="h-4 w-4 text-green-600" />
+                                                    <span className="text-sm font-mono font-bold text-green-700">{couponApplied}</span>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={handleRemoveCoupon}
+                                                >
+                                                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    placeholder="Código del cupón"
+                                                    value={couponCode}
+                                                    onChange={(e) => {
+                                                        setCouponCode(e.target.value.toUpperCase())
+                                                        setCouponError("")
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") {
+                                                            e.preventDefault()
+                                                            handleApplyCoupon()
+                                                        }
+                                                    }}
+                                                    className="text-sm font-mono"
+                                                    disabled={couponLoading}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={handleApplyCoupon}
+                                                    disabled={couponLoading || !couponCode.trim()}
+                                                    className="shrink-0"
+                                                >
+                                                    {couponLoading ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        "Aplicar"
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {couponError && (
+                                            <p className="text-xs text-destructive">{couponError}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="pt-4 border-t space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Subtotal</span>
+                                            <span className="font-medium">${total.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Cargo por servicio</span>
+                                            <span className="font-medium">${serviceFee.toLocaleString()}</span>
+                                        </div>
+                                        {couponDiscount > 0 && (
+                                            <div className="flex justify-between text-green-600">
+                                                <span>Descuento ({couponApplied})</span>
+                                                <span className="font-medium">-${couponDiscount.toLocaleString()}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="pt-4 border-t">
+                                        <div className="flex justify-between text-lg font-bold">
+                                            <span>Total</span>
+                                            <GradientText>
+                                                <span className='font-bold'>${finalTotal.toLocaleString()}</span>
+                                            </GradientText>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
-                </div>
                 )}
             </main>
         </div>

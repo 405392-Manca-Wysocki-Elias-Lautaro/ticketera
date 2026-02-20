@@ -227,6 +227,7 @@ public class CouponService {
      */
     @Transactional(readOnly = true)
     public ValidateCouponResponse validateCouponForCheckout(ValidateCouponRequest request) {
+        logger.debug("Validando cupón '{}' para organizador '{}'", request.getCode(), request.getOrganizerId());
         try {
             // Obtener cupón
             Coupon coupon = getCouponByCode(request.getCode(), request.getOrganizerId());

@@ -86,8 +86,10 @@ public class MetricsServiceImpl implements IMetricsService {
             FROM events.events e
             WHERE e.organizer_id = :organizerId
                 AND e.active = true
+                AND e.ends_at > :now
         """);
         query.setParameter("organizerId", organizerId);
+        query.setParameter("now", LocalDateTime.now());
         Object result = query.getSingleResult();
         return result != null ? ((Number) result).longValue() : 0L;
     }
@@ -124,8 +126,10 @@ public class MetricsServiceImpl implements IMetricsService {
             INNER JOIN events.areas a ON a.event_id = e.id
             WHERE e.organizer_id = :organizerId
               AND e.active = true
+              AND e.ends_at > :now
         """);
         capacityQuery.setParameter("organizerId", organizerId);
+        capacityQuery.setParameter("now", LocalDateTime.now());
         Object capacityResult = capacityQuery.getSingleResult();
         Long totalCapacity = capacityResult != null ? ((Number) capacityResult).longValue() : 0L;
         

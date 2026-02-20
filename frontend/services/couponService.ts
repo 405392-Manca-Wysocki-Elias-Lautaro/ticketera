@@ -13,7 +13,7 @@ export const couponService = {
             const params = new URLSearchParams();
             if (status) params.append('status', status);
             if (eventId) params.append('eventId', eventId);
-            
+
             const response = await api.get<ApiResponse<Coupon[]>>(
                 `${BASE_URL}${params.toString() ? `?${params.toString()}` : ''}`
             );
@@ -112,7 +112,7 @@ export const couponService = {
                 code,
                 eventId,
                 subtotalCents,
-                organizerId: organizerId || eventId,
+                organizerId: organizerId,
                 currency: "ARS",
                 customerId,
             });
