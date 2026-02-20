@@ -39,7 +39,7 @@ spring:
 mercadopago:
   access-token: ${MERCADOPAGO_ACCESS_TOKEN:APP_USR-3149021535390307-110914-55fe675713252fa4a2d138b203497d1f-2977404984}
   # URL del webhook (puerto 8080) - ngrok apunta al gateway
-  notification-url: ${MERCADOPAGO_NOTIFICATION_URL:https://windy-nydia-noncoincident.ngrok-free.dev/webhook}
+  notification-url: ${MERCADOPAGO_NOTIFICATION_URL:https://leana-hypersophisticated-scarlett.ngrok-free.dev/webhook}
   webhook-secret: ${MERCADOPAGO_WEBHOOK_SECRET:}
   # URLs de redirección (puerto 3000) - ngrok apunta al frontend
   success-url: ${MERCADOPAGO_SUCCESS_URL:https://windy-nydia-noncoincident.ngrok-free.dev/my-tickets}

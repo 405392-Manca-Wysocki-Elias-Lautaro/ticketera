@@ -158,6 +158,7 @@ export default function DynamicCard3D({
 }
 
 function drawWrappedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
+    if (!text) return
     const words = text.split(' ')
     let line = ''
 

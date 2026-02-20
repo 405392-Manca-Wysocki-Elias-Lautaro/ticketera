@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventResponse {
-    private String eventTitle;
-    private String eventDescription;
+    private String title;
+    private String description;
     private String venueName;
     private String addressLine;
     private String city;

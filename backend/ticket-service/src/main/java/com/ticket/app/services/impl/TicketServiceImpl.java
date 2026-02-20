@@ -289,8 +289,8 @@ public class TicketServiceImpl implements TicketService {
 
         // Build event model
         EventModel eventModel = EventModel.builder()
-                .eventTitle(eventData.get("title").asText())
-                .eventDescription(eventData.get("description").asText())
+                .title(eventData.get("title").asText())
+                .description(eventData.get("description").asText())
                 .venueName(eventData.get("venueName").asText())
                 .addressLine(eventData.get("addressLine").asText())
                 .city(eventData.get("city").asText())
@@ -331,8 +331,8 @@ public class TicketServiceImpl implements TicketService {
             
             // Create basic event model with fallback data
             EventModel basicEventModel = EventModel.builder()
-                    .eventTitle("Evento") // Fallback title
-                    .eventDescription("Información del evento no disponible")
+                    .title("Evento")
+                    .description("Información del evento no disponible")
                     .venueName("Ubicación por confirmar")
                     .addressLine("Dirección no disponible")
                     .city("Ciudad")

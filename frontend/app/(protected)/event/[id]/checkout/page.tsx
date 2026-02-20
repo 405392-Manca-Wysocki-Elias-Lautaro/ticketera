@@ -174,62 +174,61 @@ export default function CheckoutPage() {
 
         setIsProcessing(true)
 
+        // Abrir la ventana ANTES del await para que el browser no la bloquee como popup
+        const mpWindow = window.open('about:blank', '_blank');
+
         try {
             if (!user || !event || !selectedArea) {
+                mpWindow?.close();
                 throw new Error("Información incompleta");
             }
 
-            // Validar teléfono
             if (!phone || phone.trim().length < 8) {
+                mpWindow?.close();
                 toast.error("Por favor, ingresa un número de teléfono válido.");
                 return;
             }
 
-            // Validar que tenemos un areaId válido (debe ser un UUID string)
             if (!areaId || areaId === "undefined" || areaId === "null" || areaId.trim() === "") {
+                mpWindow?.close();
                 toast.error("Error: No se ha seleccionado un área válida. Por favor, vuelve a la selección de asientos.");
                 setIsProcessing(false);
                 return;
             }
             
-            // El eventId puede ser UUID o número - intentamos convertir si es posible
-            const eventId = event.id; // Mantener como string (UUID) o número según corresponda
+            const eventId = event.id;
             
             const items = parsedSeats.length > 0
                 ? parsedSeats.map((seat: { row: string; seat: number }) => {
-                    // Para asientos numerados, generamos un identificador único
-                    // El backend espera un UUID o string, así que creamos un formato único
                     const seatId = `${seat.row}-${seat.seat}`;
                     
                     return {
                         eventId: eventId,
-                        venueAreaId: areaId, // UUID como string
-                        venueSeatId: seatId, // String con formato "FILA-ASIENTO"
-                        ticketTypeId: 1, // 1 = adulto estándar
+                        venueAreaId: areaId,
+                        venueSeatId: seatId,
+                        ticketTypeId: 1,
                         unitPriceCents: selectedArea.priceCents + Math.round(selectedArea.priceCents * 0.1),
                         quantity: 1,
                     };
                 })
                 : [{
-                    // Área general (sin asiento específico)
                     eventId: eventId,
-                    venueAreaId: areaId, // UUID como string
+                    venueAreaId: areaId,
                     venueSeatId: undefined,
-                    ticketTypeId: 1, // 1 = adulto estándar
+                    ticketTypeId: 1,
                     unitPriceCents: selectedArea.priceCents,
                     quantity: parseInt(quantity || "1"),
                 }];
 
-            // Crear el request de la orden
             const orderRequest: CreateOrderRequest = {
                 customer: {
                     email: user.email,
                     firstName: user.firstName || "Usuario",
                     lastName: user.lastName || "Apellido",
                     phone: phone,
-                    userId: user.id, // UUID del usuario desde auth-service
+                    userId: user.id,
                 },
-                organizerId: event.organizerId || event.id, // Usar organizerId del evento o el eventId como fallback
+                organizerId: event.organizerId || event.id,
                 items: items,
                 currency: "ARS",
                 paymentDescription: `Entradas para ${event.title}`,
@@ -237,30 +236,27 @@ export default function CheckoutPage() {
                 ...(couponApplied && couponCode ? { couponCode: couponCode.toUpperCase() } : {}),
             };
 
-            // Crear la orden y obtener la URL de pago
             const orderResponse = await orderService.createOrder(orderRequest);
 
             if (orderResponse.paymentUrl) {
-                // Abrir Mercado Pago en una nueva pestaña
-                const mpWindow = window.open(orderResponse.paymentUrl, '_blank');
-                
-                if (mpWindow) {
-                    // La pestaña se abrió correctamente
+                if (mpWindow && !mpWindow.closed) {
+                    mpWindow.location.href = orderResponse.paymentUrl;
                     setPaymentWindow(mpWindow);
                     setPaymentOrderId(orderResponse.id);
                     setPaymentUrl(orderResponse.paymentUrl);
                     setWaitingPayment(true);
                     toast.info("Se abrió Mercado Pago en una nueva pestaña. Completá el pago allí.");
                 } else {
-                    // El navegador bloqueó el popup, fallback a redirección directa
                     toast.info("Redirigiendo a Mercado Pago...");
                     window.location.href = orderResponse.paymentUrl;
                 }
             } else {
+                mpWindow?.close();
                 toast.error("No se pudo obtener la URL de pago");
             }
 
         } catch (error: any) {
+            mpWindow?.close();
             console.error("Error creando orden:", error);
             console.error("API Error:", error.response?.data);
             
